@@ -54,7 +54,7 @@ ok(await S(() => window.__snap.modal) === null && await S(() => window.__snap.sc
 // parental gate + paywall (store simulator)
 await page.goto(URL + '?store=sim'); await wait(500); await S(() => window.__snap.storeTest.reset()); await tapBtn('play');
 await tapBtn('act0'); ok(await S(() => window.__snap.screen) === 'play', 'every sport opens (first 2 levels free)'); await tapBtn('back');
-await S(() => window.__snap.start(0, 3)); ok(await S(() => window.__snap.freeRemix), 'level 3 without the Club plays a free-level remix (store sim)'); await S(() => window.__snap.go('hub'));
+await S(() => window.__snap.start(0, 3)); ok(await S(() => window.__snap.freeRemix), 'level 3 without the Club plays a free-level remix (store sim)'); await S(() => window.__snap.go('hub')); await wait(300);
 await tapBtn('gear'); ok(await S(() => window.__snap.modal) === 'gate', 'gear opens the grown-up gate');
 { const bt = await S(() => window.__snap.buttons().find(b => b.id === 'gateHold')); const p = await pt(bt.x + 70, bt.y + 70); await page.mouse.move(p.x, p.y); await page.mouse.down(); await wait(3400); await page.mouse.up(); await wait(200);
   const g = await S(() => window.__snap.gate); ok(g.asked, 'hold 3 s passes the first step');
