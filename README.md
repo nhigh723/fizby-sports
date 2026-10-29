@@ -4,8 +4,8 @@ A sports hub for ages 3-6 with 11 games: Soccer, Basketball, Bowling, Tee-ball, 
 
 - No ads, no analytics, no tracking, no third-party SDKs. Purchases (Apple StoreKit only), outside links and settings sit behind a grown-up gate.
 - Free tier: the first 2 levels of every sport. Fizby Club (yearly / monthly with a 7-day trial) or Forever unlocks every level.
-- App id `com.nickhigh.game5`; products `com.nickhigh.game5.club.yearly`, `.club.monthly`, `.forever`.
+- App id `com.fizbystudio.sports`; products `com.fizbystudio.sports.club.yearly`, `.club.monthly`, `.forever`.
 - Mascot and title live in `src/brand.ts`.
-- Support: nickrhigh@yahoo.com
+- Support: the SUPPORT_EMAIL token (src/brand.ts and public/support.html, public/privacy.html) until the brand email is set
 
 Dev: `npm run build && npx vite preview --port 4182`, then `node tests/play-all.mjs`, `node tests/monkey.mjs`, `URL=http://localhost:4182/ node tests/offline-check.mjs`, `node tests/shots.mjs`.

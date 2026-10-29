@@ -4,9 +4,9 @@
 // Purchases are only ever offered in the grown-up area behind the parental gate; kids only see a lock and hear "Ask a grown-up!".
 import { Capacitor } from '@capacitor/core';
 export const PRODUCTS = {
-  yearly: 'com.nickhigh.game5.club.yearly', // auto-renewable, 1 year, $29.99, 7-day free trial (group "the mascot Club", level 1)
-  monthly: 'com.nickhigh.game5.club.monthly', // auto-renewable, 1 month, $4.99, 7-day free trial (level 2)
-  forever: 'com.nickhigh.game5.forever', // non-consumable, $59.99, one-time, no trial
+  yearly: 'com.fizbystudio.sports.club.yearly', // auto-renewable, 1 year, $29.99, 7-day free trial (group "the mascot Club", level 1)
+  monthly: 'com.fizbystudio.sports.club.monthly', // auto-renewable, 1 month, $4.99, 7-day free trial (level 2)
+  forever: 'com.fizbystudio.sports.forever', // non-consumable, $59.99, one-time, no trial
 } as const;
 export type Plan = keyof typeof PRODUCTS;
 /** Free tier (same as Fun & Learn): the first FREE_LEVELS levels of every mini-game. The rest need the Club. */
