@@ -4,3 +4,4 @@ voice/padtakes
 voice/*.log
 voice/done
 voice/done2
+__pycache__
