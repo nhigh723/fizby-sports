@@ -1,7 +1,7 @@
-// Phone-size screenshots (1170x2532) of the title, hub, each activity mid-play and My Town.
+// Screenshots of the title, hub, every game mid-play and the Trophy Room. Phone: 1170x2532 (default). Store 6.9-inch: VW=440 VH=956 OUT=store/screenshots (1320x2868).
 import { chromium } from 'playwright-core';
 const URL = process.env.URL || 'http://localhost:4182/', OUT = process.env.OUT || 'screenshots';
-const b = await chromium.launch({ executablePath: '/usr/bin/google-chrome' }); const p = await (await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3 })).newPage();
+const b = await chromium.launch({ executablePath: '/usr/bin/google-chrome' }); const p = await (await b.newContext({ viewport: { width: +(process.env.VW || 390), height: +(process.env.VH || 844) }, deviceScaleFactor: 3 })).newPage();
 const S = (f, a) => p.evaluate(f, a), wait = ms => p.waitForTimeout(ms);
 async function run(a) { if (!a) return; if (a.type === 'wait') return wait(a.ms); if (a.type === 'tap') { const q = await S(([x, y]) => window.__snap.toScreen(x, y), [a.x, a.y]); await p.mouse.click(q.x, q.y); return wait(400); }
   const pts = []; for (const [x, y] of a.path) pts.push(await S(([x, y]) => window.__snap.toScreen(x, y), [x, y]));
