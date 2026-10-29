@@ -1,6 +1,8 @@
 // Fizby Sports art, all drawn in code (original designs): balls, goal, hoop, pins, the keeper pal, trophies, stickers, fields.
 import { type Ctx, rr, shade, W } from './art';
-export type BallKind = 'soccer' | 'basket' | 'bowl';
+export type BallKind = 'soccer' | 'basket' | 'bowl' | 'tee' | 'swim' | 'golf' | 'tennis' | 'race' | 'hockey' | 'gym' | 'paint';
+/** hub order: the icon for each sport (stickers and trophies use it too) */
+export const KINDS: BallKind[] = ['soccer', 'basket', 'bowl', 'tee', 'swim', 'golf', 'tennis', 'race', 'hockey', 'gym', 'paint'];
 export const SPORT_COLS = ['#3ddc4a', '#ff9f1c', '#9b5cff', '#1fb6ff', '#ff3b6b', '#ffd60a', '#ff5fd2', '#22d3ee', '#7c5cff', '#ff6a1a', '#00c2a8'];
 export function ball(c: Ctx, kind: BallKind, x: number, y: number, r: number, rot = 0) {
   c.save(); c.translate(x, y); c.fillStyle = 'rgba(0,0,0,0.18)'; c.beginPath(); c.ellipse(r * 0.15, r * 0.95, r * 0.9, r * 0.25, 0, 0, 6.28); c.fill(); c.rotate(rot);
@@ -12,6 +14,14 @@ export function ball(c: Ctx, kind: BallKind, x: number, y: number, r: number, ro
     c.beginPath(); c.arc(-r * 1.25, 0, r * 0.85, -0.9, 0.9); c.stroke(); c.beginPath(); c.arc(r * 1.25, 0, r * 0.85, Math.PI - 0.9, Math.PI + 0.9); c.stroke(); }
   if (kind === 'bowl') { const g = c.createRadialGradient(-r * 0.35, -r * 0.35, r * 0.1, 0, 0, r); g.addColorStop(0, '#d9b8ff'); g.addColorStop(1, '#6b2fd6'); c.fillStyle = g; c.beginPath(); c.arc(0, 0, r, 0, 6.28); c.fill();
     c.fillStyle = '#2b1a55'; for (const [hx, hy] of [[-0.25, -0.3], [0.12, -0.38], [-0.05, -0.05]]) { c.beginPath(); c.arc(hx * r, hy * r, r * 0.12, 0, 6.28); c.fill(); } }
+  if (kind === 'tee') { c.fillStyle = '#fff'; c.beginPath(); c.arc(0, 0, r, 0, 6.28); c.fill(); c.strokeStyle = '#ff3b6b'; c.lineWidth = r * 0.08; c.setLineDash([r * 0.12, r * 0.1]); c.beginPath(); c.arc(-r * 1.3, 0, r * 0.95, -0.8, 0.8); c.stroke(); c.beginPath(); c.arc(r * 1.3, 0, r * 0.95, Math.PI - 0.8, Math.PI + 0.8); c.stroke(); c.setLineDash([]); c.strokeStyle = '#d8d0e8'; c.lineWidth = r * 0.06; c.beginPath(); c.arc(0, 0, r, 0, 6.28); c.stroke(); }
+  if (kind === 'swim') { c.lineWidth = r * 0.42; for (let k = 0; k < 4; k++) { c.strokeStyle = k % 2 ? '#fff' : '#ff3b6b'; c.beginPath(); c.arc(0, 0, r * 0.75, k * 1.571, (k + 1) * 1.571); c.stroke(); } }
+  if (kind === 'golf') { c.fillStyle = '#fff'; c.beginPath(); c.arc(0, 0, r, 0, 6.28); c.fill(); c.fillStyle = '#dcd6ea'; for (let k = 0; k < 9; k++) { c.beginPath(); c.arc(Math.cos(k * 0.7) * r * 0.55 * (k % 3) / 2, Math.sin(k * 0.7) * r * 0.55 * (k % 3) / 2, r * 0.1, 0, 6.28); c.fill(); } c.strokeStyle = '#cfc8e0'; c.lineWidth = r * 0.06; c.beginPath(); c.arc(0, 0, r, 0, 6.28); c.stroke(); }
+  if (kind === 'tennis') { c.fillStyle = '#d4f53c'; c.beginPath(); c.arc(0, 0, r, 0, 6.28); c.fill(); c.strokeStyle = '#fff'; c.lineWidth = r * 0.12; c.beginPath(); c.arc(-r * 1.2, 0, r * 0.9, -0.9, 0.9); c.stroke(); c.beginPath(); c.arc(r * 1.2, 0, r * 0.9, Math.PI - 0.9, Math.PI + 0.9); c.stroke(); }
+  if (kind === 'race') { c.fillStyle = '#2b2140'; c.beginPath(); c.arc(0, 0, r, 0, 6.28); c.fill(); c.fillStyle = '#c8c8d8'; c.beginPath(); c.arc(0, 0, r * 0.55, 0, 6.28); c.fill(); c.strokeStyle = '#8a8aa0'; c.lineWidth = r * 0.12; for (let k = 0; k < 5; k++) { c.beginPath(); c.moveTo(0, 0); c.lineTo(Math.cos(k * 1.2566) * r * 0.5, Math.sin(k * 1.2566) * r * 0.5); c.stroke(); } c.fillStyle = '#ff3b6b'; c.beginPath(); c.arc(0, 0, r * 0.16, 0, 6.28); c.fill(); }
+  if (kind === 'hockey') { c.scale(1, 0.55); c.fillStyle = '#2b2140'; c.beginPath(); c.arc(0, 0, r, 0, 6.28); c.fill(); c.fillStyle = '#4a3d6a'; c.beginPath(); c.arc(0, -r * 0.2, r * 0.8, 0, 6.28); c.fill(); }
+  if (kind === 'gym') { c.fillStyle = '#ff5fd2'; c.beginPath(); c.arc(0, 0, r, 0, 6.28); c.fill(); star(c, 0, 0, r * 0.7, '#ffd60a'); }
+  if (kind === 'paint') { c.fillStyle = '#ffe0b0'; c.beginPath(); c.ellipse(0, 0, r, r * 0.82, 0, 0, 6.28); c.fill(); ['#ff3b6b', '#1fb6ff', '#3ddc4a', '#ffd60a'].forEach((col, k) => { c.fillStyle = col; c.beginPath(); c.arc(Math.cos(-2.4 + k * 0.9) * r * 0.55, Math.sin(-2.4 + k * 0.9) * r * 0.5, r * 0.2, 0, 6.28); c.fill(); }); c.fillStyle = '#fff'; c.beginPath(); c.arc(r * 0.35, r * 0.3, r * 0.17, 0, 6.28); c.fill(); }
   c.fillStyle = 'rgba(255,255,255,0.45)'; c.beginPath(); c.ellipse(-r * 0.38, -r * 0.45, r * 0.25, r * 0.14, -0.6, 0, 6.28); c.fill(); c.restore();
 }
 export function field(c: Ctx, top: number, col = '#3ddc4a') { for (let i = 0; i * 60 < 900; i++) { c.fillStyle = i % 2 ? col : shade(col, -0.08); c.fillRect(0, top + i * 60, W, 60); } }
@@ -45,13 +55,13 @@ export function trophy(c: Ctx, x: number, y: number, s: number, sport: number, g
   c.save(); c.translate(x, y); c.scale(s, s); const gold = got ? '#ffc61a' : 'rgba(255,255,255,0.35)', dk = got ? '#d99a00' : 'rgba(0,0,0,0.12)';
   c.fillStyle = dk; rr(c, -26, 30, 52, 14, 4); c.fill(); c.fillStyle = gold; c.fillRect(-7, 6, 14, 26); c.beginPath(); c.moveTo(-30, -34); c.lineTo(30, -34); c.quadraticCurveTo(30, 12, 0, 12); c.quadraticCurveTo(-30, 12, -30, -34); c.fill();
   c.strokeStyle = gold; c.lineWidth = 6; c.beginPath(); c.arc(-30, -18, 11, 1.4, 4.9); c.stroke(); c.beginPath(); c.arc(30, -18, 11, -1.7, 1.7); c.stroke();
-  if (got) { ball(c, (['soccer', 'basket', 'bowl'] as BallKind[])[sport % 3], 0, -14, 12, t); c.fillStyle = 'rgba(255,255,255,0.5)'; c.fillRect(-22, -30, 5, 26); } c.restore();
+  if (got) { ball(c, KINDS[sport % KINDS.length], 0, -14, 12, t); c.fillStyle = 'rgba(255,255,255,0.5)'; c.fillRect(-22, -30, 5, 26); } c.restore();
 }
 /** a sticker: a die-cut round badge with the sport's ball and a colour variant ring + star */
 export function sticker(c: Ctx, x: number, y: number, r: number, sport: number, v: number, t = 0) {
   const col = SPORT_COLS[(sport * 3 + v) % SPORT_COLS.length]; c.save(); c.translate(x, y); c.rotate(Math.sin(t * 2 + v) * 0.08);
   c.fillStyle = 'rgba(0,0,0,0.15)'; c.beginPath(); c.arc(2, 4, r, 0, 6.28); c.fill(); c.fillStyle = '#fff'; c.beginPath(); c.arc(0, 0, r, 0, 6.28); c.fill(); c.fillStyle = col; c.beginPath(); c.arc(0, 0, r * 0.86, 0, 6.28); c.fill();
-  ball(c, (['soccer', 'basket', 'bowl'] as BallKind[])[sport % 3], 0, 0, r * 0.5, v);
+  ball(c, KINDS[sport % KINDS.length], 0, 0, r * 0.5, v);
   c.fillStyle = '#ffd60a'; c.beginPath(); for (let q = 0; q < 10; q++) { const rr2 = q % 2 ? r * 0.1 : r * 0.24; c.lineTo(r * 0.6 + Math.cos(-1.571 + q * 0.628) * rr2, -r * 0.6 + Math.sin(-1.571 + q * 0.628) * rr2); } c.fill(); c.restore();
 }
 export function star(c: Ctx, x: number, y: number, r: number, col = '#ffd60a') { c.fillStyle = col; c.beginPath(); for (let q = 0; q < 10; q++) { const rr2 = q % 2 ? r * 0.42 : r; c.lineTo(x + Math.cos(-1.571 + q * 0.628) * rr2, y + Math.sin(-1.571 + q * 0.628) * rr2); } c.fill(); }

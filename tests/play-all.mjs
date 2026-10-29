@@ -19,21 +19,21 @@ async function run(a) {
 let fails = 0; const ok = (c, m) => { if (c) console.log('ok   ' + m); else { fails++; console.log('FAIL ' + m); } };
 // UI: title -> hub (Play), each card opens, Back is a single tap
 await tapBtn('play'); ok(await S(() => window.__snap.screen) === 'hub', 'Play opens the hub');
-for (let i = 0; i < 3; i++) { await tapBtn('act' + i); const s = await S(() => window.__snap.screen); await tapBtn('back'); const s2 = await S(() => window.__snap.screen); ok(s === 'play' && s2 === 'hub', `card ${i} opens, one tap on Back returns`); }
+const LV = await S(() => window.__snap.levels), NA = LV.length;
+for (let i = 0; i < NA; i++) { await tapBtn('act' + i); const s = await S(() => window.__snap.screen); await tapBtn('back'); const s2 = await S(() => window.__snap.screen); ok(s === 'play' && s2 === 'hub', `card ${i} opens, one tap on Back returns`); }
 await tapBtn('town'); ok(await S(() => window.__snap.screen) === 'town', 'Trophy Room opens'); await tapBtn('back');
 await tapBtn('back'); ok(await S(() => window.__snap.screen) === 'title', 'Back from hub returns to title'); await tapBtn('play');
 // beat every level (authored + 2 remixes) with real input
 async function beat(i, l) {
   await S(([i, l]) => window.__snap.start(i, l), [i, l]); await wait(300); const t0 = Date.now(); let steps = 0;
-  while (Date.now() - t0 < 60000) {
+  while (Date.now() - t0 < 90000) {
     if ((await S(() => window.__snap.winT)) >= 0) return steps;
-    const a = await S(() => window.__snap.busy() ? null : window.__snap.next()); if (!a) { await wait(200); continue; } await run(a); steps++; if (steps > 120) break;
+    const a = await S(() => window.__snap.busy() ? null : window.__snap.next()); if (!a) { await wait(200); continue; } await run(a); if (a.type !== 'wait') steps++; if (steps > 150) break;
   }
   return -1;
 }
-const LV = [5, 5, 5];
 const ONLY = process.env.ONLY ? process.env.ONLY.split(',').map(Number) : null;
-for (let i = 0; i < 3; i++) if (!ONLY || ONLY.includes(i)) for (let l = 0; l < LV[i] + 2; l++) { const n = await beat(i, l); ok(n >= 0, `activity ${i} level ${l}${l >= LV[i] ? ' (remix)' : ''}: won in ${n} inputs`); }
+for (let i = 0; i < NA; i++) if (!ONLY || ONLY.includes(i)) for (let l = 0; l < LV[i] + 2; l++) { const n = await beat(i, l); ok(n >= 0, `activity ${i} level ${l}${l >= LV[i] ? ' (remix)' : ''}: won in ${n} inputs`); }
 // mistakes are recoverable: a kick that misses wide bounces back (no fail), then the round is still winnable
 await S(() => window.__snap.start(0, 0)); await wait(800);
 await run({ type: 'drag', path: [[195, 700], [120, 650], [20, 600]] }); await wait(300); ok((await S(() => window.__snap.winT)) < 0, 'soccer: a wide kick is a miss, no win, no fail');
@@ -45,8 +45,8 @@ ok((await S(() => window.__snap.winT)) < 0, 'basketball: a weak pull falls short
 { let n = 0; while ((await S(() => window.__snap.winT)) < 0 && n++ < 60) { const a = await S(() => window.__snap.busy() ? null : window.__snap.next()); if (a) await run(a); else await wait(200); } }
 ok((await S(() => window.__snap.winT)) >= 0, 'basketball: the right pull then wins');
 // stickers and a trophy
-const sv = await S(() => window.__snap.save()); ok(ONLY || (sv.wins >= 21 && sv.stickers.length === sv.wins), `wins counted (${sv.wins}), stickers ${sv.stickers.length}, trophies ${JSON.stringify(sv.trophies)}`);
-ok(ONLY || sv.trophies.length === 3, 'a trophy for each sport after its 5 levels');
+const sv = await S(() => window.__snap.save()); ok(ONLY || (sv.wins >= LV.reduce((a, b) => a + b + 2, 0) && sv.stickers.length === sv.wins), `wins counted (${sv.wins}), stickers ${sv.stickers.length}, trophies ${JSON.stringify(sv.trophies)}`);
+ok(ONLY || sv.trophies.length === NA, `a trophy for each of the ${NA} games after its levels`);
 await S(() => { const s = window.__snap.save(); s.trophies = []; s.lv[0] = 4; window.__snap.setSave(s); window.__snap.start(0, 4); }); await wait(300);
 while ((await S(() => window.__snap.winT)) < 0) { const a = await S(() => window.__snap.busy() ? null : window.__snap.next()); if (a) await run(a); else await wait(200); }
 await wait(3800); ok(await S(() => window.__snap.modal) === 'unlock', 'trophy celebration after finishing level 5'); await wait(1000); await page.mouse.click(195, 400); await wait(400);

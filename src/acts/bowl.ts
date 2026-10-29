@@ -1,5 +1,6 @@
 // Bowling: swipe the ball up the lane. Fizby counts every pin that falls. Teaches counting (to 10), aim, left/right.
-// L0 3 pins - L1 6 pins - L2 10 pins - L3 10 pins, narrow lane - L4 pins sit left or right. Each level: 2 racks. 5+: remixes.
+// L0 3 pins - L1 6 pins - L2 10 pins - L3 10 pins, narrow lane - L4 pins sit left or right - L5 (hard) 10 pins left/right, narrow lane,
+// pins only knock the pin right behind them, so most racks take 2-3 rolls. Each level: 2 racks (L5: 3). 6+: remixes.
 import { type Ctx, W } from '../art';
 import { ball, pin } from '../sports';
 import { L, NUM } from '../lines';
@@ -9,8 +10,8 @@ const B = { x: 195, y: 740 }, BR = 24, PR = 13, SPEED = 800;
 type Pin = { x: number; y: number; down: boolean; rot: number; vx: number; vy: number; counted: boolean };
 function rack(n: number, cx: number): Pin[] { const ps: Pin[] = []; let row = 0; while (ps.length < n) { for (let k = 0; k <= row && ps.length < n; k++) ps.push({ x: cx + (k - row / 2) * 36, y: 280 - row * 34, down: false, rot: 0, vx: 0, vy: 0, counted: false }); row++; } return ps; }
 export function bowl(api: Api, level: number): Activity {
-  const remix = level >= 5, rnd = Math.random, sides = level === 4 || (remix && rnd() < 0.5);
-  const N = remix ? [3, 6, 10][Math.floor(rnd() * 3)] : [3, 6, 10, 10, 6][level], LW = level === 3 ? 150 : 200, racks = 2;
+  const remix = level >= 6, rnd = Math.random, hard = level === 5, sides = level === 4 || hard || (remix && rnd() < 0.5);
+  const N = remix ? [3, 6, 10][Math.floor(rnd() * 3)] : [3, 6, 10, 10, 6, 10][level], LW = level === 3 || hard ? 170 : 200, racks = hard ? 3 : 2;
   let side = 0, pins: Pin[] = [];
   const newRack = () => { side = rnd() < 0.5 ? -1 : 1; pins = rack(N, sides ? 195 + side * 45 : 195); if (sides) api.say(side < 0 ? L.bowlLeft : L.bowlRight); };
   let bx = B.x, by = B.y, vx = 0, vy = 0, roll = false, start: Pt | null = null, countQ: number[] = [], countT = 0, after = -1, cleared = 0, done = false, spin = 0, gutter = false;
@@ -24,7 +25,7 @@ export function bowl(api: Api, level: number): Activity {
         for (const p of pins) if (!p.down && !gutter && Math.hypot(p.x - bx, p.y - by) < BR + PR) { p.down = true; p.vx = (p.x - bx) * 6 + vx * 0.3; p.vy = -260; api.sfx.crash(); }
         if (by < 150) { roll = false; after = 0; countQ = []; pins.forEach((p, i) => { if (p.down && !p.counted) { p.counted = true; countQ.push(i); } }); if (!countQ.length) api.say(L.gutter); countT = 0.2; } }
       for (const p of pins) if (p.down) { p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= 0.92; p.vy *= 0.9; p.rot = Math.min(1.5, p.rot + dt * 8);
-        for (const q of pins) if (!q.down && Math.hypot(q.x - p.x, q.y - p.y) < 2 * PR + 4) { q.down = true; q.vx = (q.x - p.x) * 5; q.vy = -200; } }
+        for (const q of pins) if (!q.down && (hard ? (q.y < p.y && Math.abs(q.x - p.x) < 12 && p.y - q.y < 75) : Math.hypot(q.x - p.x, q.y - p.y) < 2 * PR + 4)) { q.down = true; q.vx = (q.x - p.x) * 5; q.vy = -200; } }
       if (after >= 0) { after += dt; countT -= dt;
         if (countT <= 0 && countQ.length) { const done2 = pins.filter(p => p.counted).length - countQ.length + 1; countQ.shift(); api.say(NUM[Math.min(9, done2 - 1)]); api.sfx.pop(); countT = 0.6; }
         if (!countQ.length && countT <= -0.4) { after = -1; reset(); if (pins.every(p => p.down)) { cleared++; api.burst(195, 260, 30); if (cleared >= racks) { done = true; api.win(L.allDown); } else { api.say(L.allDown); api.sfx.cheer(); if (sides) newRack(); else pins = rack(N, 195); } } } } },

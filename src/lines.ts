@@ -4,8 +4,10 @@ import { MASCOT_NAME } from './brand';
 export const NAMED = { title: `Hi! I'm ${MASCOT_NAME}. Let's play sports!` };
 export const NAMED_LINES = Object.values(NAMED);
 export const NUM = ['One!', 'Two!', 'Three!', 'Four!', 'Five!', 'Six!', 'Seven!', 'Eight!', 'Nine!', 'Ten!'];
-export const COLOR_NAME: Record<string, string> = { '#ff3b6b': 'red', '#1fb6ff': 'blue', '#ffd60a': 'yellow', '#3ddc4a': 'green' };
-export const SPORT_NAME = ['Soccer!', 'Basketball!', 'Bowling!'];
+export const COLOR_NAME: Record<string, string> = { '#ff3b6b': 'red', '#1fb6ff': 'blue', '#ffd60a': 'yellow', '#3ddc4a': 'green', '#ff9f1c': 'orange', '#9b5cff': 'purple', '#ff5fd2': 'pink' };
+export const SPORT_NAME = ['Soccer!', 'Basketball!', 'Bowling!', 'Tee-ball!', 'Swimming!', 'Mini-golf!', 'Tennis!', 'Racing!', 'Hockey!', 'Gymnastics!', 'Painting!'];
+export const colorLine = (col: string) => `Find ${COLOR_NAME[col]}!`;
+export const gateLine = (col: string) => `Drive through the ${COLOR_NAME[col]} gate!`;
 export const hoopLine = (col: string) => `Shoot in the ${COLOR_NAME[col]} hoop!`;
 export const L = {
   ...NAMED,
@@ -15,9 +17,17 @@ export const L = {
   goal: 'Goal!', soClose: 'So close! Try again!', saved: 'The keeper caught it! Try the other side!',
   basketGo: 'Pull the ball back, then let go!', tooShort: 'Too short! Pull a little more!', tooFar: 'Too far! Pull a little less!', swish: 'Swish!', wrongHoop: 'That is a different color hoop!',
   bowlGo: 'Swipe the ball to the pins!', allDown: 'All the pins fell down!', gutter: 'Oops! Aim for the pins!', bowlLeft: 'The pins are on the left!', bowlRight: 'The pins are on the right!',
+  teeGo: 'Tap when the ring hugs the ball!', teeEarly: 'Wait for the ring!', homeRun: 'Home run!', runBases: 'Now run! Tap the bases!', teeLeft: 'Hit it to the left!', teeRight: 'Hit it to the right!',
+  swimGo: 'Tap to swim!', swimAlt: 'Left arm, right arm! Take turns!', left: 'Left!', right: 'Right!', splash: 'Splash! You made it!', otherArm: 'Now the other arm!',
+  golfGo: 'Pull back and let go to putt!', golfBank: 'Bounce it off the wall!', holeIn: 'In the hole!', golfMore: 'Pull a little more!', golfLess: 'A little softer!',
+  tennisGo: 'Tap the ball when it comes to you!', tennisMiss: 'Here comes another one!', rally: 'What a rally!', point: 'Point!',
+  raceGo: 'Tap left or right to steer! Grab the stars!', cone: 'Bonk! Go around the cones!', finish: 'You won the race!', wrongGate: 'That gate is a different color!',
+  hockeyGo: 'Swipe the puck into the net!', hockeyBank: 'Bounce it off the wall!',
+  gymGo: 'Watch me, then copy my moves!', gymYour: 'Your turn!', gymOops: 'Watch again!', star: 'Star!', ball: 'Ball!', arms: 'Arms up!', split: 'Splits!', bravo: 'Bravo!',
+  paintGo: 'Pick a color, then tap to paint!', paintMatch: 'Paint it to match the dots!', paintDone: 'What a beautiful picture!', paintWrong: 'Try the color on the dot!',
   yes: 'Yes!', great: 'Great job!', champ: 'You are a champion!', sticker: 'You got a sticker!', trophy: 'You won a trophy!',
   shelfHi: 'Look at your trophies and stickers!', shelfEmpty: 'Play a sport to win stickers!',
 };
 export function allLines(): string[] {
-  const s = new Set<string>([...Object.values(L), ...NUM, ...SPORT_NAME]); Object.keys(COLOR_NAME).forEach(c => s.add(hoopLine(c))); return [...s];
+  const s = new Set<string>([...Object.values(L), ...NUM, ...SPORT_NAME]); Object.keys(COLOR_NAME).forEach(c => { s.add(hoopLine(c)); s.add(colorLine(c)); s.add(gateLine(c)); }); return [...s];
 }

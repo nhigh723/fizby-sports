@@ -5,7 +5,8 @@ import { initAudio, sfx, say as voiceSay, isSpeaking, setMuted, muted, missing }
 import { L, allLines } from './lines';
 import type { Activity, Action, Api, Pt } from './kit';
 import { ball, field, sticker, trophy, star, keeper, pin, hoop, goal, type BallKind } from './sports';
-import { soccer } from './acts/soccer'; import { basket } from './acts/basket'; import { bowl } from './acts/bowl';
+import { soccer } from './acts/soccer'; import { basket } from './acts/basket'; import { bowl } from './acts/bowl'; import { tee } from './acts/tee'; import { swim } from './acts/swim';
+import { golf, hockey } from './acts/golf'; import { tennis } from './acts/tennis'; import { race } from './acts/race'; import { gym } from './acts/gym'; import { paint } from './acts/paint';
 import { SPORT_NAME } from './lines';
 import { store, hasClub, levelFree, buy, restore, manage, initStore, PRODUCTS, TERMS_URL, PRIVACY_URL, openLink, storeTest, type Plan } from './store';
 import { lineId } from './voice';
@@ -16,13 +17,19 @@ addEventListener('resize', resize); resize();
 // ---- save ----
 const ACTS = [
   { id: 'soccer', make: soccer, levels: 5, bg: ['#3ddc4a', '#c9ffb8'], ball: 'soccer' as BallKind }, { id: 'basket', make: basket, levels: 5, bg: ['#ff9f1c', '#ffe0a8'], ball: 'basket' as BallKind },
-  { id: 'bowl', make: bowl, levels: 5, bg: ['#9b5cff', '#e6dcff'], ball: 'bowl' as BallKind },
+  { id: 'bowl', make: bowl, levels: 6, bg: ['#9b5cff', '#e6dcff'], ball: 'bowl' as BallKind }, { id: 'tee', make: tee, levels: 5, bg: ['#ffd60a', '#fff4b0'], ball: 'tee' as BallKind },
+  { id: 'swim', make: swim, levels: 5, bg: ['#22d3ee', '#c8f7ff'], ball: 'swim' as BallKind }, { id: 'golf', make: (a: Api, l: number) => golf(a, l), levels: 5, bg: ['#5fd83a', '#d8ffd6'], ball: 'golf' as BallKind },
+  { id: 'tennis', make: tennis, levels: 5, bg: ['#1fb6ff', '#cde9ff'], ball: 'tennis' as BallKind }, { id: 'race', make: race, levels: 5, bg: ['#ff3b6b', '#ffd6e0'], ball: 'race' as BallKind },
+  { id: 'hockey', make: hockey, levels: 5, bg: ['#7c5cff', '#e2dcff'], ball: 'hockey' as BallKind }, { id: 'gym', make: gym, levels: 5, bg: ['#ff5fd2', '#ffd6f4'], ball: 'gym' as BallKind },
+  { id: 'paint', make: paint, levels: 5, bg: ['#ff9f1c', '#ffe0a8'], ball: 'paint' as BallKind },
 ];
 type Save = { lv: number[]; wins: number; seen: number; skills: Record<string, number>; stickers: number[]; trophies: number[] };
 const KEY = 'fs5~save', fresh = (): Save => ({ lv: ACTS.map(() => 0), wins: 0, seen: 0, skills: {}, stickers: [], trophies: [] });
 function load(): Save { const d = fresh(); try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s && Array.isArray(s.lv)) { const m = { ...d, ...s }; while (m.lv.length < ACTS.length) m.lv.push(0); return m; } } catch { /* */ } return d; }
 let save = load(); const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(save)); } catch { /* full */ } };
-const SKILLS: Record<string, string[]> = { soccer: ['Aiming (direction)', 'Counting', 'Left and right'], basket: ['Force (how hard)', 'Counting', 'Colours'], bowl: ['Counting to 10', 'Aiming (direction)', 'Left and right'] };
+const SKILLS: Record<string, string[]> = { soccer: ['Aiming (direction)', 'Counting', 'Left and right'], basket: ['Force (how hard)', 'Counting', 'Colours'], bowl: ['Counting to 10', 'Aiming (direction)', 'Left and right'], tee: ['Timing', 'Counting', 'Left and right'], swim: ['Left and right', 'Taking turns', 'Counting'],
+  golf: ['Force (how hard)', 'Angles (bank shots)'], tennis: ['Timing', 'Tracking a moving ball', 'Counting'], race: ['Left and right', 'Counting', 'Colours'], hockey: ['Aiming (direction)', 'Angles (bank shots)', 'Force (how hard)'],
+  gym: ['Memory and sequences', 'Shapes', 'Body moves'], paint: ['Colours', 'Matching', 'Fine motor'] };
 // ---- state ----
 type Screen = 'title' | 'hub' | 'play' | 'town' | 'parents';
 let newSticker = -1, freeRemix = false;
@@ -62,7 +69,8 @@ function lock(x: number, y: number, s = 1) { c.save(); c.translate(x, y); c.scal
 // ---- hub card art ----
 function cardArt(i: number, x: number, y: number, w: number, h: number) { const cx = x + w / 2, cy = y + h / 2 - 10, b = Math.abs(Math.sin(T * 3 + i)) * 10;
   c.save(); if (i === 0) goal(c, cx, cy + 22, 80, 46); if (i === 1) { c.save(); c.translate(cx + 18, cy - 4); c.scale(0.6, 0.6); hoop(c, 0, 0, '#ff3b6b', T); c.restore(); } if (i === 2) for (let k = 0; k < 3; k++) pin(c, cx + 14 + (k - 1) * 16, cy + 24 - (k % 2) * 10, 0.6);
-  ball(c, ACTS[i].ball, i === 2 ? cx - 30 : cx - 22, cy + 22 - b, 22, T * (i + 1)); c.restore(); }
+  if (i < 3) ball(c, ACTS[i].ball, i === 2 ? cx - 30 : cx - 22, cy + 22 - b, 22, T * (i + 1)); else { if (i === 3) { c.fillStyle = '#ff9f1c'; c.fillRect(cx - 4, cy + 4, 8, 34); } if (i === 7) { c.fillStyle = '#6a6080'; c.fillRect(cx - 30, cy - 30, 60, 76); } if (i === 5) { c.fillStyle = '#2b2140'; c.beginPath(); c.arc(cx + 24, cy + 30, 10, 0, 6.28); c.fill(); }
+    ball(c, ACTS[i].ball, cx, cy + (i === 3 ? -6 : 6) - (i === 4 || i === 10 ? 0 : b), i === 8 ? 26 : 28, i === 9 ? T : 0); } c.restore(); }
 // ---- drawing per screen ----
 function drawTitle() {
   sky(c, '#22d3ee', '#c8f7ff', T, 520, '#3ddc4a', '#2fc23c'); field(c, 520, '#3ddc4a');
@@ -80,17 +88,17 @@ function drawHub() {
   backBtn(() => go('title')); mascotBust(c, 195, 66, 46, T, isSpeaking()); btn('hubMascot', 150, 20, 90, 90, () => { sfx.tap(); say(L.hub); });
   roundBtn('gear', W - 44, 50, 22, 'rgba(255,255,255,0.5)', (c) => { c.fillStyle = '#7a5a8a'; for (let i = 0; i < 8; i++) { c.save(); c.rotate(i * 0.785); c.fillRect(-3, -14, 6, 8); c.restore(); } c.beginPath(); c.arc(0, 0, 9, 0, 6.28); c.fill(); c.fillStyle = '#fff'; c.beginPath(); c.arc(0, 0, 4, 0, 6.28); c.fill(); }, () => { initAudio(); sfx.tap(); openGate(); });
   for (let i = 0; i < ACTS.length; i++) {
-    const col = i % 3, row = Math.floor(i / 3), w = 112, h = 124, x = 13 + col * (w + 13), y = 140 + row * (h + 14), lk = false, wig = lockWiggle === i && lockT > 0 ? Math.sin(lockT * 40) * 5 : 0;
+    const col = i % 3, row = Math.floor(i / 3), w = 112, h = 112, x = 13 + col * (w + 13), y = 128 + row * (h + 10), lk = false, wig = lockWiggle === i && lockT > 0 ? Math.sin(lockT * 40) * 5 : 0;
     c.save(); c.translate(wig, 0); const g = c.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, ACTS[i].bg[0]); g.addColorStop(1, ACTS[i].bg[1]); c.fillStyle = 'rgba(0,0,0,0.12)'; rr(c, x, y + 5, w, h, 28); c.fill(); c.fillStyle = g; rr(c, x, y, w, h, 28); c.fill(); c.lineWidth = 6; c.strokeStyle = '#fff'; c.stroke();
     cardArt(i, x, y, w, h);
-    if (ACTS[i].levels) for (let k = 0; k < ACTS[i].levels; k++) { const on = save.lv[i] > k; c.fillStyle = on ? '#ffd60a' : 'rgba(255,255,255,0.6)'; c.beginPath(); const sx = x + w / 2 + (k - (ACTS[i].levels - 1) / 2) * 19, sy = y + h - 14; if (clubLocked(k) && !on) { c.fillStyle = 'rgba(60,40,90,0.35)'; } for (let q = 0; q < 10; q++) { const rr2 = q % 2 ? 3 : 7.5; c.lineTo(sx + Math.cos(-1.571 + q * 0.628) * rr2, sy + Math.sin(-1.571 + q * 0.628) * rr2); } c.fill(); }
+    if (ACTS[i].levels) for (let k = 0; k < ACTS[i].levels; k++) { const on = save.lv[i] > k; c.fillStyle = on ? '#ffd60a' : 'rgba(255,255,255,0.6)'; c.beginPath(); const sx = x + w / 2 + (k - (ACTS[i].levels - 1) / 2) * 17, sy = y + h - 13; if (clubLocked(k) && !on) { c.fillStyle = 'rgba(60,40,90,0.35)'; } for (let q = 0; q < 10; q++) { const rr2 = q % 2 ? 3 : 7.5; c.lineTo(sx + Math.cos(-1.571 + q * 0.628) * rr2, sy + Math.sin(-1.571 + q * 0.628) * rr2); } c.fill(); }
     if (lk) { c.fillStyle = 'rgba(60,40,90,0.35)'; rr(c, x, y, w, h, 28); c.fill(); lock(x + w / 2, y + h / 2 - 6, 1.4); }
     c.restore();
     btn('act' + i, x, y, w, h, () => { initAudio(); sfx.snap(); start(i); });
   }
   // Trophy Room button
   const ty = 690, p = 1 + Math.sin(T * 3) * 0.03; c.save(); c.translate(195, ty + 50); c.scale(p, p); c.fillStyle = 'rgba(0,0,0,0.12)'; rr(c, -172, -44, 344, 96, 30); c.fill(); c.fillStyle = '#7c5cff'; rr(c, -172, -48, 344, 96, 30); c.fill(); c.lineWidth = 6; c.strokeStyle = '#fff'; c.stroke();
-  for (let k = 0; k < 3; k++) trophy(c, -110 + k * 56, 6, 0.6, k, save.trophies.includes(k), T); save.stickers.slice(-3).forEach((s, k) => sticker(c, 70 + k * 38, -2 + (k % 2) * 8, 20, Math.floor(s / 10), s % 10, T)); c.restore();
+  for (let k = 0; k < 4; k++) trophy(c, -130 + k * 50, 6, 0.55, save.trophies[k] ?? k, k < save.trophies.length, T); save.stickers.slice(-3).forEach((s, k) => sticker(c, 70 + k * 38, -2 + (k % 2) * 8, 20, Math.floor(s / 10), s % 10, T)); c.restore();
   btn('town', 23, ty + 2, 344, 96, () => { initAudio(); sfx.snap(); go('town'); });
 }
 function drawPlay() {
@@ -103,9 +111,9 @@ function drawPlay() {
 }
 function drawTown() {
   c.fillStyle = '#7c5cff'; c.fillRect(0, 0, W, H); backBtn(() => go('hub')); mascotBust(c, 195, 66, 42, T, isSpeaking());
-  c.fillStyle = '#b07a3a'; rr(c, 16, 250, W - 32, 18, 6); c.fill(); for (let k = 0; k < ACTS.length; k++) { const x = 70 + k * 125; trophy(c, x, 200, 1.1, k, save.trophies.includes(k), T); btn('trophy' + k, x - 40, 140, 80, 110, () => { sfx.bell(); say(SPORT_NAME[k]); }); }
-  c.fillStyle = '#fff'; rr(c, 16, 300, W - 32, 520, 24); c.fill();
-  for (let i = 0; i < 24; i++) { const x = 60 + (i % 4) * 90, y = 350 + Math.floor(i / 4) * 80, s = save.stickers[save.stickers.length - 24 + i] ?? save.stickers[i];
+  c.fillStyle = '#b07a3a'; rr(c, 16, 205, W - 32, 14, 6); c.fill(); rr(c, 16, 305, W - 32, 14, 6); c.fill(); for (let k = 0; k < ACTS.length; k++) { const x = 40 + (k % 6) * 62 + (k >= 6 ? 31 : 0), ty2 = k < 6 ? 170 : 270; trophy(c, x, ty2, 0.72, k, save.trophies.includes(k), T); btn('trophy' + k, x - 28, ty2 - 40, 56, 76, () => { sfx.bell(); say(SPORT_NAME[k]); }); }
+  c.fillStyle = '#fff'; rr(c, 16, 335, W - 32, 495, 24); c.fill();
+  for (let i = 0; i < 24; i++) { const x = 60 + (i % 4) * 90, y = 378 + Math.floor(i / 4) * 78, s = save.stickers[save.stickers.length - 24 + i] ?? save.stickers[i];
     if (i < save.stickers.length) { const sv = save.stickers[Math.max(0, save.stickers.length - 24) + i]; sticker(c, x, y, 32, Math.floor(sv / 10), sv % 10, T + i); btn('st' + i, x - 34, y - 34, 68, 68, () => { sfx.pop(); say(SPORT_NAME[Math.floor(sv / 10)]); }); }
     else { c.strokeStyle = '#e0d8f5'; c.lineWidth = 4; c.setLineDash([6, 8]); c.beginPath(); c.arc(x, y, 30, 0, 6.28); c.stroke(); c.setLineDash([]); } void s; }
   return 0;
@@ -207,7 +215,7 @@ function renderArt(kind: 'icon' | 'splash') {
   return cv2.toDataURL('image/png');
 }
 (window as any).__snap = { renderArt,
-  get screen() { return screen; }, get act() { return actI; }, get level() { return level; }, get winT() { return winT; }, get modal() { return modal ? modal.kind : null; }, get freeRemix() { return freeRemix; }, get demo() { return demo ? demo.a : null; },
+  get screen() { return screen; }, get act() { return actI; }, get level() { return level; }, get winT() { return winT; }, get modal() { return modal ? modal.kind : null; }, levels: ACTS.map(a => a.levels), get freeRemix() { return freeRemix; }, get demo() { return demo ? demo.a : null; },
   buttons: () => btns.map(b => ({ id: b.id, x: b.x, y: b.y, w: b.w, h: b.h })), next: () => act?.next() ?? null, busy: () => !!act?.busy?.(),
   toScreen: (x: number, y: number) => { const r = cv.getBoundingClientRect(); return { x: r.left + (ox + x * scale) / dpr, y: r.top + (oy + y * scale) / dpr }; },
   start: (i: number, l: number) => start(i, l), go, save: () => JSON.parse(JSON.stringify(save)), setSave: (s: Save) => { save = s; persist(); }, closeModal: () => { modal = null; afterWin(); },

@@ -25,7 +25,7 @@ async function chaos(sec) {
 async function beat(i) { const t0 = Date.now(); 
   while (Date.now() - t0 < 60000) { if ((await S(() => window.__snap.winT)) >= 0) return true;
     const a = await S(() => window.__snap.busy() ? null : window.__snap.next()); if (!a) { await wait(200); continue; } await run(a); } return false; }
-for (let i = 0; i < 3; i++) { if (process.env.ONLY && !process.env.ONLY.split(",").includes(String(i))) continue;
+for (let i = 0; i < 11; i++) { if (process.env.ONLY && !process.env.ONLY.split(",").includes(String(i))) continue;
   await S(i => window.__snap.start(i, 0), i); await wait(300);
   // chaos stays inside the activity: hide Back from the monkey for this phase so it keeps playing (Back spam is tested separately)
   await chaos(+(process.env.CHAOS || 20)); const scr = await S(() => window.__snap.screen);
@@ -37,7 +37,7 @@ for (let i = 0; i < 3; i++) { if (process.env.ONLY && !process.env.ONLY.split(",
 // Back spam everywhere
 await S(() => { window.__snap.closeModal(); window.__snap.go('hub'); }); for (let k = 0; k < 30; k++) { const bt = await S(() => window.__snap.buttons().find(b => b.id === 'back' || b.id === 'play')); if (bt) { const p = await pt(bt.x + bt.w / 2, bt.y + bt.h / 2); await page.mouse.click(p.x, p.y); } }
 ok(['title', 'hub'].includes(await S(() => window.__snap.screen)), 'Back/Play spam 30x leaves a sane screen');
-for (let i = 0; i < 3; i++) { await S(i => window.__snap.start(i, 0), i); const p = await pt(50, 62); await page.mouse.move(150, 700); await page.mouse.down(); await page.mouse.move(200, 400, { steps: 4 }); await page.mouse.up(); await page.mouse.click(p.x, p.y); await wait(100); ok(await S(() => window.__snap.screen) === 'hub', `activity ${i}: one Back tap mid-drag returns to the hub`); }
+for (let i = 0; i < 11; i++) { await S(i => window.__snap.start(i, 0), i); const p = await pt(50, 62); await page.mouse.move(150, 700); await page.mouse.down(); await page.mouse.move(200, 400, { steps: 4 }); await page.mouse.up(); await page.mouse.click(p.x, p.y); await wait(100); ok(await S(() => window.__snap.screen) === 'hub', `activity ${i}: one Back tap mid-drag returns to the hub`); }
 // whole-app chaos across screens
 await S(() => window.__snap.go('title')); await chaos(25); ok(['title', 'hub', 'play', 'town', 'parents'].includes(await S(() => window.__snap.screen)), 'free roam chaos 25 s: app alive on ' + await S(() => window.__snap.screen));
 const t1 = await S(() => performance.now()); await wait(300); ok(await S(() => window.__snap.screen) !== undefined, 'still rendering');
