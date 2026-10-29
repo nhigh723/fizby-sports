@@ -1,4 +1,40 @@
 {
+"113m0vn": {
+"check": {
+"bad": [],
+"edge_in": -22.4,
+"edge_out": -39.2,
+"heard": "Wait for the ring!",
+"islands": 1,
+"lead": 50,
+"lufs": -16.81,
+"trail": 55
+},
+"heard": "Wait for the ring!",
+"padded": true,
+"sim": 0.927,
+"take": "113m0vn~1",
+"text": "Wait for the ring!",
+"trimmed_sim": 0.821
+},
+"1232ywl": {
+"check": {
+"bad": [],
+"edge_in": -31.2,
+"edge_out": -38.0,
+"heard": "Drive through the pink gate.",
+"islands": 1,
+"lead": 55,
+"lufs": -18.04,
+"trail": 50
+},
+"heard": "Drive through the pink gate.",
+"padded": true,
+"sim": 0.939,
+"take": "1232ywl~0",
+"text": "Drive through the pink gate!",
+"trimmed_sim": 0.87
+},
 "1236ajr": {
 "check": {
 "bad": [],
@@ -71,6 +107,24 @@
 "text": "Racing!",
 "trimmed_sim": 0.806
 },
+"189dn0j": {
+"check": {
+"bad": [],
+"edge_in": -22.0,
+"edge_out": -34.0,
+"heard": "Splash! You made it!",
+"islands": 2,
+"lead": 50,
+"lufs": -17.89,
+"trail": 50
+},
+"heard": "Splash! You made it!",
+"padded": true,
+"sim": 0.917,
+"take": "189dn0j~0",
+"text": "Splash! You made it!",
+"trimmed_sim": 0.802
+},
 "18fdtuw": {
 "check": {
 "bad": [],
@@ -106,6 +160,24 @@
 "take": "1a13zzo~1",
 "text": "Great job!",
 "trimmed_sim": 0.853
+},
+"1aip7r2": {
+"check": {
+"bad": [],
+"edge_in": -31.6,
+"edge_out": -32.9,
+"heard": "Drive through the red gate.",
+"islands": 1,
+"lead": 55,
+"lufs": -16.43,
+"trail": 60
+},
+"heard": "Drive through the red gate.",
+"padded": true,
+"sim": 0.939,
+"take": "1aip7r2~1",
+"text": "Drive through the red gate!",
+"trimmed_sim": 0.894
 },
 "1b72y8w": {
 "check": {
@@ -161,6 +233,60 @@
 "text": "Swipe the ball into the goal!",
 "trimmed_sim": 0.909
 },
+"1cyqwlz": {
+"check": {
+"bad": [],
+"edge_in": -18.1,
+"edge_out": -36.6,
+"heard": "8",
+"islands": 1,
+"lead": 50,
+"lufs": -16.37,
+"trail": 50
+},
+"heard": "8",
+"padded": true,
+"sim": 0.91,
+"take": "1cyqwlz~0",
+"text": "Eight!",
+"trimmed_sim": 0.648
+},
+"1diei2q": {
+"check": {
+"bad": [],
+"edge_in": -39.7,
+"edge_out": -30.6,
+"heard": "Find Red!",
+"islands": 1,
+"lead": 70,
+"lufs": -16.42,
+"trail": 50
+},
+"heard": "Find Red!",
+"padded": true,
+"sim": 0.945,
+"take": "1diei2q~1",
+"text": "Find red!",
+"trimmed_sim": 0.802
+},
+"1dq4199": {
+"check": {
+"bad": [],
+"edge_in": -32.9,
+"edge_out": -38.2,
+"heard": "Shoot in the orange hoop!",
+"islands": 1,
+"lead": 55,
+"lufs": -16.44,
+"trail": 50
+},
+"heard": "Shoot in the orange hoop!",
+"padded": true,
+"sim": 0.887,
+"take": "1dq4199~0",
+"text": "Shoot in the orange hoop!",
+"trimmed_sim": 0.768
+},
 "1dxaza6": {
 "check": {
 "bad": [],
@@ -179,6 +305,24 @@
 "text": "Your turn!",
 "trimmed_sim": 0.751
 },
+"1dzq53a": {
+"check": {
+"bad": [],
+"edge_in": -25.1,
+"edge_out": -37.5,
+"heard": "Pull the ball back, then let go!",
+"islands": 1,
+"lead": 50,
+"lufs": -16.41,
+"trail": 55
+},
+"heard": "Pull the ball back, then let go!",
+"padded": true,
+"sim": 0.929,
+"take": "1dzq53a~1",
+"text": "Pull the ball back, then let go!",
+"trimmed_sim": 0.908
+},
 "1fz1tgo": {
 "check": {
 "bad": [],
@@ -196,6 +340,96 @@
 "take": "1fz1tgo~0",
 "text": "Mini-golf!",
 "trimmed_sim": 0.832
+},
+"1i8iloz": {
+"check": {
+"bad": [],
+"edge_in": -24.3,
+"edge_out": -35.8,
+"heard": "Let us count the goals!",
+"islands": 1,
+"lead": 50,
+"lufs": -18.13,
+"trail": 55
+},
+"heard": "Let us count the goals!",
+"padded": true,
+"sim": 0.952,
+"take": "1i8iloz~0",
+"text": "Let us count the goals!",
+"trimmed_sim": 0.895
+},
+"1iqex6b": {
+"check": {
+"bad": [],
+"edge_in": -32.4,
+"edge_out": -33.9,
+"heard": "Shoot in the pink hoop!",
+"islands": 1,
+"lead": 55,
+"lufs": -16.54,
+"trail": 60
+},
+"heard": "Shoot in the pink hoop!",
+"padded": true,
+"sim": 0.916,
+"take": "1iqex6b~0",
+"text": "Shoot in the pink hoop!",
+"trimmed_sim": 0.799
+},
+"1iv2uut": {
+"check": {
+"bad": [],
+"edge_in": -27.0,
+"edge_out": -37.2,
+"heard": "The pins are on the right.",
+"islands": 1,
+"lead": 50,
+"lufs": -16.42,
+"trail": 50
+},
+"heard": "The pins are on the right!",
+"padded": true,
+"sim": 0.938,
+"take": "1iv2uut~1",
+"text": "The pins are on the right!",
+"trimmed_sim": 0.885
+},
+"1jlc7ey": {
+"check": {
+"bad": [],
+"edge_in": -15.8,
+"edge_out": -36.4,
+"heard": "Paint it to match the dots.",
+"islands": 1,
+"lead": 50,
+"lufs": -16.38,
+"trail": 50
+},
+"heard": "paint it to match the dots.",
+"padded": true,
+"sim": 0.922,
+"take": "1jlc7ey~1",
+"text": "Paint it to match the dots!",
+"trimmed_sim": 0.865
+},
+"1k7bz68": {
+"check": {
+"bad": [],
+"edge_in": -24.7,
+"edge_out": -40.2,
+"heard": "Point",
+"islands": 1,
+"lead": 50,
+"lufs": -16.45,
+"trail": 55
+},
+"heard": "Point",
+"padded": true,
+"sim": 0.934,
+"take": "1k7bz68~0",
+"text": "Point!",
+"trimmed_sim": 0.7
 },
 "1ldnef8": {
 "check": {
@@ -250,6 +484,24 @@
 "take": "1lyg0hz~1",
 "text": "Seven!",
 "trimmed_sim": 0.769
+},
+"1mavur8": {
+"check": {
+"bad": [],
+"edge_in": -36.6,
+"edge_out": -35.2,
+"heard": "Swish!",
+"islands": 1,
+"lead": 55,
+"lufs": -16.39,
+"trail": 50
+},
+"heard": "Swish.",
+"padded": true,
+"sim": 0.889,
+"take": "1mavur8~0",
+"text": "Swish!",
+"trimmed_sim": 0.72
 },
 "1muej46": {
 "check": {
@@ -359,6 +611,24 @@
 "text": "Pull back and let go to putt!",
 "trimmed_sim": 0.883
 },
+"1r43l5r": {
+"check": {
+"bad": [],
+"edge_in": -31.1,
+"edge_out": -39.2,
+"heard": "Drive through the orange gate.",
+"islands": 1,
+"lead": 50,
+"lufs": -16.43,
+"trail": 55
+},
+"heard": "Drive through the orange gate.",
+"padded": true,
+"sim": 0.937,
+"take": "1r43l5r~0",
+"text": "Drive through the orange gate!",
+"trimmed_sim": 0.896
+},
 "1rpjhkb": {
 "check": {
 "bad": [],
@@ -412,6 +682,24 @@
 "take": "1u6brdw~1",
 "text": "Swipe the puck into the net!",
 "trimmed_sim": 0.809
+},
+"1yvoi6n": {
+"check": {
+"bad": [],
+"edge_in": -35.6,
+"edge_out": -37.7,
+"heard": "Find Blue!",
+"islands": 1,
+"lead": 55,
+"lufs": -16.58,
+"trail": 50
+},
+"heard": "Find Blue!",
+"padded": true,
+"sim": 0.953,
+"take": "1yvoi6n~1",
+"text": "Find blue!",
+"trimmed_sim": 0.85
 },
 "1yxggsj": {
 "check": {
@@ -467,6 +755,24 @@
 "text": "Shoot in the green hoop!",
 "trimmed_sim": 0.877
 },
+"3d0irc": {
+"check": {
+"bad": [],
+"edge_in": -17.0,
+"edge_out": -39.1,
+"heard": "What a beautiful picture!",
+"islands": 1,
+"lead": 50,
+"lufs": -17.19,
+"trail": 55
+},
+"heard": "What a beautiful picture!",
+"padded": true,
+"sim": 0.952,
+"take": "3d0irc~1",
+"text": "What a beautiful picture!",
+"trimmed_sim": 0.874
+},
 "3km9wh": {
 "check": {
 "bad": [],
@@ -484,6 +790,78 @@
 "take": "3km9wh~1",
 "text": "Ball!",
 "trimmed_sim": 0.717
+},
+"3nmc7k": {
+"check": {
+"bad": [],
+"edge_in": -27.2,
+"edge_out": -31.3,
+"heard": "Five!",
+"islands": 1,
+"lead": 65,
+"lufs": -16.69,
+"trail": 55
+},
+"heard": "Five!",
+"padded": true,
+"sim": 0.904,
+"take": "3nmc7k~0",
+"text": "Five!",
+"trimmed_sim": 0.719
+},
+"3nqy2q": {
+"check": {
+"bad": [],
+"edge_in": -25.5,
+"edge_out": -35.1,
+"heard": "Four!",
+"islands": 1,
+"lead": 60,
+"lufs": -16.4,
+"trail": 50
+},
+"heard": "Four!",
+"padded": true,
+"sim": 0.917,
+"take": "3nqy2q~0",
+"text": "Four!",
+"trimmed_sim": 0.707
+},
+"3ofw6h": {
+"check": {
+"bad": [],
+"edge_in": -26.6,
+"edge_out": -36.0,
+"heard": "Goal",
+"islands": 1,
+"lead": 60,
+"lufs": -16.41,
+"trail": 55
+},
+"heard": "Goal",
+"padded": true,
+"sim": 0.93,
+"take": "3ofw6h~1",
+"text": "Goal!",
+"trimmed_sim": 0.741
+},
+"3rrelt": {
+"check": {
+"bad": [],
+"edge_in": -16.3,
+"edge_out": -33.3,
+"heard": "Left!",
+"islands": 1,
+"lead": 50,
+"lufs": -16.39,
+"trail": 55
+},
+"heard": "Left!",
+"padded": true,
+"sim": 0.924,
+"take": "3rrelt~0",
+"text": "Left!",
+"trimmed_sim": 0.743
 },
 "3t9hzk": {
 "check": {
@@ -521,6 +899,24 @@
 "text": "Star!",
 "trimmed_sim": 0.746
 },
+"4du61": {
+"check": {
+"bad": [],
+"edge_in": -39.9,
+"edge_out": -37.3,
+"heard": "Find pink!",
+"islands": 1,
+"lead": 60,
+"lufs": -17.44,
+"trail": 55
+},
+"heard": "Find pink!",
+"padded": true,
+"sim": 0.935,
+"take": "4du61~0",
+"text": "Find pink!",
+"trimmed_sim": 0.735
+},
 "5e6kby": {
 "check": {
 "bad": [],
@@ -537,6 +933,42 @@
 "sim": 0.945,
 "take": "5e6kby~0",
 "text": "Play a sport to win stickers!",
+"trimmed_sim": 0.884
+},
+"67qjxb": {
+"check": {
+"bad": [],
+"edge_in": -27.8,
+"edge_out": -35.6,
+"heard": "Drive through the yellow gate!",
+"islands": 1,
+"lead": 50,
+"lufs": -16.44,
+"trail": 65
+},
+"heard": "Drive through the yellow gate!",
+"padded": true,
+"sim": 0.955,
+"take": "67qjxb~1",
+"text": "Drive through the yellow gate!",
+"trimmed_sim": 0.888
+},
+"6s0yii": {
+"check": {
+"bad": [],
+"edge_in": -19.5,
+"edge_out": -35.8,
+"heard": "Kick to the left goal!",
+"islands": 1,
+"lead": 50,
+"lufs": -16.46,
+"trail": 50
+},
+"heard": "Kick to the left goal!",
+"padded": true,
+"sim": 0.945,
+"take": "6s0yii~0",
+"text": "Kick to the left goal!",
 "trimmed_sim": 0.884
 },
 "9ej7f5": {
@@ -647,6 +1079,24 @@
 "text": "Gymnastics!",
 "trimmed_sim": 0.849
 },
+"fy356f": {
+"check": {
+"bad": [],
+"edge_in": -20.0,
+"edge_out": -37.1,
+"heard": "Tennis!",
+"islands": 1,
+"lead": 50,
+"lufs": -16.45,
+"trail": 45
+},
+"heard": "Tennis!",
+"padded": true,
+"sim": 0.929,
+"take": "fy356f~0",
+"text": "Tennis!",
+"trimmed_sim": 0.673
+},
 "g6mpw3": {
 "check": {
 "bad": [],
@@ -682,6 +1132,78 @@
 "take": "gk69tw~1",
 "text": "The keeper caught it! Try the other side!",
 "trimmed_sim": 0.872
+},
+"gly2de": {
+"check": {
+"bad": [],
+"edge_in": -28.2,
+"edge_out": -36.3,
+"heard": "The pins are on the left.",
+"islands": 1,
+"lead": 55,
+"lufs": -17.26,
+"trail": 50
+},
+"heard": "The pins are on the left.",
+"padded": true,
+"sim": 0.921,
+"take": "gly2de~0",
+"text": "The pins are on the left!",
+"trimmed_sim": 0.827
+},
+"hjdyqh": {
+"check": {
+"bad": [],
+"edge_in": -36.8,
+"edge_out": -26.2,
+"heard": "Shoot in the purple hoop!",
+"islands": 1,
+"lead": 55,
+"lufs": -16.46,
+"trail": 50
+},
+"heard": "Shoot in the purple hoop!",
+"padded": true,
+"sim": 0.924,
+"take": "hjdyqh~0",
+"text": "Shoot in the purple hoop!",
+"trimmed_sim": 0.874
+},
+"ja9w4k": {
+"check": {
+"bad": [],
+"edge_in": -21.7,
+"edge_out": -35.6,
+"heard": "Now run! Tap the bases!",
+"islands": 1,
+"lead": 55,
+"lufs": -16.43,
+"trail": 55
+},
+"heard": "Now run! Tap the bases!",
+"padded": true,
+"sim": 0.924,
+"take": "ja9w4k~0",
+"text": "Now run! Tap the bases!",
+"trimmed_sim": 0.874
+},
+"ku1bwh": {
+"check": {
+"bad": [],
+"edge_in": -24.5,
+"edge_out": -30.9,
+"heard": "Tap when the ring hugs the ball.",
+"islands": 1,
+"lead": 55,
+"lufs": -16.46,
+"trail": 55
+},
+"heard": "Tap when the ring hugs the ball.",
+"padded": true,
+"sim": 0.915,
+"take": "ku1bwh~0",
+"text": "Tap when the ring hugs the ball!",
+"trimmed_sim": 0.856
 },
 "lwll1m": {
 "check": {
@@ -755,6 +1277,24 @@
 "text": "Drive through the blue gate!",
 "trimmed_sim": 0.837
 },
+"ooy791": {
+"check": {
+"bad": [],
+"edge_in": -26.9,
+"edge_out": -38.6,
+"heard": "Too far, pull a little less.",
+"islands": 1,
+"lead": 50,
+"lufs": -16.46,
+"trail": 45
+},
+"heard": "Too far, pull a little less.",
+"padded": true,
+"sim": 0.933,
+"take": "ooy791~1",
+"text": "Too far! Pull a little less!",
+"trimmed_sim": 0.845
+},
 "oym5ja": {
 "check": {
 "bad": [],
@@ -790,6 +1330,24 @@
 "take": "p6fjs0~1",
 "text": "That is a different color hoop!",
 "trimmed_sim": 0.895
+},
+"q1pcpj": {
+"check": {
+"bad": [],
+"edge_in": -36.6,
+"edge_out": -33.2,
+"heard": "Hit it to the left.",
+"islands": 1,
+"lead": 60,
+"lufs": -16.42,
+"trail": 55
+},
+"heard": "Hit it to the left.",
+"padded": true,
+"sim": 0.946,
+"take": "q1pcpj~0",
+"text": "Hit it to the left!",
+"trimmed_sim": 0.797
 },
 "ru8yla": {
 "check": {
@@ -899,6 +1457,24 @@
 "text": "Drive through the purple gate!",
 "trimmed_sim": 0.815
 },
+"yjzuyw": {
+"check": {
+"bad": [],
+"edge_in": -19.1,
+"edge_out": -32.4,
+"heard": "One!",
+"islands": 1,
+"lead": 55,
+"lufs": -16.47,
+"trail": 55
+},
+"heard": "One",
+"padded": true,
+"sim": 0.909,
+"take": "yjzuyw~0",
+"text": "One!",
+"trimmed_sim": 0.772
+},
 "yk2u62": {
 "check": {
 "bad": [],
@@ -916,5 +1492,95 @@
 "take": "yk2u62~0",
 "text": "Six!",
 "trimmed_sim": 0.685
+},
+"yk3ia5": {
+"check": {
+"bad": [],
+"edge_in": -22.3,
+"edge_out": -30.4,
+"heard": "10!",
+"islands": 1,
+"lead": 45,
+"lufs": -16.4,
+"trail": 80
+},
+"heard": "10!",
+"padded": true,
+"sim": 0.932,
+"take": "yk3ia5~0",
+"text": "Ten!",
+"trimmed_sim": 0.718
+},
+"yk3xfk": {
+"check": {
+"bad": [],
+"edge_in": -30.6,
+"edge_out": -35.9,
+"heard": "TOO!",
+"islands": 1,
+"lead": 50,
+"lufs": -16.45,
+"trail": 60
+},
+"heard": "TOO!",
+"padded": true,
+"sim": 0.922,
+"take": "yk3xfk~1",
+"text": "Two!",
+"trimmed_sim": 0.704
+},
+"yk7d1z": {
+"check": {
+"bad": [],
+"edge_in": -23.1,
+"edge_out": -35.5,
+"heard": "Yes!",
+"islands": 1,
+"lead": 55,
+"lufs": -16.45,
+"trail": 55
+},
+"heard": "Yes!",
+"padded": true,
+"sim": 0.913,
+"take": "yk7d1z~1",
+"text": "Yes!",
+"trimmed_sim": 0.731
+},
+"z2ewit": {
+"check": {
+"bad": [],
+"edge_in": -23.2,
+"edge_out": -37.3,
+"heard": "Pull a little more!",
+"islands": 1,
+"lead": 55,
+"lufs": -16.46,
+"trail": 60
+},
+"heard": "Pull a little more!",
+"padded": true,
+"sim": 0.93,
+"take": "z2ewit~1",
+"text": "Pull a little more!",
+"trimmed_sim": 0.747
+},
+"zmxy5n": {
+"check": {
+"bad": [],
+"edge_in": -23.8,
+"edge_out": -34.9,
+"heard": "You are a champion!",
+"islands": 1,
+"lead": 55,
+"lufs": -16.45,
+"trail": 50
+},
+"heard": "You are a champion!",
+"padded": true,
+"sim": 0.944,
+"take": "zmxy5n~1",
+"text": "You are a champion!",
+"trimmed_sim": 0.876
 }
 }

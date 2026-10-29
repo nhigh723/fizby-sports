@@ -37,6 +37,10 @@ for h, text in miss:
         if a is None or b is None: tried.append((k, ['no-timestamp'])); continue
         nxt = flat[n0 + len(tgt)][1][0] if len(flat) > n0 + len(tgt) else b + 0.3
         g = gap_cut(y, sr, a, b)
+        if g is not None and g[1] / sr > nxt - 0.02:  # Whisper's end stamp ran into the carrier's first word: look for the pause just before it
+            for back in (0.2, 0.3, 0.4, 0.5):
+                g2 = gap_cut(y, sr, a, max(a + 0.1, nxt - back))
+                if g2 is not None and g2[1] / sr < nxt - 0.01: g = g2; break
         if g is None: tried.append((k, ['no-gap'])); continue
         cut = y[g[0]:g[1]].copy(); n5 = int(0.005 * sr); cut[:n5] *= np.linspace(0, 1, n5); cut[-n5:] *= np.linspace(1, 0, n5)
         c16 = librosa.resample(cut, orig_sr=sr, target_sr=16000); heard = asr(c16.copy())['text']
