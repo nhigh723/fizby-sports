@@ -6,7 +6,7 @@ import { L, allLines } from './lines';
 import type { Activity, Action, Api, Pt } from './kit';
 import { ball, field, sticker, trophy, star, keeper, pin, hoop, goal, type BallKind } from './sports';
 import { soccer } from './acts/soccer'; import { basket } from './acts/basket'; import { bowl } from './acts/bowl'; import { tee } from './acts/tee'; import { swim } from './acts/swim';
-import { golf, hockey } from './acts/golf'; import { tennis } from './acts/tennis'; import { race } from './acts/race'; import { gym } from './acts/gym'; import { paint } from './acts/paint';
+import { golf } from './acts/golf'; import { hockey } from './acts/hockey'; import { tennis } from './acts/tennis'; import { race } from './acts/race'; import { gym } from './acts/gym'; import { paint } from './acts/paint';
 import { SPORT_NAME } from './lines';
 import { store, hasClub, levelFree, buy, restore, manage, initStore, PRODUCTS, TERMS_URL, PRIVACY_URL, openLink, storeTest, type Plan } from './store';
 import { lineId } from './voice';
@@ -174,7 +174,7 @@ function frame(now: number) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now; T += dt; requestAnimationFrame(frame);
   if (lockT > 0) lockT -= dt; if (mascotPoseT > 0) mascotPoseT -= dt; else mascotPose = 'stand'; if (shake > 0) shake = Math.max(0, shake - dt * 30);
   if (screen === 'play' && act) { act.update(dt);
-    if (winT >= 0) { winT += dt; if (winT > 3.2 && !modal) { winT = -1; if (!checkUnlock()) afterWin(); } }
+    if (winT >= 0) { const w0 = winT; winT += dt; if (w0 < 1.9 && winT >= 1.9 && newSticker >= 0) { say(L.sticker); sfx.pop(); } if (winT > 3.2 && !modal) { winT = -1; if (!checkUnlock()) afterWin(); } }
     else if (!modal) { idle += dt; if (act.busy?.()) idle = 0; if (idle > 6) { const a = act.next(); if (a && a.type !== 'wait') { if (!demo || JSON.stringify(demo.a) !== JSON.stringify(a)) demo = { a, t: 0 }; } else demo = null; } if (demo) demo.t += dt; } }
   if (resetPress && pointerIsDown) { resetHold += dt; if (resetHold > 3) { resetPress = false; resetHold = 0; save = fresh(); persist(); sfx.crash(); } } else { resetHold = 0; resetPress = false; }
   for (const p of parts) { p.vy += 900 * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= 0.99; p.life -= dt; } for (let i = parts.length - 1; i >= 0; i--) if (parts[i].life <= 0) parts.splice(i, 1);
@@ -204,7 +204,10 @@ cv.addEventListener('pointermove', e => { if (e.pointerId !== pointerId) return;
 cv.addEventListener('pointerup', release); cv.addEventListener('pointercancel', release); cv.addEventListener('lostpointercapture', e => { if (e.pointerId === pointerId) release(e); });
 addEventListener('blur', () => { if (pointerId !== null && act) act.up({ x: 0, y: 0 }); pointerId = null; pointerIsDown = false; });
 document.addEventListener('visibilitychange', () => { if (document.hidden) setMuted(true); else setMuted(false); });
-document.title = GAME_TITLE; void initStore(); requestAnimationFrame(frame); setTimeout(() => { if (screen === 'title') say(L.title, false); }, 600);
+document.title = GAME_TITLE;
+// offline: the web build registers dist/sw.js (made by scripts/precache.mjs). The iOS app bundles its files, so it needs none.
+if ('serviceWorker' in navigator && location.protocol.startsWith('http') && !(window as any).Capacitor?.isNativePlatform?.()) navigator.serviceWorker.register('./sw.js').catch(() => { /* */ });
+ void initStore(); requestAnimationFrame(frame); setTimeout(() => { if (screen === 'title') say(L.title, false); }, 600);
 // ---- test hooks ----
 /** Store art, drawn with the game's own art code (scripts/icons.mjs saves it): 'icon' = 1024 full-bleed square, 'splash' = 2732 square launch art. */
 function renderArt(kind: 'icon' | 'splash') {

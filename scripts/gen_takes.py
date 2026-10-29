@@ -1,7 +1,7 @@
-import sys, json, time, torch, soundfile as sf
+import os, sys, json, time, torch, soundfile as sf
 from qwen_tts import Qwen3TTSModel
-torch.set_num_threads(6)
-import os; REF = os.environ['VOICE_REF']; REF_TEXT = "Today we're making a campfire."
+torch.set_num_threads(int(os.environ.get("TTS_THREADS", "4")))
+import os; REF = os.environ['VOICE_REF']; REF_TEXT = os.environ['VOICE_REF_TEXT']
 m = Qwen3TTSModel.from_pretrained("Qwen/Qwen3-TTS-12Hz-0.6B-Base", device_map="cpu", dtype=torch.float32)
 items = json.load(open(sys.argv[1])); out = sys.argv[2]
 prompt = m.create_voice_clone_prompt(ref_audio=REF, ref_text=REF_TEXT) if hasattr(m, 'create_voice_clone_prompt') else None

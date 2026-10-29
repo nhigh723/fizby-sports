@@ -45,4 +45,3 @@ export function golf(api: Api, level: number, hockey = false): Activity {
     busy: () => roll || sink >= 0 || done,
   };
 }
-export const hockey = (api: Api, level: number) => { const a = golf(api, level, true); a.intro = level >= 2 ? L.hockeyBank : L.hockeyGo; return a; };

@@ -22,7 +22,7 @@ export const L = {
   golfGo: 'Pull back and let go to putt!', golfBank: 'Bounce it off the wall!', holeIn: 'In the hole!', golfMore: 'Pull a little more!', golfLess: 'A little softer!',
   tennisGo: 'Tap the ball when it comes to you!', tennisMiss: 'Here comes another one!', rally: 'What a rally!', point: 'Point!',
   raceGo: 'Tap left or right to steer! Grab the stars!', cone: 'Bonk! Go around the cones!', finish: 'You won the race!', wrongGate: 'That gate is a different color!',
-  hockeyGo: 'Swipe the puck into the net!', hockeyBank: 'Bounce it off the wall!',
+  hockeyGo: 'Swipe the puck into the net!', hockeyBank: 'Bounce it off the wall!', hockeyPass: 'Pass to your friend first!', hockeyShoot: 'Now shoot!',
   gymGo: 'Watch me, then copy my moves!', gymYour: 'Your turn!', gymOops: 'Watch again!', star: 'Star!', ball: 'Ball!', arms: 'Arms up!', split: 'Splits!', bravo: 'Bravo!',
   paintGo: 'Pick a color, then tap to paint!', paintMatch: 'Paint it to match the dots!', paintDone: 'What a beautiful picture!', paintWrong: 'Try the color on the dot!',
   yes: 'Yes!', great: 'Great job!', champ: 'You are a champion!', sticker: 'You got a sticker!', trophy: 'You won a trophy!',
