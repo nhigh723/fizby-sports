@@ -32,15 +32,15 @@ for h, text in miss:
         y, sr = sf.read(f'{td}/{k}.wav', dtype='float32'); y16 = librosa.resample(y, orig_sr=sr, target_sr=16000)
         ch = asr(y16.copy(), return_timestamps='word')['chunks']; ws = [(words(c['text']), c['timestamp']) for c in ch]
         tgt, n0 = words(text), len(words(PRE)); flat = [(w, ts) for ww, ts in ws for w in ww]
-        if len(flat) < n0 + len(tgt) or [w for w, _ in flat[n0:n0 + len(tgt)]] != tgt: continue
+        if len(flat) < n0 + len(tgt) or [w for w, _ in flat[n0:n0 + len(tgt)]] != tgt: tried.append((k, ['align', ' '.join(w for w, _ in flat)])); continue
         a, b = flat[n0][1][0], flat[n0 + len(tgt) - 1][1][1]
-        if a is None or b is None: continue
+        if a is None or b is None: tried.append((k, ['no-timestamp'])); continue
         nxt = flat[n0 + len(tgt)][1][0] if len(flat) > n0 + len(tgt) else b + 0.3
         g = gap_cut(y, sr, a, b)
-        if g is None: continue
+        if g is None: tried.append((k, ['no-gap'])); continue
         cut = y[g[0]:g[1]].copy(); n5 = int(0.005 * sr); cut[:n5] *= np.linspace(0, 1, n5); cut[-n5:] *= np.linspace(1, 0, n5)
         c16 = librosa.resample(cut, orig_sr=sr, target_sr=16000); heard = asr(c16.copy())['text']
-        if words(heard) != words(text): continue
+        if words(heard) != words(text): tried.append((k, ['trim-heard', heard.strip()])); continue
         out = f'{G}/public/voice/{h}.mp3'; export(cut, sr, out)
         cc = check(out, text, MED, asr, words)
         if cc['bad'] == ['padding']: repad(out); cc = check(out, text, MED, asr, words)
