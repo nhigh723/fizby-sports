@@ -22,10 +22,10 @@ export function bowl(api: Api, level: number): Activity {
     intro: L.bowlGo,
     update(dt) { spin += dt * (roll ? 10 : 0);
       if (roll) { bx += vx * dt; by += vy * dt; if (!gutter && (bx < lx0 + 6 || bx > lx1 - 6)) { gutter = true; vx = 0; bx = bx < 195 ? lx0 - 14 : lx1 + 14; api.sfx.thud(); }
-        for (const p of pins) if (!p.down && !gutter && Math.hypot(p.x - bx, p.y - by) < BR + PR) { p.down = true; p.vx = (p.x - bx) * 6 + vx * 0.3; p.vy = -260; api.sfx.crash(); }
+        for (const p of pins) if (!p.down && !gutter && Math.hypot(p.x - bx, p.y - by) < BR + PR) { p.down = true; p.vx = hard ? (p.x - bx) * 1.5 : (p.x - bx) * 6 + vx * 0.3; p.vy = hard ? -60 : -260; api.sfx.crash(); }
         if (by < 150) { roll = false; after = 0; countQ = []; pins.forEach((p, i) => { if (p.down && !p.counted) { p.counted = true; countQ.push(i); } }); if (!countQ.length) api.say(L.gutter); countT = 0.2; } }
       for (const p of pins) if (p.down) { p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= 0.92; p.vy *= 0.9; p.rot = Math.min(1.5, p.rot + dt * 8);
-        for (const q of pins) if (!q.down && (hard ? (q.y < p.y && Math.abs(q.x - p.x) < 12 && p.y - q.y < 75) : Math.hypot(q.x - p.x, q.y - p.y) < 2 * PR + 4)) { q.down = true; q.vx = (q.x - p.x) * 5; q.vy = -200; } }
+        for (const q of pins) if (!q.down && (hard ? (q.y < p.y && Math.abs(q.x - p.x) < 12 && p.y - q.y < 75) : Math.hypot(q.x - p.x, q.y - p.y) < 2 * PR + 4)) { q.down = true; q.vx = hard ? 0 : (q.x - p.x) * 5; q.vy = hard ? -60 : -200; } }
       if (after >= 0) { after += dt; countT -= dt;
         if (countT <= 0 && countQ.length) { const done2 = pins.filter(p => p.counted).length - countQ.length + 1; countQ.shift(); api.say(NUM[Math.min(9, done2 - 1)]); api.sfx.pop(); countT = 0.6; }
         if (!countQ.length && countT <= -0.4) { after = -1; reset(); if (pins.every(p => p.down)) { cleared++; api.burst(195, 260, 30); if (cleared >= racks) { done = true; api.win(L.allDown); } else { api.say(L.allDown); api.sfx.cheer(); if (sides) newRack(); else pins = rack(N, 195); } } } } },

@@ -49,6 +49,7 @@ async function clip(id: string) {
 let lastAt = 0;
 /** the mascot speaks. force=false lines are skipped if he spoke in the last 2.5 s (keeps chatter down). */
 export async function say(text: string, force = true) {
+  if (!text) return;
   const now = performance.now(); if (!force && now - lastAt < 2500) return; lastAt = now; lastLine = text;
   if (muted) return; const id = lineId(text);
   try { cur?.stop(); } catch { /* */ } try { speechSynthesis.cancel(); } catch { /* */ }
