@@ -17,6 +17,24 @@
 "text": "Wait for the ring!",
 "trimmed_sim": 0.821
 },
+"11fryd0": {
+"check": {
+"bad": [],
+"edge_in": -20.2,
+"edge_out": -35.3,
+"heard": "Let us do some painting!",
+"islands": 1,
+"lead": 55,
+"lufs": -17.12,
+"trail": 55
+},
+"heard": "Let us do some painting!",
+"padded": true,
+"sim": 0.95,
+"take": "11fryd0~3",
+"text": "Let us do some painting!",
+"trimmed_sim": 0.863
+},
 "1232ywl": {
 "check": {
 "bad": [],
@@ -71,6 +89,24 @@
 "text": "Find yellow!",
 "trimmed_sim": 0.84
 },
+"12hzdub": {
+"check": {
+"bad": [],
+"edge_in": -23.9,
+"edge_out": -34.1,
+"heard": "Yes, it went in the hole.",
+"islands": 2,
+"lead": 55,
+"lufs": -16.42,
+"trail": 50
+},
+"heard": "Yes, it went in the hole.",
+"padded": true,
+"sim": 0.93,
+"take": "12hzdub~3",
+"text": "Yes! It went in the hole!",
+"trimmed_sim": 0.811
+},
 "14j5b2h": {
 "check": {
 "bad": [],
@@ -124,6 +160,24 @@
 "take": "15gbcca~0",
 "text": "Racing!",
 "trimmed_sim": 0.806
+},
+"16w3vom": {
+"check": {
+"bad": [],
+"edge_in": -38.1,
+"edge_out": -36.7,
+"heard": "Find the yellow one!",
+"islands": 1,
+"lead": 50,
+"lufs": -16.44,
+"trail": 45
+},
+"heard": "Find the yellow one!",
+"padded": true,
+"sim": 0.927,
+"take": "16w3vom~2",
+"text": "Find the yellow one!",
+"trimmed_sim": 0.837
 },
 "17w7ut9": {
 "check": {
@@ -376,6 +430,24 @@
 "take": "1e0tqvd~3",
 "text": "Hockey!",
 "trimmed_sim": 0.75
+},
+"1eh1rly": {
+"check": {
+"bad": [],
+"edge_in": -18.1,
+"edge_out": -34.9,
+"heard": "Put your arms up high!",
+"islands": 1,
+"lead": 50,
+"lufs": -16.6,
+"trail": 55
+},
+"heard": "Put your arms up high!",
+"padded": true,
+"sim": 0.935,
+"take": "1eh1rly~2",
+"text": "Put your arms up high!",
+"trimmed_sim": 0.871
 },
 "1fz1tgo": {
 "check": {
@@ -827,6 +899,24 @@
 "text": "Swipe the puck into the net!",
 "trimmed_sim": 0.809
 },
+"1ubcca7": {
+"check": {
+"bad": [],
+"edge_in": -14.0,
+"edge_out": -35.7,
+"heard": "Oops! Try the other side!",
+"islands": 2,
+"lead": 55,
+"lufs": -16.7,
+"trail": 55
+},
+"heard": "Oops! Try the other side!",
+"padded": true,
+"sim": 0.954,
+"take": "1ubcca7~3",
+"text": "Oops! Try the other side!",
+"trimmed_sim": 0.912
+},
 "1vox2ud": {
 "check": {
 "bad": [],
@@ -844,6 +934,24 @@
 "take": "1vox2ud~3",
 "text": "Pass, then shoot!",
 "trimmed_sim": 0.854
+},
+"1xpkf7t": {
+"check": {
+"bad": [],
+"edge_in": -15.9,
+"edge_out": -33.9,
+"heard": "Pick a color, then tap the picture to paint.",
+"islands": 1,
+"lead": 55,
+"lufs": -17.5,
+"trail": 55
+},
+"heard": "Pick a color, then tap the picture to paint.",
+"padded": true,
+"sim": 0.913,
+"take": "1xpkf7t~0",
+"text": "Pick a color, then tap the picture to paint!",
+"trimmed_sim": 0.883
 },
 "1yvoi6n": {
 "check": {
@@ -880,6 +988,24 @@
 "take": "1yxggsj~1",
 "text": "You got a sticker!",
 "trimmed_sim": 0.868
+},
+"2f96m4": {
+"check": {
+"bad": [],
+"edge_in": -19.7,
+"edge_out": -36.5,
+"heard": "Find the pink one!",
+"islands": 1,
+"lead": 50,
+"lufs": -16.42,
+"trail": 50
+},
+"heard": "Find the pink one!",
+"padded": true,
+"sim": 0.936,
+"take": "2f96m4~1",
+"text": "Find the pink one!",
+"trimmed_sim": 0.899
 },
 "2g5yf2": {
 "check": {
@@ -1439,6 +1565,24 @@
 "text": "Now run! Tap the bases!",
 "trimmed_sim": 0.874
 },
+"jfhry5": {
+"check": {
+"bad": [],
+"edge_in": -22.3,
+"edge_out": -35.8,
+"heard": "Watch me first, then copy my moves?",
+"islands": 1,
+"lead": 50,
+"lufs": -16.79,
+"trail": 55
+},
+"heard": "Watch me first, then copy my moves?",
+"padded": true,
+"sim": 0.948,
+"take": "jfhry5~3",
+"text": "Watch me first, then copy my moves!",
+"trimmed_sim": 0.891
+},
 "ku1bwh": {
 "check": {
 "bad": [],
@@ -1582,6 +1726,24 @@
 "take": "ooy791~1",
 "text": "Too far! Pull a little less!",
 "trimmed_sim": 0.845
+},
+"oy40f0": {
+"check": {
+"bad": [],
+"edge_in": -22.3,
+"edge_out": -34.4,
+"heard": "Ask a grown-up to open more levels for you!",
+"islands": 1,
+"lead": 50,
+"lufs": -16.44,
+"trail": 45
+},
+"heard": "Ask a grown-up to open more levels for you!",
+"padded": true,
+"sim": 0.933,
+"take": "oy40f0~0",
+"text": "Ask a grown-up to open more levels for you!",
+"trimmed_sim": 0.896
 },
 "oym5ja": {
 "check": {
@@ -1816,6 +1978,42 @@
 "take": "uxdimz~1",
 "text": "Drive through the purple gate!",
 "trimmed_sim": 0.815
+},
+"wptu9b": {
+"check": {
+"bad": [],
+"edge_in": -21.3,
+"edge_out": -33.7,
+"heard": "Watch me again!",
+"islands": 1,
+"lead": 50,
+"lufs": -16.41,
+"trail": 45
+},
+"heard": "Watch me again!",
+"padded": true,
+"sim": 0.933,
+"take": "wptu9b~1",
+"text": "Watch me again!",
+"trimmed_sim": 0.837
+},
+"wy95ni": {
+"check": {
+"bad": [],
+"edge_in": -25.9,
+"edge_out": -34.7,
+"heard": "Wow! All the pins fell down!",
+"islands": 1,
+"lead": 50,
+"lufs": -16.4,
+"trail": 55
+},
+"heard": "Wow! All the pins fell down!",
+"padded": true,
+"sim": 0.955,
+"take": "wy95ni~1",
+"text": "Wow, all the pins fell down!",
+"trimmed_sim": 0.908
 },
 "xgiu87": {
 "check": {
