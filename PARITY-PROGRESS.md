@@ -11,11 +11,15 @@ Commits push after each chunk. Newest first.
   - audio-check: ALL PASSED (`/workspace/fs-logs/final/audio-check.log`)
   - offline-check: OK (`/workspace/fs-logs/final/offline-check.log`)
   - parity screenshots: 26 pairs in `screenshots/parity/`
-- Still to do:
-  1. Green play-all.
-  2. Monkey.
-  3. Merge the voice clips and rebuild.
-  4. Rerun audio-check and offline-check.
-  5. Re-shoot the parity screenshots.
-  6. Deploy, then live-check.
-  7. PARITY-AUDIT.md closure table.
+- Still to do (as of 00:50 EDT):
+  1. Green full play-all. Running under nohup; log at fs-logs/final/play-all.log.
+  2. Rerun monkey. It passed at 23:15 but needs a rerun after the bowling, tennis and racing fixes.
+  3. Rerun audio-check and offline-check.
+  4. Re-shoot the parity screenshots.
+  5. Deploy, then live-check.
+  6. Final closure table and BUGS.md sign-off.
+- Done:
+  - Voice 124/124 (voice/coverage.json)
+  - monkey: ALL PASSED at 23:15
+  - profiles-check: ALL PASSED
+  - Gymnastics L4: passes
