@@ -19,6 +19,9 @@ export function paint(api: Api, level: number): Activity {
   const make = () => { pic = level >= 5 ? Math.floor(rnd() * PICS.length) : (level + made) % PICS.length; parts = PICS[pic](); const cs = [...PAL].sort(() => rnd() - 0.5); parts.forEach((p, i) => p.want = cs[i % cs.length]); if (level === 4 || level >= 5) api.say(colorLine(parts[0].want)); };
   make();
   const hit = (p: Part, q: Pt) => p.k === 'c' ? Math.hypot(q.x - p.x, q.y - p.y) < p.w / 2 : q.x > p.x && q.x < p.x + p.w && q.y > p.y && q.y < p.y + p.h;
+  /** a point that really paints part p: inside it and not covered by a part drawn on top (also where the colour dot goes) */
+  const spot = (p: Part): Pt => { const c0 = center(p), top = (q: Pt) => [...parts].reverse().find(o => hit(o, q)) === p; if (top(c0)) return c0;
+    for (let k = 1; k < 60; k++) { const a = k * 2.4, r = 4 + k * 2.2, q = { x: c0.x + Math.cos(a) * r, y: c0.y + Math.sin(a) * r }; if (top(q)) return q; } return c0; };
   const center = (p: Part) => p.k === 'c' ? { x: p.x, y: p.y + p.h * 0.3 } : { x: p.x + p.w / 2, y: p.y + p.h / 2 };
   const pot = (i: number) => ({ x: 38 + i * 52, y: 760 });
   return {
@@ -26,7 +29,7 @@ export function paint(api: Api, level: number): Activity {
     update(dt) { if (cheer >= 0) { cheer += dt; if (cheer > 1.6) { cheer = -1; made++; if (made >= need) { done = true; api.win(L.paintDone); } else make(); } } },
     draw(c: Ctx) { const t = api.t(); c.fillStyle = '#fff6d6'; c.fillRect(0, 0, W, 844); c.fillStyle = '#fff'; rr(c, 30, 130, W - 60, 540, 24); c.fill(); c.strokeStyle = '#ffd27a'; c.lineWidth = 6; c.stroke();
       for (const p of parts) { c.fillStyle = p.got || '#ffffff'; c.strokeStyle = '#2b2140'; c.lineWidth = 6; c.beginPath(); if (p.k === 'c') c.arc(p.x, p.y, p.w / 2, 0, 6.28); else rr(c, p.x, p.y, p.w, p.h, 8); c.fill(); c.stroke();
-        if (p.got !== p.want) { const q = center(p); c.fillStyle = p.want; c.beginPath(); c.arc(q.x, q.y, 11 + Math.sin(t * 4) * 1.5, 0, 6.28); c.fill(); c.strokeStyle = '#fff'; c.lineWidth = 3; c.stroke(); } }
+        if (p.got !== p.want) { const q = spot(p); c.fillStyle = p.want; c.beginPath(); c.arc(q.x, q.y, 11 + Math.sin(t * 4) * 1.5, 0, 6.28); c.fill(); c.strokeStyle = '#fff'; c.lineWidth = 3; c.stroke(); } }
       PAL.forEach((col, i) => { const b = pot(i), up = sel === i ? -14 : 0; c.fillStyle = '#b8b0c8'; rr(c, b.x - 22, b.y - 6 + up, 44, 40, 10); c.fill(); c.fillStyle = col; c.beginPath(); c.ellipse(b.x, b.y - 6 + up, 22, 12, 0, 0, 6.28); c.fill(); if (sel === i) { c.strokeStyle = '#2b2140'; c.lineWidth = 4; c.stroke(); } });
       for (let i = 0; i < need; i++) { c.fillStyle = i < made ? '#ffd60a' : 'rgba(43,33,64,0.15)'; c.beginPath(); c.arc(180 + i * 30, 825, 9, 0, 6.28); c.fill(); }
       if (sel >= 0) { c.fillStyle = PAL[sel]; c.beginPath(); c.arc(W - 40, 130, 16, 0, 6.28); c.fill(); } },
@@ -35,7 +38,7 @@ export function paint(api: Api, level: number): Activity {
       ps.got = PAL[sel]; api.sfx.splash(); if (ps.got !== ps.want) { api.say(L.paintWrong, false); return; }
       if (parts.every(p => p.got === p.want)) { cheer = 0; api.sfx.cheer(); api.burst(195, 400, 40); } else { const nx = parts.find(p => p.got !== p.want); if (nx && (level === 4 || level >= 5)) api.say(colorLine(nx.want)); } },
     move() { /* */ }, up() { /* */ },
-    next() { if (done || cheer >= 0) return null; const p = parts.find(p => p.got !== p.want); if (!p) return null; const i = PAL.indexOf(p.want); if (sel !== i) { const b = pot(i); return { type: 'tap', x: b.x, y: b.y }; } const q = center(p); return { type: 'tap', x: q.x, y: q.y }; },
+    next() { if (done || cheer >= 0) return null; const p = parts.find(p => p.got !== p.want); if (!p) return null; const i = PAL.indexOf(p.want); if (sel !== i) { const b = pot(i); return { type: 'tap', x: b.x, y: b.y }; } const q = spot(p); return { type: 'tap', x: q.x, y: q.y }; },
     busy: () => done || cheer >= 0,
   };
 }

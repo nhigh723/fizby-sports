@@ -14,4 +14,4 @@ Open: **0**
 | 8 | Bowling hard level (L5) was unwinnable at times. Off-centre 10-pin racks put the back pins outside the lane, so every roll at them went into the gutter. | play-all (reproduced 3/3 with `ONLY=2 LVL=5`) | The rack offset is limited so the whole rack stays inside the lane. The hint aims inside the lane. Hard level uses 2 racks. Now passes. | Fixed |
 | 9 | Tennis remix: the hit window was too tight (about 0.5 s). | play-all | The early window is wider (little kids swing early). | Fixed |
 | 10 | Racing: a stall seen once in a full run, no stars coming. Could not reproduce (3/3 passes alone). | play-all | Spawn watchdog: if nothing has spawned for 3 s, a new star appears anyway. | Fixed |
-
+| 11 | Paint: a part's colour dot could sit where another part overlaps it, so tapping the dot painted the wrong part (the L4 picture got stuck). | play-all | The dot and hint go to a spot that really belongs to the part (`spot()` in `src/acts/paint.ts`). All 7 Paint levels pass. | Fixed |
