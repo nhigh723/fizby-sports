@@ -25,3 +25,9 @@ Source: /workspace/fs-qa-independent/REPORT.md. Newest first.
 - Voice 126/126 (new: setup line, Handstand).
 - B1: play-all showed 2 intermittent stalls (bowl L6 hard busy forever; paint L2 hint loop), no page errors. Fixes: busy watchdog (>12 s busy → restart level, counted in __snap.heals); paint tap prefers the part whose dot is tapped.
 - Logs: /workspace/fs-logs/qa2/.
+
+## QA round 2 — update (Oct 30, 2026 ~09:15 EDT)
+- V10 new mechanics (in addition to each game's 5 level modes): soccer pass-then-shoot (L1), basket pick-the-colour ball (L2), bowl how-many-fell quiz (L0-L1), tee catch the fly ball (L1-L2), swim dive start on the green light (L1+), golf sliding gate timing (L1), tennis aim at the bucket (L2), gym Handstand (L2+), race boost pads, paint sparkle stamps (L2+). Voice 131/131.
+- Frame loop bug from 81f4685 (inline comment swallowed `T += dt`) found by an fps probe and fixed in 77b3bc7; nothing deployed in between.
+- B1 diagnostics in __snap.perf: longest JS frame (<=90 ms), longest long task, gaps between frames, slowest audio/voice call (<=2 ms). The stalls line up with 8-16 s gaps where no rAF and no timer ran, while no JS task was long. So the page is being starved, not looping. Running an A/B now: headless GPU (SwiftShader) vs --disable-gpu.
+- Watchdog restarts now count as test failures in play-all.
