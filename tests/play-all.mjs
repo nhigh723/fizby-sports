@@ -2,7 +2,7 @@
 // at screen coordinates). Each activity exposes next(): the next input a player would make, so this proves every level is winnable.
 import { chromium } from 'playwright-core';
 const URL = process.env.URL || 'http://localhost:4182/';
-const b = await chromium.launch({ executablePath: process.env.CHROME || '/usr/bin/google-chrome', args: ['--autoplay-policy=no-user-gesture-required'] });
+const b = await chromium.launch({ executablePath: process.env.CHROME || '/usr/bin/google-chrome', args: ['--autoplay-policy=no-user-gesture-required', ...(process.env.CHROME_ARGS ? process.env.CHROME_ARGS.split(' ') : [])] });
 const page = await (await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, hasTouch: false })).newPage();
 const errors = []; page.on('pageerror', e => errors.push(e.message)); page.on('console', m => m.type() === 'error' && !/voice|manifest|404|Failed to load/.test(m.text()) && errors.push(m.text()));
 await page.goto(URL); await page.evaluate(() => localStorage.clear()); await page.reload(); await page.waitForTimeout(500);
@@ -64,5 +64,6 @@ await tapBtn('gear'); ok(await S(() => window.__snap.modal) === 'gate', 'gear op
 await tapBtn('buy-yearly'); await wait(300); ok((await S(() => window.__snap.store())).club, 'simulated purchase unlocks the mascot Club');
 await tapBtn('back'); await S(() => window.__snap.start(0, 3)); ok(!(await S(() => window.__snap.freeRemix)), 'level 3 is the real level after purchase');
 { const h = await S(() => ({ n: window.__snap.heals, last: window.__snap.lastHeal })); ok(h.n === 0, 'no watchdog restarts (a stall is a bug) ' + JSON.stringify(h)); }
+console.log('perf', JSON.stringify(await S(() => window.__snap.perf)));
 ok(!errors.length, 'no page errors ' + JSON.stringify(errors.slice(0, 5)));
 console.log(fails ? `${fails} FAILED` : 'ALL PASSED'); await b.close(); process.exit(fails ? 1 : 0);
