@@ -92,6 +92,10 @@ function lock(x: number, y: number, s = 1) { c.save(); c.translate(x, y); c.scal
 // ---- hub card art ----
 /** Illustrated hub-card vignettes: a little scene per sport with a kid player, props and the ball (drawn with the shared F&L kit). */
 const CL: KidLook[] = [{ skin: '#f2c29b', hair: '#7a4a2a', style: 'spiky', shoes: '#ffffff', band: '' }, { skin: '#8d5a3b', hair: '#2b1a12', style: 'puffs', shoes: '#ff3b6b', band: '' }, { skin: '#e0ac69', hair: '#1d1427', style: 'curly', shoes: '#1fb6ff', band: '#ffd60a' }];
+/** round illustrated sport badge (same art as the hub card), centred at cx,cy with radius r */
+function badge(i: number, cx: number, cy: number, r: number, dim = false) { c.save(); c.beginPath(); c.arc(cx, cy, r, 0, 6.28); c.clip(); const g = c.createLinearGradient(0, cy - r, 0, cy + r); g.addColorStop(0, ACTS[i].bg[0]); g.addColorStop(1, ACTS[i].bg[1]); c.fillStyle = g; c.fillRect(cx - r, cy - r, 2 * r, 2 * r); const w = r * 2.3; cardArt(i, cx - w / 2, cy - w / 2 + r * 0.12, w, w); if (dim) { c.fillStyle = 'rgba(255,255,255,0.45)'; c.fillRect(cx - r, cy - r, 2 * r, 2 * r); } c.restore(); }
+/** trophy cup with the sport's illustrated badge on the bowl */
+function cup(x: number, y: number, s: number, sp: number, got: boolean, t: number) { trophy(c, x, y, s, sp, got, t); if (got) { badge(sp, x, y - 14 * s, 15 * s); c.lineWidth = 2.5 * s; c.strokeStyle = '#fff'; c.beginPath(); c.arc(x, y - 14 * s, 15 * s, 0, 6.28); c.stroke(); } }
 function cardArt(i: number, x: number, y: number, w: number, h: number) { const b = Math.abs(Math.sin(T * 3 + i)) * 6, k = w / 112;
   c.save(); c.translate(x + w / 2, y + h / 2 - 6); c.scale(k, k); setKitCtx(c); c.beginPath(); c.rect(-56, -56, 112, 100); c.clip();
   const grass = (col = '#3ddc4a') => { c.fillStyle = col; c.beginPath(); c.ellipse(0, 44, 70, 22, 0, 0, 6.28); c.fill(); };
@@ -157,7 +161,7 @@ function stickerArt(x: number, y: number, r: number, sp: number, v: number, t = 
   const g = c.createLinearGradient(0, -r, 0, r); g.addColorStop(0, A.bg[1]); g.addColorStop(1, col); c.fillStyle = g; c.beginPath(); c.arc(0, 0, r - 1, 0, 6.28); c.fill();
   c.save(); c.beginPath(); c.arc(0, 0, r - 1, 0, 6.28); c.clip(); c.scale(k, k);
   if (v === 0) { ball(c, A.ball, 0, 0, 17, 0.3); for (let i = 0; i < 6; i++) star(c, Math.cos(i * 1.05) * 24, Math.sin(i * 1.05) * 24, 3.5, '#fff'); }
-  if (v === 1) { trophy(c, 0, 4, 0.62, sp, true, 0); }
+  if (v === 1) { cup(0, 4, 0.62, sp, true, 0); }
   if (v === 2) { setKitCtx(c); kid(0, 26, 0.36, col, 1, 0, 0, String(sp + 1), PAL_LOOK[sp % 3] as KidLook); }
   if (v === 3) { c.fillStyle = '#ff3b6b'; c.beginPath(); c.moveTo(-12, -28); c.lineTo(-2, -6); c.lineTo(2, -6); c.lineTo(12, -28); c.fill(); c.fillStyle = '#ffd60a'; c.beginPath(); c.arc(0, 6, 15, 0, 6.28); c.fill(); c.strokeStyle = '#e0a800'; c.lineWidth = 3; c.stroke(); ball(c, A.ball, 0, 6, 9, 0); }
   if (v === 4) { star(c, 0, 0, 24, '#ffd60a'); ball(c, A.ball, 0, 2, 9, 0); }
@@ -204,7 +208,7 @@ function drawHub() {
   }
   // Trophy Room button
   const ty = 690, p = 1 + Math.sin(T * 3) * 0.03; c.save(); c.translate(195, ty + 50); c.scale(p, p); c.fillStyle = 'rgba(0,0,0,0.12)'; rr(c, -172, -44, 344, 96, 30); c.fill(); c.fillStyle = '#7c5cff'; rr(c, -172, -48, 344, 96, 30); c.fill(); c.lineWidth = 6; c.strokeStyle = '#fff'; c.stroke();
-  for (let k = 0; k < 4; k++) trophy(c, -130 + k * 50, 6, 0.55, save.trophies[k] ?? k, k < save.trophies.length, T); save.stickers.slice(-3).forEach((s, k) => sticker(c, 70 + k * 38, -2 + (k % 2) * 8, 20, Math.floor(s / 10), s % 10, T)); c.restore();
+  for (let k = 0; k < 4; k++) cup(-130 + k * 50, 6, 0.55, save.trophies[k] ?? k, k < save.trophies.length, T); save.stickers.slice(-3).forEach((s, k) => sticker(c, 70 + k * 38, -2 + (k % 2) * 8, 20, Math.floor(s / 10), s % 10, T)); c.restore();
   btn('town', 23, ty + 2, 344, 96, () => { initAudio(); sfx.snap(); go('town'); });
 }
 function drawPlay() {
@@ -225,24 +229,28 @@ function drawPlay() {
     if (f < 1) stickerArt(160 + (48 - 160) * e, 420 + (792 - 420) * e - Math.sin(e * Math.PI) * 120, (30 + 50 * s) * (1 - e * 0.7), Math.floor(newSticker / 10), newSticker % 10, T); } }
   if (isBig() && winT < 0) crowdStrip();
 }
-let setupFace = 0, setupBand: Band = '4-5';
+let setupFace = 0, setupBand: Band = '4-5', setupName = '';
 /** First launch: Fizby asks who is playing. Pick your ball and your age (pictures and numbers only), then the big check. */
 function drawSetup() {
   sky(c, '#22d3ee', '#c8f7ff', T, 760, '#3ddc4a', '#2fc23c', false); mascot(c, 300, 330, 230, 'point', T, isSpeaking(), true);
-  btn('setupGo', 195 - 60, 690, 120, 120, () => { saveFirst(setupFace, setupBand); applyTuning(); sfx.yay(); go('hub'); }); // registered first: the obvious next step
+  btn('setupGo', 195 - 60, 690, 120, 120, () => { saveFirst(setupFace, setupBand); if (setupName) rename(0, setupName); applyTuning(); sfx.yay(); go('hub'); }); // registered first: the obvious next step
   const p = 1 + Math.sin(T * 4) * 0.05; c.save(); c.translate(195, 750); c.scale(p, p); c.fillStyle = 'rgba(0,0,0,0.18)'; c.beginPath(); c.arc(0, 6, 56, 0, 6.28); c.fill(); c.fillStyle = '#3ddc4a'; c.beginPath(); c.arc(0, 0, 56, 0, 6.28); c.fill(); c.lineWidth = 7; c.strokeStyle = '#fff'; c.stroke();
   c.strokeStyle = '#fff'; c.lineWidth = 12; c.lineCap = 'round'; c.lineJoin = 'round'; c.beginPath(); c.moveTo(-24, 2); c.lineTo(-6, 20); c.lineTo(26, -18); c.stroke(); c.restore();
   const FACE: BallKind[] = ['soccer', 'basket', 'tennis'];
   FACE.forEach((k, i) => { const x = 85 + i * 110, y = 430, on = i === setupFace; c.fillStyle = on ? '#fff' : 'rgba(255,255,255,0.45)'; c.beginPath(); c.arc(x, y, on ? 48 : 42, 0, 6.28); c.fill(); if (on) { c.lineWidth = 6; c.strokeStyle = '#7b4fd6'; c.stroke(); }
     ball(c, k, x, y - (on ? Math.abs(Math.sin(T * 5)) * 6 : 0), on ? 32 : 28, on ? T * 2 : 0); btn('setupKid' + i, x - 50, y - 50, 100, 100, () => { setupFace = i; sfx.pop(); }); });
   (['2-3', '4-5', '6+'] as Band[]).forEach((bd, i) => { const x = 30 + i * 115, y = 540, on = bd === setupBand; c.fillStyle = on ? '#7b4fd6' : '#ffffff'; rr(c, x, y, 100, 90, 22); c.fill();
-    text(['3', '4', '5 6'][i], x + 50, y + 34, i === 2 ? 30 : 38, on ? '#fff' : INK, 'center', 900); for (let k = 0; k < [3, 4, 6][i]; k++) { c.fillStyle = on ? '#ffd60a' : '#ffb703'; c.beginPath(); c.arc(x + 50 + (k - ([3, 4, 6][i] - 1) / 2) * 13, y + 70, 5, 0, 6.28); c.fill(); }
+    text(['3', '4', '5-6'][i], x + 50, y + 34, i === 2 ? 30 : 38, on ? '#fff' : INK, 'center', 900); for (let k = 0; k < [3, 4, 6][i]; k++) { c.fillStyle = on ? '#ffd60a' : '#ffb703'; c.beginPath(); c.arc(x + 50 + (k - ([3, 4, 6][i] - 1) / 2) * 13, y + 70, 5, 0, 6.28); c.fill(); }
     btn('setupAge' + i, x, y, 100, 90, () => { setupBand = bd; sfx.pop(); }); });
+  { // optional child name, typed by a grown-up; kept on this device only (localStorage profile), never sent anywhere
+    const x = 85, y = 640, w = 220, h = 44; c.fillStyle = 'rgba(255,255,255,0.92)'; rr(c, x, y, w, h, 22); c.fill(); c.lineWidth = 3; c.strokeStyle = '#7b4fd6'; c.stroke();
+    text(setupName ? '\u270E ' + setupName : '\u270E Name (grown-ups, optional)', 195, y + 23, setupName ? 18 : 14, '#5a4a6e', 'center', 800);
+    btn('setupName', x, y, w, h, () => { const n = window.prompt('Child name (optional, stays on this device)', setupName); if (n !== null) { setupName = n.trim().slice(0, 14); sfx.pop(); } }); }
 }
 let bookPage = -1;
 function drawTown() {
   c.fillStyle = '#7c5cff'; band(c, 0, H); backBtn(() => go('hub')); mascotBust(c, 195, 66, 42, T, isSpeaking(), 'cheer');
-  c.fillStyle = '#b07a3a'; rr(c, 16, 205, W - 32, 14, 6); c.fill(); rr(c, 16, 305, W - 32, 14, 6); c.fill(); for (let k = 0; k < ACTS.length; k++) { const x = 40 + (k % 6) * 62 + (k >= 6 ? 31 : 0), ty2 = k < 6 ? 170 : 270; trophy(c, x, ty2, 0.72, k, save.trophies.includes(k), T); btn('trophy' + k, x - 28, ty2 - 40, 56, 76, () => { sfx.ding(); say(SPORT_NAME[k]); }); }
+  c.fillStyle = '#b07a3a'; rr(c, 16, 205, W - 32, 14, 6); c.fill(); rr(c, 16, 305, W - 32, 14, 6); c.fill(); for (let k = 0; k < ACTS.length; k++) { const x = 40 + (k % 6) * 62 + (k >= 6 ? 31 : 0), ty2 = k < 6 ? 170 : 270; cup(x, ty2, 0.72, k, save.trophies.includes(k), T); btn('trophy' + k, x - 28, ty2 - 40, 56, 76, () => { sfx.ding(); say(SPORT_NAME[k]); }); }
   // Sticker Book (F&L stickers.ts style): one page per sport, earned stickers in colour, missing ones as silhouettes to collect
   if (bookPage < 0) bookPage = save.stickers.length ? Math.floor(save.stickers[save.stickers.length - 1] / 10) : 0;
   const P = bookPage, have = new Set(save.stickers); c.fillStyle = '#fff'; rr(c, 16, 335, W - 32, 420, 24); c.fill(); c.fillStyle = ACTS[P].bg[0]; rr(c, 16, 335, W - 32, 70, 24); c.fill(); c.fillRect(16, 380, W - 32, 25);
@@ -251,7 +259,7 @@ function drawTown() {
   for (let v = 0; v < 10; v++) { const x = 60 + (v % 5) * 68, y = 462 + Math.floor(v / 5) * 120, on = have.has(P * 10 + v);
     if (on) { stickerArt(x, y, 30, P, v, T + v); btn('st' + v, x - 32, y - 32, 64, 64, () => { sfx.sticker(); say(SPORT_NAME[P]); }); }
     else { c.save(); c.globalAlpha = 0.22; c.filter = 'grayscale(1) brightness(0.4)'; stickerArt(x, y, 30, P, v, 0); c.restore(); c.fillStyle = '#ffffff'; c.font = '900 22px ui-rounded, system-ui'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('?', x, y + 2); } }
-  for (let k = 0; k < ACTS.length; k++) { const x = 30 + k * 33, y = 790, on = k === P; c.fillStyle = on ? '#fff' : 'rgba(255,255,255,0.35)'; c.beginPath(); c.arc(x, y, on ? 17 : 14, 0, 6.28); c.fill(); ball(c, ACTS[k].ball, x, y, on ? 11 : 9, 0);
+  for (let k = 0; k < ACTS.length; k++) { const x = 30 + k * 33, y = 790, on = k === P; c.fillStyle = on ? '#fff' : 'rgba(255,255,255,0.35)'; c.beginPath(); c.arc(x, y, on ? 17 : 14, 0, 6.28); c.fill(); badge(k, x, y, on ? 14.5 : 11.5, !on);
     btn('page' + k, x - 16, y - 22, 32, 44, () => { if (bookPage !== k) { bookPage = k; sfx.flip(); } }); }
   return 0;
 }
@@ -299,7 +307,7 @@ function drawModal() {
   if (modal.kind === 'unlock') { const m = modal; m.t += 1 / 60; c.fillStyle = 'rgba(40,20,80,0.55)'; band(c, 0, H);
     const k = Math.min(1, m.t * 2.5), s = 0.5 + 0.5 * k + Math.sin(m.t * 5) * 0.03; c.save(); c.translate(195, 380); c.scale(s, s); c.rotate(m.t * 0.3);
     c.fillStyle = 'rgba(255,230,90,0.5)'; for (let i = 0; i < 12; i++) { c.rotate(0.5236); c.beginPath(); c.moveTo(0, 0); c.lineTo(-24, -230); c.lineTo(24, -230); c.fill(); } c.restore();
-    c.save(); c.translate(195, 380); c.scale(s * 2.2, s * 2.2); trophy(c, 0, 0, 1.2, m.sport, true, T); c.restore();
+    c.save(); c.translate(195, 380); c.scale(s * 2.2, s * 2.2); cup(0, 0, 1.2, m.sport, true, T); c.restore();
     mascot(c, 90, 760, 230, 'cheer', T, isSpeaking()); if (m.t < 0.1) burst(195, 380, 50);
     btn('unlockOk', 0, 0, W, H, () => { if (m.t > 0.8) { modal = null; afterWin(); } }); if (m.t > 4) { modal = null; afterWin(); } return; }
   // gate: hold, then a sum (grown-up reading required)
