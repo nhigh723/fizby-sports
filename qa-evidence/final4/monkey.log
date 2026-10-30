@@ -1,0 +1,28 @@
+ok   activity 0: still winnable after 20 s of random taps, mashing, off-screen drags and two fingers (left via town)
+ok   activity 1: still winnable after 20 s of random taps, mashing, off-screen drags and two fingers (left via play)
+ok   activity 2: still winnable after 20 s of random taps, mashing, off-screen drags and two fingers (left via play)
+ok   activity 3: still winnable after 20 s of random taps, mashing, off-screen drags and two fingers (left via play)
+ok   activity 4: still winnable after 20 s of random taps, mashing, off-screen drags and two fingers (left via play)
+ok   activity 5: still winnable after 20 s of random taps, mashing, off-screen drags and two fingers (left via play)
+ok   activity 6: still winnable after 20 s of random taps, mashing, off-screen drags and two fingers (left via play)
+ok   activity 7: still winnable after 20 s of random taps, mashing, off-screen drags and two fingers (left via play)
+ok   activity 8: still winnable after 20 s of random taps, mashing, off-screen drags and two fingers (left via play)
+ok   activity 9: still winnable after 20 s of random taps, mashing, off-screen drags and two fingers (left via play)
+ok   activity 10: still winnable after 20 s of random taps, mashing, off-screen drags and two fingers (left via play)
+ok   Back/Play spam 30x leaves a sane screen
+ok   activity 0: one Back tap mid-drag returns to the hub
+ok   activity 1: one Back tap mid-drag returns to the hub
+ok   activity 2: one Back tap mid-drag returns to the hub
+ok   activity 3: one Back tap mid-drag returns to the hub
+ok   activity 4: one Back tap mid-drag returns to the hub
+ok   activity 5: one Back tap mid-drag returns to the hub
+ok   activity 6: one Back tap mid-drag returns to the hub
+ok   activity 7: one Back tap mid-drag returns to the hub
+ok   activity 8: one Back tap mid-drag returns to the hub
+ok   activity 9: one Back tap mid-drag returns to the hub
+ok   activity 10: one Back tap mid-drag returns to the hub
+ok   free roam chaos 25 s: app alive on town
+ok   still rendering
+ok   no page errors []
+ALL PASSED
+EXIT 0

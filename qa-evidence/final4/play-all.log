@@ -1,0 +1,113 @@
+ok   first launch: Play opens the profile setup
+ok   setup saves the ball and age (5-6 tuning), then the hub
+ok   card 0 pokes, opens with its sport intro, one tap on Back returns
+ok   card 1 pokes, opens with its sport intro, one tap on Back returns
+ok   card 2 pokes, opens with its sport intro, one tap on Back returns
+ok   card 3 pokes, opens with its sport intro, one tap on Back returns
+ok   card 4 pokes, opens with its sport intro, one tap on Back returns
+ok   card 5 pokes, opens with its sport intro, one tap on Back returns
+ok   card 6 pokes, opens with its sport intro, one tap on Back returns
+ok   card 7 pokes, opens with its sport intro, one tap on Back returns
+ok   card 8 pokes, opens with its sport intro, one tap on Back returns
+ok   card 9 pokes, opens with its sport intro, one tap on Back returns
+ok   card 10 pokes, opens with its sport intro, one tap on Back returns
+ok   Trophy Room opens
+ok   Back from hub returns to title
+ok   activity 0 level 0: won in 3 inputs
+ok   activity 0 level 1: won in 6 inputs
+ok   activity 0 level 2: won in 3 inputs
+ok   activity 0 level 3: won in 5 inputs
+ok   activity 0 level 4: won in 3 inputs
+ok   activity 0 level 5 (remix): won in 4 inputs
+ok   activity 0 level 6 (remix): won in 3 inputs
+ok   activity 1 level 0: won in 3 inputs
+ok   activity 1 level 1: won in 3 inputs
+ok   activity 1 level 2: won in 6 inputs
+ok   activity 1 level 3: won in 3 inputs
+ok   activity 1 level 4: won in 3 inputs
+ok   activity 1 level 5 (remix): won in 3 inputs
+ok   activity 1 level 6 (remix): won in 3 inputs
+ok   activity 2 level 0: won in 4 inputs
+ok   activity 2 level 1: won in 4 inputs
+ok   activity 2 level 2: won in 2 inputs
+ok   activity 2 level 3: won in 2 inputs
+ok   activity 2 level 4: won in 2 inputs
+ok   activity 2 level 5: won in 6 inputs
+ok   activity 2 level 6 (remix): won in 4 inputs
+ok   activity 2 level 7 (remix): won in 2 inputs
+ok   activity 3 level 0: won in 3 inputs
+ok   activity 3 level 1: won in 6 inputs
+ok   activity 3 level 2: won in 7 inputs
+ok   activity 3 level 3: won in 16 inputs
+ok   activity 3 level 4: won in 4 inputs
+ok   activity 3 level 5 (remix): won in 7 inputs
+ok   activity 3 level 6 (remix): won in 3 inputs
+ok   activity 4 level 0: won in 6 inputs
+ok   activity 4 level 1: won in 9 inputs
+ok   activity 4 level 2: won in 13 inputs
+ok   activity 4 level 3: won in 9 inputs
+ok   activity 4 level 4: won in 11 inputs
+ok   activity 4 level 5 (remix): won in 11 inputs
+ok   activity 4 level 6 (remix): won in 11 inputs
+ok   activity 5 level 0: won in 2 inputs
+ok   activity 5 level 1: won in 2 inputs
+ok   activity 5 level 2: won in 2 inputs
+ok   activity 5 level 3: won in 2 inputs
+ok   activity 5 level 4: won in 4 inputs
+ok   activity 5 level 5 (remix): won in 2 inputs
+ok   activity 5 level 6 (remix): won in 2 inputs
+ok   activity 6 level 0: won in 3 inputs
+ok   activity 6 level 1: won in 3 inputs
+ok   activity 6 level 2: won in 3 inputs
+ok   activity 6 level 3: won in 5 inputs
+ok   activity 6 level 4: won in 3 inputs
+ok   activity 6 level 5 (remix): won in 3 inputs
+ok   activity 6 level 6 (remix): won in 3 inputs
+ok   activity 7 level 0: won in 3 inputs
+ok   activity 7 level 1: won in 4 inputs
+ok   activity 7 level 2: won in 4 inputs
+ok   activity 7 level 3: won in 2 inputs
+ok   activity 7 level 4: won in 6 inputs
+ok   activity 7 level 5 (remix): won in 6 inputs
+ok   activity 7 level 6 (remix): won in 9 inputs
+ok   activity 8 level 0: won in 3 inputs
+ok   activity 8 level 1: won in 3 inputs
+ok   activity 8 level 2: won in 8 inputs
+ok   activity 8 level 3: won in 6 inputs
+ok   activity 8 level 4: won in 3 inputs
+ok   activity 8 level 5 (remix): won in 8 inputs
+ok   activity 8 level 6 (remix): won in 7 inputs
+ok   activity 9 level 0: won in 3 inputs
+ok   activity 9 level 1: won in 6 inputs
+ok   activity 9 level 2: won in 9 inputs
+ok   activity 9 level 3: won in 9 inputs
+ok   activity 9 level 4: won in 12 inputs
+ok   activity 9 level 5 (remix): won in 15 inputs
+ok   activity 9 level 6 (remix): won in 15 inputs
+ok   activity 10 level 0: won in 16 inputs
+ok   activity 10 level 1: won in 20 inputs
+ok   activity 10 level 2: won in 26 inputs
+ok   activity 10 level 3: won in 24 inputs
+ok   activity 10 level 4: won in 24 inputs
+ok   activity 10 level 5 (remix): won in 23 inputs
+ok   activity 10 level 6 (remix): won in 28 inputs
+ok   soccer: a wide kick is a miss, no win, no fail
+ok   soccer: after a miss the level is still winnable
+ok   basketball: a weak pull falls short (no win, no fail)
+ok   basketball: the right pull then wins
+ok   wins counted (80), stickers 80, trophies [0,1,2,3,4,5,6,7,8,9,10]
+ok   a trophy for each of the 11 games after its levels
+ok   trophy celebration after finishing level 5
+ok   tap closes it and the next level starts
+ok   every sport opens (first 2 levels free)
+ok   level 3 without the Club plays a free-level remix (store sim)
+ok   gear opens the grown-up gate
+ok   hold 3 s passes the first step
+ok   right answer opens grown-ups
+ok   simulated purchase unlocks the mascot Club
+ok   level 3 is the real level after purchase
+ok   no watchdog restarts (a stall is a bug) {"n":0,"last":null}
+perf {"maxFrame":18,"maxFrameAt":"parents:0:3","maxTask":0,"maxGap":0,"maxGapAt":"","gaps":[],"slow":{"ms":2,"what":"sfx.snap "}}
+ok   no page errors []
+ALL PASSED
+EXIT 0

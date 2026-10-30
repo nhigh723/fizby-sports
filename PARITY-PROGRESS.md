@@ -60,3 +60,10 @@ Source: /workspace/fs-qa-independent/REPORT.md. Newest first.
 | Audio incl. gameplay music | ok | fs-logs/qa-final2 audio-check |
 | Offline (live) | ok, only host github.io | qa-evidence/offline-live2.log |
 | Monkey / profiles | EXIT 0 | fs-logs/qa-final2 |
+
+## 2026-10-30 ~15:35 EDT: QA round-2 nits (live cache fs5-c7cf5c5383)
+1. Trophy cups and sticker-book tabs now use illustrated sport badges, the same art as the hub cards.
+2. The Gymnastics bunting is now side swags below the top buttons.
+3. The setup age chip reads "5-6".
+4. Optional name entry in setup: a grown-up types it, it stays on the device only (localStorage), there is no network call, and it can be skipped.
+Screenshots: screenshots/nits/. Live play-all 110 ok, monkey, live-check and offline all EXIT 0 (qa-evidence/final4/).
