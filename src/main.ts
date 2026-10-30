@@ -14,7 +14,7 @@ import { store, hasClub, levelFree, buy, restore, manage, initStore, PRODUCTS, T
 import { lineId } from './voice';
 import { profiles, current, addProfile, setBand, setFace, rename, switchTo, tuning, type Band } from './profiles';
 import { tune } from './kit';
-import { settings, cycleVol, applySettings } from './audio';
+import { settings, cycleVol, applySettings, audioStats } from './audio';
 const cv = document.getElementById('c') as HTMLCanvasElement, c = cv.getContext('2d')!; setHintCtx(c); void preloadArt([]); musicScene('hub');
 let scale = 1, ox = 0, oy = 0, dpr = 1;
 function resize() { dpr = Math.min(devicePixelRatio || 1, 3); cv.width = Math.round(innerWidth * dpr); cv.height = Math.round(innerHeight * dpr); scale = Math.min(cv.width / W, cv.height / H); ox = (cv.width - W * scale) / 2; oy = (cv.height - H * scale) / 2; }
@@ -28,7 +28,7 @@ const ACTS = [
   { id: 'hockey', make: hockey, levels: 5, bg: ['#7c5cff', '#e2dcff'], ball: 'hockey' as BallKind }, { id: 'gym', make: gym, levels: 5, bg: ['#ff5fd2', '#ffd6f4'], ball: 'gym' as BallKind },
   { id: 'paint', make: paint, levels: 5, bg: ['#ff9f1c', '#ffe0a8'], ball: 'paint' as BallKind },
 ];
-type Save = { lv: number[]; wins: number; seen: number; skills: Record<string, number>; stickers: number[]; trophies: number[] };
+type Save = { lv: number[]; wins: number; seen: number; skills: Record<string, number>; stickers: number[]; trophies: number[]; stars?: Record<string, number> };
 const KEY = 'fs5~save', fresh = (): Save => ({ lv: ACTS.map(() => 0), wins: 0, seen: 0, skills: {}, stickers: [], trophies: [] });
 function load(): Save { const d = fresh(); try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s && Array.isArray(s.lv)) { const m = { ...d, ...s }; while (m.lv.length < ACTS.length) m.lv.push(0); return m; } } catch { /* */ } return d; }
 let save = load();
@@ -49,10 +49,11 @@ const parts: { x: number; y: number; vx: number; vy: number; r: number; col: str
 function burst(x: number, y: number, n = 20, cols: string[] = COLORS) { for (let i = 0; i < n && parts.length < 400; i++) { const a = Math.random() * 6.28, s = 120 + Math.random() * 380; parts.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 200, r: 4 + Math.random() * 5, col: cols[i % cols.length], life: 1.2 + Math.random() * 0.6 }); } }
 /** force: a fresh line drops whatever is queued (the current sentence still finishes); otherwise it is skipped while Fizby talks */
 function say(text: string, force = true) { if (!text) return; if (!force && isSpeaking()) return; if (force) stopVoice(false); voiceSay(text); }
-const sfxApi = { ...sfx, wrong: () => { sfx.wrong(); mascotPose = 'oops'; mascotPoseT = 1.4; } };
+let misses = 0, winStars = 0; const pops: { x: number; y: number; t: number }[] = [];
+const sfxApi = { ...sfx, wrong: () => { sfx.wrong(); misses++; mascotPose = 'oops'; mascotPoseT = 1.4; } };
 const api: Api = {
-  say, sfx: sfxApi, burst, t: () => T, shake: (a) => { shake = Math.max(shake, a); },
-  win(line: string) { if (winT >= 0 || !act) return; winT = 0; winLine = line; sfx.cheer(); burst(195, 300, 60); say(line); voiceSay(FACT[actI]); if (isBig()) { sfx.crowd(); burst(100, 200, 40, ['#ffd60a', '#fff']); burst(290, 200, 40, ['#ffd60a', '#fff']); } mascotPose = 'cheer'; mascotPoseT = 3; credit(); },
+  say, sfx: sfxApi, burst: (x: number, y: number, n?: number, cols?: string[]) => { burst(x, y, n, cols); if (winT < 0 && pops.length < 6) pops.push({ x, y, t: 0 }); }, t: () => T, shake: (a) => { shake = Math.max(shake, a); },
+  win(line: string) { if (winT >= 0 || !act) return; winT = 0; winLine = line; winStars = misses === 0 ? 3 : misses <= 2 ? 2 : 1; { const k = actI + ':' + level, st = save.stars || (save.stars = {}); st[k] = Math.max(st[k] || 0, winStars); } sfx.cheer(); burst(195, 300, 60); say(line); voiceSay(FACT[actI]); if (isBig()) { sfx.crowd(); burst(100, 200, 40, ['#ffd60a', '#fff']); burst(290, 200, 40, ['#ffd60a', '#fff']); } mascotPose = 'cheer'; mascotPoseT = 3; credit(); },
 };
 function credit() { save.wins++; for (const s of SKILLS[ACTS[actI].id]) save.skills[s] = (save.skills[s] || 0) + 1; if (!freeRemix && level >= save.lv[actI]) save.lv[actI] = level + 1;
   newSticker = actI * 10 + (save.stickers.filter(x => Math.floor(x / 10) === actI).length % 10); save.stickers.push(newSticker); if (save.lv[actI] >= ACTS[actI].levels && !save.trophies.includes(actI)) { save.trophies.push(actI); pendingTrophy = actI; } persist(); }
@@ -61,7 +62,7 @@ function checkUnlock() { if (pendingTrophy >= 0) { modal = { kind: 'unlock', spo
 const isBig = () => ACTS[actI].levels > 0 && level === ACTS[actI].levels - 1 && !freeRemix;
 const clubLocked = (l: number) => !hasClub() && !levelFree(l);
 function start(i: number, lv = save.lv[i], withIntro = false) {
-  modal = null; fadeT = 0; tut = -1; intro = withIntro ? { t: 0 } : null; onboard = -1;
+  misses = 0; pops.length = 0; modal = null; fadeT = 0; tut = -1; intro = withIntro ? { t: 0 } : null; onboard = -1;
   actI = i; level = lv; freeRemix = clubLocked(lv); act = ACTS[i].make(api, freeRemix ? lv % 2 : lv); newSticker = -1; screen = 'play'; musicScene(ACTS[i].id === 'paint' ? 'paint' : 'sports'); resetHint(); winT = -1; idle = 0; demo = null; mascotPose = 'point'; mascotPoseT = 2;
   const big = ACTS[i].levels > 0 && lv === ACTS[i].levels - 1 && !freeRemix;
   if (intro) { say(SPORT_NAME[i]); if (big) voiceSay(L.bigGame); if (act.intro) voiceSay(act.intro); } else if (big) { say(L.bigGame); if (act.intro) voiceSay(act.intro); } else if (act.intro) say(act.intro);
@@ -156,6 +157,8 @@ function drawPlay() {
   mascotBust(c, 195, 64, 40, T, isSpeaking(), mascotPose); btn('mascot', 150, 20, 90, 90, () => { sfx.tap(); if (act?.intro) say(act.intro); idle = 99; });
   if (A.levels) for (let k = 0; k < A.levels; k++) { c.fillStyle = Math.min(level, A.levels) > k ? '#ffd60a' : 'rgba(255,255,255,0.7)'; c.beginPath(); c.arc(W - 30 - (A.levels - 1 - k) * 18, 62, 7, 0, 6.28); c.fill(); }
   if (!intro && winT < 0) roundBtn('restart', W - 96, 122, 24, '#ff9f1c', (c) => { c.strokeStyle = '#fff'; c.lineWidth = 5; c.lineCap = 'round'; c.beginPath(); c.arc(0, 0, 10, -0.3, 4.6); c.stroke(); c.fillStyle = '#fff'; c.beginPath(); c.moveTo(8, -14); c.lineTo(14, -2); c.lineTo(2, -4); c.fill(); }, () => { sfx.whoosh(); start(actI, level); });
+  for (const q of pops) { const k = q.t / 0.9; c.save(); c.globalAlpha = Math.max(0, 1 - k); star(c, q.x, q.y - 30 - k * 70, 16 + k * 6); c.restore(); }
+  if (winT >= 0) for (let i = 0; i < 3; i++) { const k = Math.max(0, Math.min(1, (winT - 0.3 - i * 0.25) * 4)); if (k <= 0) continue; const sc = k < 1 ? 1.4 - 0.4 * k : 1; c.save(); c.globalAlpha = i < winStars ? 1 : 0.3; star(c, 135 + i * 60, 230 - (i === 1 ? 14 : 0), 26 * sc, i < winStars ? '#ffd60a' : '#ffffff'); c.restore(); }
   if (tut >= 0) { c.fillStyle = `rgba(40,20,80,${0.35 * Math.min(1, tut * 4, (4.5 - tut) * 2)})`; c.fillRect(0, 140, W, H - 140); }
   if (intro) drawIntro();
   if (winT >= 0) { const k = Math.min(1, winT * 3); c.fillStyle = `rgba(255,255,255,${0.25 * k})`; c.fillRect(0, 0, W, H); mascot(c, 300, 844 - 40 + (1 - k) * 300, 270, 'cheer', T, isSpeaking()); if (newSticker >= 0) { bookIcon(48, 792, 1 + (winT > 2.3 && winT < 2.6 ? Math.sin((winT - 2.3) / 0.3 * Math.PI) * 0.25 : 0)); const s = Math.min(1, winT * 2), f = Math.max(0, Math.min(1, (winT - 1.7) / 0.6)), e = f * f * (3 - 2 * f);
@@ -238,7 +241,7 @@ function afterWin() { if (screen !== 'play') return; const A = ACTS[actI]; if (A
 let last = performance.now();
 function frame(now: number) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now; T += dt; requestAnimationFrame(frame);
-  fadeT += dt; if (intro) { intro.t += dt; idle = 0; if (intro.t > 2.4) intro = null; } if (tut >= 0) { tut += dt; if (tut > 4.5) tut = -1; } if (onboard >= 0) onboard += dt;
+  fadeT += dt; for (let i = pops.length - 1; i >= 0; i--) { pops[i].t += dt; if (pops[i].t > 0.9) pops.splice(i, 1); } if (intro) { intro.t += dt; idle = 0; if (intro.t > 2.4) intro = null; } if (tut >= 0) { tut += dt; if (tut > 4.5) tut = -1; } if (onboard >= 0) onboard += dt;
   if (poke) { poke.t += dt; if (poke.t > 0.3) { const i = poke.i; poke = null; if (screen === 'hub') start(i, save.lv[i], true); } }
   if (lockT > 0) lockT -= dt; if (mascotPoseT > 0) { mascotPoseT -= dt; if (mascotPoseT <= 0) mascotPose = 'stand'; } if (shake > 0) shake = Math.max(0, shake - dt * 30);
   if (screen === 'play' && act) { act.update(dt);
@@ -287,7 +290,7 @@ function renderArt(kind: 'icon' | 'splash') {
   return cv2.toDataURL('image/png');
 }
 (window as any).__snap = { renderArt,
-  get screen() { return screen; }, get hintDelay() { return hintCfg.delay; }, get slack() { return tune.slack; }, get kid() { return profiles().cur; }, get act() { return actI; }, get level() { return level; }, get winT() { return winT; }, get modal() { return modal ? modal.kind : null; }, levels: ACTS.map(a => a.levels), get freeRemix() { return freeRemix; }, get demo() { return demo ? demo.a : null; },
+  get screen() { return screen; }, get audio() { return { ...audioStats, track: audioStats.track, ctx: audioStats.ctx }; }, get winStars() { return winStars; }, get hintDelay() { return hintCfg.delay; }, get slack() { return tune.slack; }, get kid() { return profiles().cur; }, get act() { return actI; }, get level() { return level; }, get winT() { return winT; }, get modal() { return modal ? modal.kind : null; }, levels: ACTS.map(a => a.levels), get freeRemix() { return freeRemix; }, get demo() { return demo ? demo.a : null; },
   buttons: () => btns.map(b => ({ id: b.id, x: b.x, y: b.y, w: b.w, h: b.h })), next: () => act?.next() ?? null, busy: () => !!intro || !!poke || !!act?.busy?.(), get intro() { return !!intro; }, get onboard() { return onboard; },
   toScreen: (x: number, y: number) => { const r = cv.getBoundingClientRect(); return { x: r.left + (ox + x * scale) / dpr, y: r.top + (oy + y * scale) / dpr }; },
   start: (i: number, l: number) => start(i, l), go, save: () => JSON.parse(JSON.stringify(save)), setSave: (s: Save) => { save = s; persist(); }, closeModal: () => { modal = null; afterWin(); },

@@ -16,7 +16,7 @@ export function race(api: Api, level: number): Activity {
     intro: L.raceGo,
     update(dt) { if (done) return; road += dt * SPEED; kx += (LANES[lane] - kx) * Math.min(1, dt * 10); bonk = Math.max(0, bonk - dt); const sp = SPEED * (bonk ? 0.4 : 1);
       spawn -= dt; if (spawn <= 0 && !things.some(t => t.y < 300)) { add(); spawn = gates ? 2.6 : 1.4; }
-      for (const t of things) { t.y += sp * dt; if (!t.hit && t.y > KY - 30 && t.y < KY + 30 && t.lane === lane) { t.hit = true;
+      for (const t of things) { t.y += sp * dt; if (!t.hit && t.y > KY - 30 && t.y < KY + 30 && (t.lane === lane || (t.kind === 'star' && Math.abs(kx - LANES[t.lane]) < 45))) { t.hit = true;
         if (t.kind === 'star') { got++; api.sfx.unlock(); api.burst(LANES[t.lane], KY, 14); api.say(NUM[got - 1]); }
         if (t.kind === 'cone') { bonk = 0.8; api.sfx.boing(); api.say(L.cone, false); }
         if (t.kind === 'gate') { things.filter(o => o.kind === 'gate' && Math.abs(o.y - t.y) < 2).forEach(o => o.hit = true); if (t.col === want) { got++; api.sfx.cheer(); api.say(NUM[got - 1]); } else { api.sfx.wrong(); api.say(L.wrongGate); } } } }

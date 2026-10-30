@@ -20,7 +20,7 @@ let fails = 0; const ok = (c, m) => { if (c) console.log('ok   ' + m); else { fa
 // UI: title -> hub (Play), each card opens, Back is a single tap
 await tapBtn('play'); ok(await S(() => window.__snap.screen) === 'hub', 'Play opens the hub');
 const LV = await S(() => window.__snap.levels), NA = LV.length;
-for (let i = 0; i < NA; i++) { await tapBtn('act' + i); const s = await S(() => window.__snap.screen); await tapBtn('back'); const s2 = await S(() => window.__snap.screen); ok(s === 'play' && s2 === 'hub', `card ${i} opens, one tap on Back returns`); }
+for (let i = 0; i < NA; i++) { await tapBtn('act' + i); await wait(300); const intro = await S(() => window.__snap.intro); const s = await S(() => window.__snap.screen); await tapBtn('back'); const s2 = await S(() => window.__snap.screen); ok(s === 'play' && intro && s2 === 'hub', `card ${i} pokes, opens with its sport intro, one tap on Back returns`); }
 await tapBtn('town'); ok(await S(() => window.__snap.screen) === 'town', 'Trophy Room opens'); await tapBtn('back');
 await tapBtn('back'); ok(await S(() => window.__snap.screen) === 'title', 'Back from hub returns to title'); await tapBtn('play');
 // beat every level (authored + 2 remixes) with real input
@@ -28,7 +28,7 @@ async function beat(i, l) {
   await S(([i, l]) => window.__snap.start(i, l), [i, l]); await wait(300); const t0 = Date.now(); let steps = 0;
   while (Date.now() - t0 < 90000) {
     if ((await S(() => window.__snap.winT)) >= 0) return steps;
-    const a = await S(() => window.__snap.busy() ? null : window.__snap.next()); if (!a) { await wait(200); continue; } await run(a); if (a.type !== 'wait') steps++; if (steps > 150) break;
+    const a = await S(() => window.__snap.busy() ? null : window.__snap.next()); if (!a) { await wait(200); continue; } await run(a); if (a.type !== 'wait') steps++; if (steps > 250) break;
   }
   return -1;
 }
@@ -53,7 +53,7 @@ await wait(3800); ok(await S(() => window.__snap.modal) === 'unlock', 'trophy ce
 ok(await S(() => window.__snap.modal) === null && await S(() => window.__snap.screen) === 'play', 'tap closes it and the next level starts');
 // parental gate + paywall (store simulator)
 await page.goto(URL + '?store=sim'); await wait(500); await S(() => window.__snap.storeTest.reset()); await tapBtn('play');
-await tapBtn('act0'); ok(await S(() => window.__snap.screen) === 'play', 'every sport opens (first 2 levels free)'); await tapBtn('back');
+await tapBtn('act0'); await wait(300); ok(await S(() => window.__snap.screen) === 'play', 'every sport opens (first 2 levels free)'); await tapBtn('back');
 await S(() => window.__snap.start(0, 3)); ok(await S(() => window.__snap.freeRemix), 'level 3 without the Club plays a free-level remix (store sim)'); await S(() => window.__snap.go('hub')); await wait(300);
 await tapBtn('gear'); ok(await S(() => window.__snap.modal) === 'gate', 'gear opens the grown-up gate');
 { const bt = await S(() => window.__snap.buttons().find(b => b.id === 'gateHold')); const p = await pt(bt.x + 70, bt.y + 70); await page.mouse.move(p.x, p.y); await page.mouse.down(); await wait(3400); await page.mouse.up(); await wait(200);

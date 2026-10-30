@@ -112,7 +112,9 @@ let ducks = 0, relT = 0;
 function duck(on: boolean) { if (!ctx) return; ducks = Math.max(0, ducks + (on ? 1 : -1)); clearTimeout(relT);
   if (ducks) { duckGain.gain.setTargetAtTime(0.3, ctx.currentTime, 0.06); sfxDuck.gain.setTargetAtTime(0.75, ctx.currentTime, 0.06); }
   else relT = window.setTimeout(() => { if (ctx && !ducks) { duckGain.gain.setTargetAtTime(1, ctx.currentTime, 0.35); sfxDuck.gain.setTargetAtTime(1, ctx.currentTime, 0.2); } }, 500); }
-function voiceStarted(s: AudioBufferSourceNode) { duck(true); let done = false; const end = () => { if (!done) { done = true; duck(false); } }; s.onended = end; }
+/** test probe: voices = recorded lines sounding right now (must never exceed 1), track = the music loop that is playing */
+export const audioStats = { voices: 0, maxVoices: 0, lines: 0, get track() { return curTrack; }, get ctx() { return ctx?.state ?? 'none'; } };
+function voiceStarted(s: AudioBufferSourceNode) { duck(true); audioStats.voices++; audioStats.lines++; audioStats.maxVoices = Math.max(audioStats.maxVoices, audioStats.voices); let done = false; const end = () => { if (!done) { done = true; audioStats.voices--; duck(false); } }; s.onended = end; }
 function tone(freq: number, dur: number, type: OscillatorType = 'sine', vol = 0.3, when = 0, slide = 0, dest?: AudioNode) {
   if (!ctx) return; const t = ctx.currentTime + when; const o = ctx.createOscillator(), g = ctx.createGain();
   o.type = type; o.frequency.setValueAtTime(freq, t); if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(30, freq + slide), t + dur);
