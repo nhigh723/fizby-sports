@@ -1,0 +1,18 @@
+screen title onboard -1
+after play screen setup modal null btns ["setupGo","setupKid0","setupKid1","setupKid2","setupAge0","setupAge1","setupAge2"]
+nonhub step setup ["setupGo","setupKid0","setupKid1","setupKid2","setupAge0","setupAge1","setupAge2"]
+kid 0
+audio {"voices":1,"maxVoices":1,"lines":1,"track":"hub","ctx":"running"}
+levels [5,5,6,5,5,5,5,5,5,5,5]
+save wins 0 stickers 0 trophies []
+town screen town ["back","trophy0","trophy1","trophy2","trophy3","trophy4","trophy5","trophy6","trophy7","trophy8","trophy9","trophy10","page0","page1","page2","page3","page4","page5","page6","page7","page8","page9","page10"]
+gate modal gate
+after wrong hub null
+parents screen parents ["back","kid0","kidAdd","kidName","band2-3","band4-5","band6+","buy-yearly","buy-monthly","buy-forever","restore","manage","terms","privacy","music","sfx","voice","reset"]
+freeRemix true modal null
+offline screen title newfails 0
+RESULTS fails 0 of 0
+PAGEERRORS []
+CONSOLE []
+NETFAIL []
+EXIT 0

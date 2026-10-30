@@ -18,3 +18,6 @@ Open: **0**
 | 12 | B1 "freezes": a game could sit busy with no input accepted. The frame dt cap (0.05 s) made game time crawl on starved frames, so animations looked frozen. A follow-up edit briefly commented out the clock (caught by fps probe, fixed in 77b3bc7). | QA round 2, play-all, stall-probe | dt cap 0.25 s with 1/120 s physics substeps; rAF-stall interval fallback; real-time 12 s busy watchdog restarts the turn (counted in __snap.heals). | Fixed |
 | 13 | Swim win: Fizby covered the arrow; the book icon always showed a soccer sticker. | QA round 2 | Fizby is centred between the arrows on a washed-out scene; the book icon shows this sport's sticker. | Fixed |
 | 14 | Parent area tap targets under 44 pt; "practised"; an "Ages 2-3" band. | QA round 2 | All targets 44 pt or more; US spelling; bands Age 3 / Age 4 / Ages 5-6. | Fixed |
+
+## 15. Parent gate hold never completes on slower frame rates (iPad)
+The hold timer added 1/60 s per frame, so at below 60 fps a 3.4 s hold counted as less than 3 s and the question never opened (live qa on iPad: `BUG no button gateA*`). Fix: count real elapsed time (performance.now, max 0.1 s per frame). Verified: qa-evidence/qa-tail-ipad-local.log reaches the parents screen.
