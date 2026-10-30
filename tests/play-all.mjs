@@ -31,7 +31,7 @@ async function beat(i, l) {
     if ((await S(() => window.__snap.winT)) >= 0) return steps;
     const a = await S(() => window.__snap.busy() ? null : window.__snap.next()); if (!a) { await wait(200); continue; } await run(a); if (a.type !== 'wait') steps++; if (steps > 250) break;
   }
-  console.log("  stuck state", JSON.stringify(await S(() => ({ T: window.__snap.T, stalls: window.__snap.stalls, heals: window.__snap.heals, screen: window.__snap.screen, act: window.__snap.act, level: window.__snap.level, winT: window.__snap.winT, modal: window.__snap.modal, busy: window.__snap.busy(), next: window.__snap.next(), intro: window.__snap.intro }))));
+  console.log("  stuck state", JSON.stringify(await S(() => ({ dbg: window.__snap.dbg, busyT: window.__snap.busyT, T: window.__snap.T, stalls: window.__snap.stalls, heals: window.__snap.heals, screen: window.__snap.screen, act: window.__snap.act, level: window.__snap.level, winT: window.__snap.winT, modal: window.__snap.modal, busy: window.__snap.busy(), next: window.__snap.next(), intro: window.__snap.intro }))));
   return -1;
 }
 const ONLY = process.env.ONLY ? process.env.ONLY.split(',').map(Number) : null;
