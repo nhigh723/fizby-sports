@@ -1,6 +1,6 @@
 // Tee-ball: a ring pulses around the ball on the tee; tap when it hugs the ball to hit. Teaches timing, counting bases, left/right.
 // L0 slow ring - L1 faster - L2 fastest - L3 hit, then tap bases 1-2-3-home - L4 Fizby says left or right: tap that side of the ball. 5+: remixes.
-import { type Ctx, W } from '../art';
+import { type Ctx, W, band } from '../art';
 import { ball, field } from '../sports';
 import { L, NUM } from '../lines';
 import type { Activity, Api, Pt } from '../kit';
@@ -17,7 +17,7 @@ export function tee(api: Api, level: number): Activity {
     intro: L.teeGo,
     update(dt) { if (fly < 0 && base < 0) ph += dt * sp * 2; early = Math.max(0, early - dt); runnerT += dt;
       if (fly >= 0) { fly += dt; fx += fvx * dt; fy += fvy * dt; fvy += 300 * dt; if (fly > 1.4) { fly = -1; if (runs) { base = 0; api.say(L.runBases); } else round(); } } },
-    draw(c: Ctx) { const t = api.t(); c.fillStyle = '#7fe3f5'; c.fillRect(0, 0, W, 300); field(c, 260, '#3ddc4a');
+    draw(c: Ctx) { const t = api.t(); c.fillStyle = '#7fe3f5'; band(c, 0, 300); field(c, 260, '#3ddc4a');
       c.fillStyle = '#e0a060'; c.beginPath(); c.moveTo(195, 680); c.lineTo(330, 470); c.lineTo(195, 330); c.lineTo(60, 470); c.closePath(); c.fill(); c.fillStyle = '#3ddc4a'; c.beginPath(); c.moveTo(195, 610); c.lineTo(280, 470); c.lineTo(195, 390); c.lineTo(110, 470); c.closePath(); c.fill();
       BASES.forEach(([x, y], i) => { c.fillStyle = base > i ? '#ffd60a' : '#fff'; c.save(); c.translate(x, y); c.rotate(0.785); c.fillRect(-16, -16, 32, 32); c.restore(); if (base === i) { c.strokeStyle = '#ffd60a'; c.lineWidth = 5; c.beginPath(); c.arc(x, y, 30 + Math.sin(t * 8) * 4, 0, 6.28); c.stroke(); } });
       if (lr && fly < 0 && base < 0) { const ax = BX + side * 110, a = Math.sin(t * 6) * 6; c.fillStyle = '#ffd60a'; c.beginPath(); c.moveTo(ax + side * (24 + a), BY); c.lineTo(ax - side * 4, BY - 22); c.lineTo(ax - side * 4, BY + 22); c.fill(); }

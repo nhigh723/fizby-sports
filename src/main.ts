@@ -2,7 +2,7 @@
 import { CLUB_NAME, GAME_TITLE } from './brand';
 import { mascot, mascotBust, preloadArt, type Mood } from './fizby2d';
 import { stepHint, drawHint, resetHint, hint, hintCfg, setHintCtx } from './hint';
-import { W, H, INK, COLORS, hand, sky, confettiDraw, rr, shade, type Ctx, type Pose } from './art';
+import { bleed, W, H, INK, COLORS, hand, sky, confettiDraw, rr, shade, type Ctx, type Pose, band } from './art';
 import { initAudio, sfx, say as voiceSay, isSpeaking, missing, musicScene, stopVoice } from './audio';
 import { L, allLines } from './lines';
 import type { Activity, Action, Api, Pt } from './kit';
@@ -17,7 +17,7 @@ import { tune } from './kit';
 import { settings, cycleVol, applySettings, audioStats } from './audio';
 const cv = document.getElementById('c') as HTMLCanvasElement, c = cv.getContext('2d')!; setHintCtx(c); void preloadArt([]); musicScene('hub');
 let scale = 1, ox = 0, oy = 0, dpr = 1;
-function resize() { dpr = Math.min(devicePixelRatio || 1, 3); cv.width = Math.round(innerWidth * dpr); cv.height = Math.round(innerHeight * dpr); scale = Math.min(cv.width / W, cv.height / H); ox = (cv.width - W * scale) / 2; oy = (cv.height - H * scale) / 2; }
+function resize() { dpr = Math.min(devicePixelRatio || 1, 3); cv.width = Math.round(innerWidth * dpr); cv.height = Math.round(innerHeight * dpr); scale = Math.min(cv.width / W, cv.height / H); ox = (cv.width - W * scale) / 2; oy = (cv.height - H * scale) / 2; bleed.x = ox / scale; bleed.y = oy / scale; }
 addEventListener('resize', resize); resize();
 // ---- save ----
 const ACTS = [
@@ -80,7 +80,7 @@ function roundBtn(id: string, x: number, y: number, r: number, col: string, icon
   c.save(); c.translate(x, y); c.fillStyle = 'rgba(0,0,0,0.15)'; c.beginPath(); c.arc(0, 4, r, 0, 6.28); c.fill(); c.fillStyle = col; c.beginPath(); c.arc(0, 0, r, 0, 6.28); c.fill(); c.lineWidth = 5; c.strokeStyle = '#fff'; c.stroke(); icon(c); c.restore(); btn(id, x - r, y - r, r * 2, r * 2, fn);
 }
 const backIcon = (c: Ctx) => { c.strokeStyle = '#fff'; c.lineWidth = 8; c.lineCap = 'round'; c.lineJoin = 'round'; c.beginPath(); c.moveTo(7, -14); c.lineTo(-9, 0); c.lineTo(7, 14); c.stroke(); };
-function backBtn(to: () => void) { roundBtn('back', 50, 62, 34, '#1fb6ff', backIcon, () => { sfx.tap(); to(); }); }
+function backBtn(to: () => void) { roundBtn('back', 50 - bleed.x, 62 - Math.min(bleed.y, 20), 34, '#1fb6ff', backIcon, () => { sfx.tap(); to(); }); }
 function text(s: string, x: number, y: number, size: number, col = INK, align: CanvasTextAlign = 'center', weight = 800) { c.font = `${weight} ${size}px ui-rounded, "SF Pro Rounded", system-ui, sans-serif`; c.fillStyle = col; c.textAlign = align; c.textBaseline = 'middle'; c.fillText(s, x, y); }
 function lock(x: number, y: number, s = 1) { c.save(); c.translate(x, y); c.scale(s, s); c.strokeStyle = '#fff'; c.lineWidth = 7; c.beginPath(); c.arc(0, -8, 12, Math.PI, 0); c.stroke(); c.fillStyle = '#ffd60a'; rr(c, -18, -8, 36, 28, 7); c.fill(); c.strokeStyle = shade('#ffd60a', -0.4); c.lineWidth = 3; c.stroke(); c.fillStyle = INK; c.beginPath(); c.arc(0, 4, 4, 0, 6.28); c.fill(); c.restore(); }
 // ---- hub card art ----
@@ -110,10 +110,10 @@ function drawTitle() {
 function bookIcon(x: number, y: number, k = 1) { c.save(); c.translate(x, y); c.scale(k, k); c.fillStyle = 'rgba(0,0,0,0.18)'; rr(c, -26, -20, 56, 46, 8); c.fill(); c.fillStyle = '#9b5cff'; rr(c, -28, -24, 56, 46, 8); c.fill(); c.fillStyle = '#fff'; rr(c, -20, -18, 40, 34, 5); c.fill(); sticker(c, 0, -1, 12, 0, 1, 0); c.restore(); }
 /** Big game (the last level of a sport): a cheering crowd along the top. */
 function crowdStrip() { const CR = ['#ff3b6b', '#ffd60a', '#1fb6ff', '#ff9f1c', '#3ddc4a', '#ff5fd2'];
-  c.fillStyle = 'rgba(91,75,214,0.85)'; c.fillRect(0, 100, W, 46); for (let q = 0; q < 16; q++) { const x = 12 + q * 25, w = Math.max(0, Math.sin(q * 0.6 - T * 4)), y = 124 - w * 8; c.fillStyle = CR[q % 6]; rr(c, x - 8, y + 4, 16, 16, 6); c.fill(); c.fillStyle = '#f6c6a0'; c.beginPath(); c.arc(x, y, 7, 0, 6.28); c.fill(); } }
+  c.fillStyle = 'rgba(91,75,214,0.85)'; band(c, 100, 46); for (let q = 0; q < 16; q++) { const x = 12 + q * 25, w = Math.max(0, Math.sin(q * 0.6 - T * 4)), y = 124 - w * 8; c.fillStyle = CR[q % 6]; rr(c, x - 8, y + 4, 16, 16, 6); c.fill(); c.fillStyle = '#f6c6a0'; c.beginPath(); c.arc(x, y, 7, 0, 6.28); c.fill(); } }
 /** Sport intro card (like F&L introAnim): the sport's picture zooms in on a sunburst, Fizby explains, tap to skip. */
 function drawIntro() { const t = intro!.t, A = ACTS[actI], k = Math.min(1, t * 3), out = t > 2.1 ? Math.min(1, (t - 2.1) * 4) : 0;
-  c.save(); c.globalAlpha = 1 - out; const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, A.bg[0]); g.addColorStop(1, A.bg[1]); c.fillStyle = g; c.fillRect(0, 0, W, H);
+  c.save(); c.globalAlpha = 1 - out; const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, A.bg[0]); g.addColorStop(1, A.bg[1]); c.fillStyle = g; band(c, 0, H);
   c.save(); c.translate(195, 330); c.rotate(t * 0.4); c.fillStyle = 'rgba(255,255,255,0.25)'; for (let q = 0; q < 12; q++) { c.rotate(0.5236); c.beginPath(); c.moveTo(0, 0); c.lineTo(-40, -520); c.lineTo(40, -520); c.fill(); } c.restore();
   const s = (0.4 + 0.6 * k) * (1 + Math.sin(t * 5) * 0.03) * 2.3; c.save(); c.translate(195, 330); c.scale(s, s); c.fillStyle = '#fff'; rr(c, -56, -56, 112, 112, 28); c.fill(); cardArt(actI, -56, -56, 112, 112); c.restore();
   mascot(c, 120 + (1 - k) * -200, 830, 330, 'stand', T, isSpeaking()); c.restore(); }
@@ -122,17 +122,17 @@ function drawOnboard() { const t = onboard, k = Math.min(1, t * 2.5); mascot(c, 
 /** Living stadium behind the hub cards: a crowd doing the wave, flags, bunting, a ball rolling across the grass. */
 function stadium() {
   sky(c, '#22d3ee', '#c8f7ff', T, 790, '#3ddc4a', '#2fc23c', false);
-  c.fillStyle = '#5b4bd6'; rr(c, -20, 110, W + 40, 520, 40); c.fill(); c.fillStyle = '#7a6af0'; for (let r = 0; r < 9; r++) c.fillRect(0, 140 + r * 54, W, 6);
+  c.fillStyle = '#5b4bd6'; rr(c, -20 - bleed.x, 110, W + 40 + 2 * bleed.x, 520, 40); c.fill(); c.fillStyle = '#7a6af0'; for (let r = 0; r < 9; r++) band(c, 140 + r * 54, 6);
   const CROWD = ['#ff3b6b', '#ffd60a', '#1fb6ff', '#ff9f1c', '#3ddc4a', '#ff5fd2', '#ffffff'];
-  for (let r = 0; r < 9; r++) for (let q = 0; q < 14; q++) { const x = 14 + q * 28 + (r % 2) * 14, wave = Math.max(0, Math.sin(q * 0.5 - T * 3.2 + r * 0.25)), y = 136 + r * 54 - wave * 14;
-    c.fillStyle = CROWD[(q * 3 + r * 5) % 7]; rr(c, x - 9, y + 4, 18, 18, 7); c.fill(); c.fillStyle = '#f6c6a0'; c.beginPath(); c.arc(x, y, 8, 0, 6.28); c.fill(); if (wave > 0.6) { c.strokeStyle = '#f6c6a0'; c.lineWidth = 4; c.beginPath(); c.moveTo(x - 9, y + 8); c.lineTo(x - 14, y - 10); c.moveTo(x + 9, y + 8); c.lineTo(x + 14, y - 10); c.stroke(); } }
+  for (let r = 0; r < 9; r++) for (let q = -Math.ceil(bleed.x / 28); q < 14 + Math.ceil(bleed.x / 28); q++) { const x = 14 + q * 28 + (r % 2) * 14, wave = Math.max(0, Math.sin(q * 0.5 - T * 3.2 + r * 0.25)), y = 136 + r * 54 - wave * 14;
+    c.fillStyle = CROWD[(((q * 3 + r * 5) % 7) + 7) % 7]; rr(c, x - 9, y + 4, 18, 18, 7); c.fill(); c.fillStyle = '#f6c6a0'; c.beginPath(); c.arc(x, y, 8, 0, 6.28); c.fill(); if (wave > 0.6) { c.strokeStyle = '#f6c6a0'; c.lineWidth = 4; c.beginPath(); c.moveTo(x - 9, y + 8); c.lineTo(x - 14, y - 10); c.moveTo(x + 9, y + 8); c.lineTo(x + 14, y - 10); c.stroke(); } }
   for (let i = 0; i < 5; i++) { const x = 20 + i * 87; c.fillStyle = '#fff'; c.fillRect(x, 96, 3, 30); c.fillStyle = CROWD[i]; c.beginPath(); c.moveTo(x + 3, 96); c.quadraticCurveTo(x + 18, 96 + Math.sin(T * 6 + i) * 5, x + 30, 104); c.lineTo(x + 3, 112); c.fill(); }
-  const bx = ((T * 70) % (W + 120)) - 60; ball(c, 'soccer', bx, 640 - Math.abs(Math.sin(T * 5)) * 16, 14, T * 5);
+  const bx = ((T * 70) % (W + 120 + 2 * bleed.x)) - 60 - bleed.x; ball(c, 'soccer', bx, 640 - Math.abs(Math.sin(T * 5)) * 16, 14, T * 5);
 }
 function drawHub() {
   stadium();
   backBtn(() => go('title')); mascotBust(c, 195, 66, 46, T, isSpeaking(), 'point'); btn('hubMascot', 150, 20, 90, 90, () => { sfx.tap(); say(L.hub); });
-  roundBtn('gear', W - 44, 50, 22, 'rgba(255,255,255,0.5)', (c) => { c.fillStyle = '#7a5a8a'; for (let i = 0; i < 8; i++) { c.save(); c.rotate(i * 0.785); c.fillRect(-3, -14, 6, 8); c.restore(); } c.beginPath(); c.arc(0, 0, 9, 0, 6.28); c.fill(); c.fillStyle = '#fff'; c.beginPath(); c.arc(0, 0, 4, 0, 6.28); c.fill(); }, () => { initAudio(); sfx.tap(); openGate(); });
+  roundBtn('gear', W - 44 + bleed.x, 50, 22, 'rgba(255,255,255,0.5)', (c) => { c.fillStyle = '#7a5a8a'; for (let i = 0; i < 8; i++) { c.save(); c.rotate(i * 0.785); c.fillRect(-3, -14, 6, 8); c.restore(); } c.beginPath(); c.arc(0, 0, 9, 0, 6.28); c.fill(); c.fillStyle = '#fff'; c.beginPath(); c.arc(0, 0, 4, 0, 6.28); c.fill(); }, () => { initAudio(); sfx.tap(); openGate(); });
   for (let i = 0; i < ACTS.length; i++) {
     const col = i % 3, row = Math.floor(i / 3), w = 112, h = 112, x = 13 + col * (w + 13), y = 128 + row * (h + 10), lk = false, wig = lockWiggle === i && lockT > 0 ? Math.sin(lockT * 40) * 5 : 0;
     const pk = poke && poke.i === i ? 1 + Math.sin(Math.min(1, poke.t / 0.28) * Math.PI) * 0.12 : 1;
@@ -153,21 +153,21 @@ function drawPlay() {
   if (intro) btn('introSkip', 0, 0, W, H, () => { intro = null; });
   act!.draw(c);
   backBtn(() => go('hub'));
-  if (!intro && winT < 0 && ACTS[actI].id !== 'paint') roundBtn('help', W - 40, 122, 24, '#9b5cff', (c) => { c.fillStyle = '#fff'; c.font = '900 30px ui-rounded, system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('?', 0, 2); }, () => { sfx.tap(); tut = 0; idle = 99; resetHint(); if (act?.intro) say(act.intro); mascotPose = 'point'; mascotPoseT = 3; });
+  if (!intro && winT < 0 && ACTS[actI].id !== 'paint') roundBtn('help', W - 40 + bleed.x, 122, 24, '#9b5cff', (c) => { c.fillStyle = '#fff'; c.font = '900 30px ui-rounded, system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('?', 0, 2); }, () => { sfx.tap(); tut = 0; idle = 99; resetHint(); if (act?.intro) say(act.intro); mascotPose = 'point'; mascotPoseT = 3; });
   mascotBust(c, 195, 64, 40, T, isSpeaking(), mascotPose); btn('mascot', 150, 20, 90, 90, () => { sfx.tap(); if (act?.intro) say(act.intro); idle = 99; });
-  if (A.levels) for (let k = 0; k < A.levels; k++) { c.fillStyle = Math.min(level, A.levels) > k ? '#ffd60a' : 'rgba(255,255,255,0.7)'; c.beginPath(); c.arc(W - 30 - (A.levels - 1 - k) * 18, 62, 7, 0, 6.28); c.fill(); }
-  if (!intro && winT < 0) roundBtn('restart', W - 96, 122, 24, '#ff9f1c', (c) => { c.strokeStyle = '#fff'; c.lineWidth = 5; c.lineCap = 'round'; c.beginPath(); c.arc(0, 0, 10, -0.3, 4.6); c.stroke(); c.fillStyle = '#fff'; c.beginPath(); c.moveTo(8, -14); c.lineTo(14, -2); c.lineTo(2, -4); c.fill(); }, () => { sfx.whoosh(); start(actI, level); });
+  if (A.levels) for (let k = 0; k < A.levels; k++) { c.fillStyle = Math.min(level, A.levels) > k ? '#ffd60a' : 'rgba(255,255,255,0.7)'; c.beginPath(); c.arc(W - 30 + bleed.x - (A.levels - 1 - k) * 18, 62, 7, 0, 6.28); c.fill(); }
+  if (!intro && winT < 0) roundBtn('restart', W - 96 + bleed.x, 122, 24, '#ff9f1c', (c) => { c.strokeStyle = '#fff'; c.lineWidth = 5; c.lineCap = 'round'; c.beginPath(); c.arc(0, 0, 10, -0.3, 4.6); c.stroke(); c.fillStyle = '#fff'; c.beginPath(); c.moveTo(8, -14); c.lineTo(14, -2); c.lineTo(2, -4); c.fill(); }, () => { sfx.whoosh(); start(actI, level); });
   for (const q of pops) { const k = q.t / 0.9; c.save(); c.globalAlpha = Math.max(0, 1 - k); star(c, q.x, q.y - 30 - k * 70, 16 + k * 6); c.restore(); }
   if (winT >= 0) for (let i = 0; i < 3; i++) { const k = Math.max(0, Math.min(1, (winT - 0.3 - i * 0.25) * 4)); if (k <= 0) continue; const sc = k < 1 ? 1.4 - 0.4 * k : 1; c.save(); c.globalAlpha = i < winStars ? 1 : 0.3; star(c, 135 + i * 60, 230 - (i === 1 ? 14 : 0), 26 * sc, i < winStars ? '#ffd60a' : '#ffffff'); c.restore(); }
-  if (tut >= 0) { c.fillStyle = `rgba(40,20,80,${0.35 * Math.min(1, tut * 4, (4.5 - tut) * 2)})`; c.fillRect(0, 140, W, H - 140); }
+  if (tut >= 0) { c.fillStyle = `rgba(40,20,80,${0.35 * Math.min(1, tut * 4, (4.5 - tut) * 2)})`; band(c, 140, H - 140); }
   if (intro) drawIntro();
-  if (winT >= 0) { const k = Math.min(1, winT * 3); c.fillStyle = `rgba(255,255,255,${0.25 * k})`; c.fillRect(0, 0, W, H); mascot(c, 300, 844 - 40 + (1 - k) * 300, 270, 'cheer', T, isSpeaking()); if (newSticker >= 0) { bookIcon(48, 792, 1 + (winT > 2.3 && winT < 2.6 ? Math.sin((winT - 2.3) / 0.3 * Math.PI) * 0.25 : 0)); const s = Math.min(1, winT * 2), f = Math.max(0, Math.min(1, (winT - 1.7) / 0.6)), e = f * f * (3 - 2 * f);
+  if (winT >= 0) { const k = Math.min(1, winT * 3); c.fillStyle = `rgba(255,255,255,${0.25 * k})`; band(c, 0, H); mascot(c, 300, 844 - 40 + (1 - k) * 300, 270, 'cheer', T, isSpeaking()); if (newSticker >= 0) { bookIcon(48, 792, 1 + (winT > 2.3 && winT < 2.6 ? Math.sin((winT - 2.3) / 0.3 * Math.PI) * 0.25 : 0)); const s = Math.min(1, winT * 2), f = Math.max(0, Math.min(1, (winT - 1.7) / 0.6)), e = f * f * (3 - 2 * f);
     if (f < 1) sticker(c, 160 + (48 - 160) * e, 420 + (792 - 420) * e - Math.sin(e * Math.PI) * 120, (30 + 50 * s) * (1 - e * 0.7), Math.floor(newSticker / 10), newSticker % 10, T); } }
   if (isBig() && winT < 0) crowdStrip();
 }
 let bookPage = -1;
 function drawTown() {
-  c.fillStyle = '#7c5cff'; c.fillRect(0, 0, W, H); backBtn(() => go('hub')); mascotBust(c, 195, 66, 42, T, isSpeaking(), 'cheer');
+  c.fillStyle = '#7c5cff'; band(c, 0, H); backBtn(() => go('hub')); mascotBust(c, 195, 66, 42, T, isSpeaking(), 'cheer');
   c.fillStyle = '#b07a3a'; rr(c, 16, 205, W - 32, 14, 6); c.fill(); rr(c, 16, 305, W - 32, 14, 6); c.fill(); for (let k = 0; k < ACTS.length; k++) { const x = 40 + (k % 6) * 62 + (k >= 6 ? 31 : 0), ty2 = k < 6 ? 170 : 270; trophy(c, x, ty2, 0.72, k, save.trophies.includes(k), T); btn('trophy' + k, x - 28, ty2 - 40, 56, 76, () => { sfx.ding(); say(SPORT_NAME[k]); }); }
   // Sticker Book (F&L stickers.ts style): one page per sport, earned stickers in colour, missing ones as silhouettes to collect
   if (bookPage < 0) bookPage = save.stickers.length ? Math.floor(save.stickers[save.stickers.length - 1] / 10) : 0;
@@ -187,7 +187,7 @@ let gate = { hold: 0, q: [0, 0], opts: [] as number[], asked: false, pressing: f
 function openGate() { const a = 2 + Math.floor(Math.random() * 6), b = 2 + Math.floor(Math.random() * 6), r = a + b, o = new Set([r]); while (o.size < 3) o.add(Math.max(2, r + Math.floor(Math.random() * 7) - 3)); gate = { hold: 0, q: [a, b], opts: [...o].sort(() => Math.random() - 0.5), asked: false, pressing: false }; modal = { kind: 'gate' }; }
 let resetHold = 0, resetPress = false;
 function drawParents() {
-  c.fillStyle = '#f4f1ff'; c.fillRect(0, 0, W, H); backBtn(() => go('hub'));
+  c.fillStyle = '#f4f1ff'; band(c, 0, H); backBtn(() => go('hub'));
   text('For grown-ups', 195, 62, 26); const P = profiles(), me = current();
   // ---- children (up to 3), each with an age band that tunes hints and touch slack ----
   let y = 96; c.fillStyle = '#fff'; rr(c, 16, y, W - 32, 128, 20); c.fill();
@@ -222,14 +222,14 @@ function drawParents() {
 }
 function drawModal() {
   if (!modal) return;
-  if (modal.kind === 'unlock') { const m = modal; m.t += 1 / 60; c.fillStyle = 'rgba(40,20,80,0.55)'; c.fillRect(0, 0, W, H);
+  if (modal.kind === 'unlock') { const m = modal; m.t += 1 / 60; c.fillStyle = 'rgba(40,20,80,0.55)'; band(c, 0, H);
     const k = Math.min(1, m.t * 2.5), s = 0.5 + 0.5 * k + Math.sin(m.t * 5) * 0.03; c.save(); c.translate(195, 380); c.scale(s, s); c.rotate(m.t * 0.3);
     c.fillStyle = 'rgba(255,230,90,0.5)'; for (let i = 0; i < 12; i++) { c.rotate(0.5236); c.beginPath(); c.moveTo(0, 0); c.lineTo(-24, -230); c.lineTo(24, -230); c.fill(); } c.restore();
     c.save(); c.translate(195, 380); c.scale(s * 2.2, s * 2.2); trophy(c, 0, 0, 1.2, m.sport, true, T); c.restore();
     mascot(c, 90, 760, 230, 'cheer', T, isSpeaking()); if (m.t < 0.1) burst(195, 380, 50);
     btn('unlockOk', 0, 0, W, H, () => { if (m.t > 0.8) { modal = null; afterWin(); } }); if (m.t > 4) { modal = null; afterWin(); } return; }
   // gate: hold, then a sum (grown-up reading required)
-  c.fillStyle = 'rgba(40,20,80,0.7)'; c.fillRect(0, 0, W, H); c.fillStyle = '#fff'; rr(c, 30, 210, W - 60, 420, 28); c.fill(); text('Grown-ups only', 195, 250, 22);
+  c.fillStyle = 'rgba(40,20,80,0.7)'; band(c, 0, H); c.fillStyle = '#fff'; rr(c, 30, 210, W - 60, 420, 28); c.fill(); text('Grown-ups only', 195, 250, 22);
   if (!gate.asked) { text('Press and hold for 3 seconds', 195, 300, 16, '#5a4a6e', 'center', 700); if (gate.pressing) { gate.hold += 1 / 60; if (gate.hold >= 3) { gate.asked = true; gate.pressing = false; sfx.snap(); } } else gate.hold = 0;
     lock(195, 430, 1.6); c.beginPath(); c.arc(195, 430, 70, -1.571, -1.571 + Math.min(1, gate.hold / 3) * 6.28); c.lineWidth = 10; c.lineCap = 'round'; c.strokeStyle = '#3ddc4a'; c.stroke(); btn('gateHold', 125, 360, 140, 140, () => { gate.pressing = true; }); }
   else { text(`${gate.q[0]} + ${gate.q[1]} = ?`, 195, 340, 40, INK, 'center', 900); gate.opts.forEach((v, i) => { c.fillStyle = '#e8f6ff'; c.beginPath(); c.arc(95 + i * 100, 460, 40, 0, 6.28); c.fill(); text(String(v), 95 + i * 100, 462, 28);
@@ -254,12 +254,12 @@ function frame(now: number) {
   const sx = shake ? (Math.random() - 0.5) * shake : 0, sy = shake ? (Math.random() - 0.5) * shake : 0; c.setTransform(scale, 0, 0, scale, ox + sx * scale, oy + sy * scale);
   frameBtns = [];
   if (screen === 'title') drawTitle(); else if (screen === 'hub') drawHub(); else if (screen === 'play' && act) drawPlay(); else if (screen === 'town') townMax = drawTown(); else if (screen === 'parents') drawParents();
-  if (screen === 'hub' && onboard >= 0) drawOnboard(); confettiDraw(c, parts); if (fadeT < 0.25) { c.fillStyle = `rgba(255,255,255,${1 - fadeT / 0.25})`; c.fillRect(0, 0, W, H); } if (screen === 'play' && act && winT < 0 && !modal) drawHint(T, idle); if (modal) { frameBtns = frameBtns.filter(() => false); drawModal(); }
+  if (screen === 'hub' && onboard >= 0) drawOnboard(); confettiDraw(c, parts); if (fadeT < 0.25) { c.fillStyle = `rgba(255,255,255,${1 - fadeT / 0.25})`; band(c, 0, H); } if (screen === 'play' && act && winT < 0 && !modal) drawHint(T, idle); if (modal) { frameBtns = frameBtns.filter(() => false); drawModal(); }
   btns = frameBtns;
 }
 // ---- input: one finger at a time; leaving the screen or a cancelled touch counts as letting go ----
 let pointerId: number | null = null, pointerIsDown = false, lastPtr = 0;
-const toLogical = (e: PointerEvent): Pt => { const r = cv.getBoundingClientRect(); return { x: Math.max(0, Math.min(W, ((e.clientX - r.left) * dpr - ox) / scale)), y: Math.max(0, Math.min(H, ((e.clientY - r.top) * dpr - oy) / scale)) }; };
+const toLogical = (e: PointerEvent): Pt => { const r = cv.getBoundingClientRect(); return { x: Math.max(-bleed.x, Math.min(W + bleed.x, ((e.clientX - r.left) * dpr - ox) / scale)), y: Math.max(-bleed.y, Math.min(H + bleed.y, ((e.clientY - r.top) * dpr - oy) / scale)) }; };
 cv.addEventListener('pointerdown', e => {
   if (pointerId !== null) { // a second finger: ignore it, unless the first one went quiet (a lost touch end must never freeze input)
     if (performance.now() - lastPtr < 600) return; const old = pointerId; release({ pointerId: old, clientX: e.clientX, clientY: e.clientY } as PointerEvent); }

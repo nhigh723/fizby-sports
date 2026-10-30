@@ -1,6 +1,6 @@
 // Basketball: pull the ball back like a slingshot and let go. Teaches force (pull more = goes farther), counting, colours.
 // L0 close low hoop - L1 farther - L2 higher - L3 hoop moves each basket - L4 two colour hoops, Fizby names the colour. 5+: remixes.
-import { type Ctx, W } from '../art';
+import { type Ctx, W, band } from '../art';
 import { ball, hoop } from '../sports';
 import { L, NUM, hoopLine } from '../lines';
 import type { Activity, Api, Pt } from '../kit';
@@ -27,7 +27,7 @@ export function basket(api: Api, level: number): Activity {
         if (by > 900 || bx > W + 60) { fly = false; back = 0; const h = hs[two ? want : 0]; const far = (passX || bx) > h.x; api.sfx.thud(); api.say(far ? L.tooFar : L.tooShort); passX = 0; } }
       if (back >= 0) { back += dt; if (back > 0.8) { back = -1; reset(); } }
       if (cheer >= 0) { cheer += dt; by += 200 * dt; if (cheer > 1.2) { cheer = -1; reset(); if (made >= need) { done = true; api.win(L.swish); } else { if (moving || two) place(); if (two) api.say(hoopLine(hs[want].col)); } } } },
-    draw(c: Ctx) { const t = api.t(); c.fillStyle = '#ffb000'; c.fillRect(0, 0, W, 844); c.fillStyle = '#e88a00'; for (let i = 0; i < 8; i++) c.fillRect(i * 52, 0, 4, 844); c.fillStyle = '#ffd27a'; c.fillRect(0, 760, W, 84);
+    draw(c: Ctx) { const t = api.t(); c.fillStyle = '#ffb000'; band(c, 0, 844); c.fillStyle = '#e88a00'; for (let i = 0; i < 8; i++) c.fillRect(i * 52, 0, 4, 844); c.fillStyle = '#ffd27a'; band(c, 760, 84);
       c.strokeStyle = '#fff'; c.lineWidth = 5; c.beginPath(); c.arc(W, 780, 200, Math.PI, 1.5 * Math.PI); c.stroke();
       hs.forEach((h, i) => { hoop(c, h.x, h.y, h.col, t, swish); if (two && i === want) { const a = Math.sin(t * 6) * 6; c.fillStyle = h.col; c.beginPath(); c.moveTo(h.x, h.y - 92 + a); c.lineTo(h.x - 14, h.y - 116 + a); c.lineTo(h.x + 14, h.y - 116 + a); c.fill(); } });
       for (let i = 0; i < need; i++) { c.globalAlpha = i < made ? 1 : 0.35; ball(c, 'basket', 260 + i * 40, 805, 15); c.globalAlpha = 1; }

@@ -1,7 +1,7 @@
 // Bowling: swipe the ball up the lane. Fizby counts every pin that falls. Teaches counting (to 10), aim, left/right.
 // L0 3 pins - L1 6 pins - L2 10 pins - L3 10 pins, narrow lane - L4 pins sit left or right - L5 (hard) 10 pins left/right, narrow lane,
 // pins only knock the pin right behind them, so most racks take 2-3 rolls. Each level: 2 racks. 6+: remixes.
-import { type Ctx, W } from '../art';
+import { type Ctx, W, band } from '../art';
 import { ball, pin } from '../sports';
 import { L, NUM } from '../lines';
 import type { Activity, Api, Pt } from '../kit';
@@ -29,7 +29,7 @@ export function bowl(api: Api, level: number): Activity {
       if (after >= 0) { after += dt; countT -= dt;
         if (countT <= 0 && countQ.length) { const done2 = pins.filter(p => p.counted).length - countQ.length + 1; countQ.shift(); api.say(NUM[Math.min(9, done2 - 1)]); api.sfx.pop(); countT = 0.6; }
         if (!countQ.length && countT <= -0.4) { after = -1; reset(); if (pins.every(p => p.down)) { cleared++; api.burst(195, 260, 30); if (cleared >= racks) { done = true; api.win(L.allDown); } else { api.say(L.allDown); api.sfx.cheer(); if (sides) newRack(); else pins = rack(N, 195); } } } } },
-    draw(c: Ctx) { c.fillStyle = '#9b5cff'; c.fillRect(0, 0, W, 844); c.fillStyle = '#6b2fd6'; c.fillRect(lx0 - 30, 100, LW + 60, 744);
+    draw(c: Ctx) { c.fillStyle = '#9b5cff'; band(c, 0, 844); c.fillStyle = '#6b2fd6'; c.fillRect(lx0 - 30, 100, LW + 60, 744);
       const g = c.createLinearGradient(0, 100, 0, 844); g.addColorStop(0, '#ffd99a'); g.addColorStop(1, '#ffb35a'); c.fillStyle = g; c.fillRect(lx0, 100, LW, 744);
       c.strokeStyle = 'rgba(160,90,30,0.3)'; c.lineWidth = 2; for (let x = lx0 + 20; x < lx1; x += 20) { c.beginPath(); c.moveTo(x, 100); c.lineTo(x, 844); c.stroke(); }
       for (let k = -2; k <= 2; k++) { c.fillStyle = '#ff3b6b'; c.beginPath(); c.moveTo(195 + k * 28, 560); c.lineTo(189 + k * 28, 575); c.lineTo(201 + k * 28, 575); c.fill(); }

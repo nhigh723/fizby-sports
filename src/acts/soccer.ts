@@ -1,6 +1,6 @@
 // Soccer: swipe the ball into the goal. Teaches aim/direction, counting goals, and left/right.
 // L0 big goal - L1 smaller goal that moves each round - L2 keeper pal - L3 keeper + count 5 goals - L4 left/right goals. 5+: remixes.
-import { type Ctx, W } from '../art';
+import { type Ctx, W, band } from '../art';
 import { ball, field, goal, keeper } from '../sports';
 import { L, NUM } from '../lines';
 import type { Activity, Api, Pt } from '../kit';
@@ -28,7 +28,7 @@ export function soccer(api: Api, level: number): Activity {
         if (bx < -40 || bx > W + 40 || by < -40) { fly = false; back = 0; api.say(L.soClose); } }
       if (back >= 0) { back += dt; if (back > 0.9) { back = -1; reset(); } }
       if (cheer >= 0) { cheer += dt; if (cheer > 1.3) { cheer = -1; reset(); if (scored >= need) { done = true; api.win(L.goal); } else newRound(); } } },
-    draw(c: Ctx) { const t = api.t(); c.fillStyle = '#7fe3f5'; c.fillRect(0, 0, W, 240); field(c, 200, '#3ddc4a');
+    draw(c: Ctx) { const t = api.t(); c.fillStyle = '#7fe3f5'; band(c, 0, 240); field(c, 200, '#3ddc4a');
       c.strokeStyle = 'rgba(255,255,255,0.8)'; c.lineWidth = 5; c.beginPath(); c.arc(195, 760, 90, 0, 6.28); c.stroke(); c.beginPath(); c.moveTo(0, GY + 4); c.lineTo(W, GY + 4); c.stroke();
       goals().forEach((g, i) => goal(c, g.x, GY, g.w, 110, twoGoals ? (i === side ? '#ffd60a' : '#ffffff') : '#ffffff'));
       if (twoGoals) { const g = goals()[side], a = Math.sin(t * 6) * 6; c.fillStyle = '#ffd60a'; c.beginPath(); c.moveTo(g.x, GY - 120 + a); c.lineTo(g.x - 16, GY - 146 + a); c.lineTo(g.x + 16, GY - 146 + a); c.fill(); }

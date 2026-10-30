@@ -1,6 +1,6 @@
 // Hockey (ice rink): flick the puck into the net. Ice is slippery and the boards bounce. Teaches aim, passing then shooting (sequencing), bank angles, counting.
 // L0 big net - L1 goalie pal - L2 faster goalie - L3 pass to your teammate, then shoot - L4 a big snowman blocks the middle: bounce it off the boards. 3 goals. 5+: remixes.
-import { type Ctx, W, rr } from '../art';
+import { type Ctx, W, rr, band } from '../art';
 import { ball, keeper } from '../sports';
 import { L, NUM } from '../lines';
 import type { Activity, Api, Pt } from '../kit';
@@ -25,7 +25,7 @@ export function hockey(api: Api, level: number): Activity {
         if (Math.abs(px - 195) < nw / 2 - 8 && !(goalie && Math.abs(px - gx) < 34)) { slide = false; cheer = 0; goals++; py = NY - 20; api.sfx.cheer(); api.burst(px, NY - 20, 26); api.say(NUM[goals - 1]); }
         else { slide = false; back = 0; api.sfx.thud(); api.say(goalie && Math.abs(px - gx) < 34 ? L.saved : L.soClose); } }
       if (py > 860 || py < 100) { slide = false; back = 0; } },
-    draw(c: Ctx) { const t = api.t(); c.fillStyle = '#1f7ae0'; c.fillRect(0, 0, W, 844); const g = c.createLinearGradient(0, 120, 0, 800); g.addColorStop(0, '#f4fbff'); g.addColorStop(1, '#d6efff'); c.fillStyle = g; rr(c, X0, 120, X1 - X0, 680, 60); c.fill();
+    draw(c: Ctx) { const t = api.t(); c.fillStyle = '#1f7ae0'; band(c, 0, 844); const g = c.createLinearGradient(0, 120, 0, 800); g.addColorStop(0, '#f4fbff'); g.addColorStop(1, '#d6efff'); c.fillStyle = g; rr(c, X0, 120, X1 - X0, 680, 60); c.fill();
       c.strokeStyle = '#ffd60a'; c.lineWidth = 8; rr(c, X0, 120, X1 - X0, 680, 60); c.stroke();
       c.strokeStyle = 'rgba(255,59,107,0.6)'; c.lineWidth = 5; c.beginPath(); c.moveTo(X0, 460); c.lineTo(X1, 460); c.stroke(); c.strokeStyle = 'rgba(31,182,255,0.6)'; c.beginPath(); c.arc(195, 460, 60, 0, 6.28); c.stroke();
       for (let i = 0; i < 8; i++) { c.strokeStyle = 'rgba(255,255,255,0.9)'; c.lineWidth = 2; const sx = (i * 53 + t * 10) % 330 + X0, sy = 150 + (i * 97) % 620; c.beginPath(); c.moveTo(sx - 8, sy); c.lineTo(sx + 8, sy - 3); c.stroke(); }

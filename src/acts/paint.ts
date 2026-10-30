@@ -1,7 +1,7 @@
 // Sports Day Paint Studio: colour sports pictures. Pick a paint pot, tap a part to fill it. Teaches colour names, matching, fine motor.
 // L0 medal (match the dots) - L1 ball - L2 trophy - L3 jersey - L4 flag; Fizby names the colour to find. 5+: remixes (any picture, new colours).
 // Each level: when every part matches its dot, the picture is done (2 pictures per level).
-import { type Ctx, W, rr } from '../art';
+import { type Ctx, W, rr, band } from '../art';
 import { L, colorLine } from '../lines';
 import type { Activity, Api, Pt } from '../kit';
 const PAL = ['#ff3b6b', '#ff9f1c', '#ffd60a', '#3ddc4a', '#1fb6ff', '#9b5cff', '#ff5fd2'];
@@ -27,7 +27,7 @@ export function paint(api: Api, level: number): Activity {
   return {
     intro: level === 0 ? L.paintMatch : L.paintGo,
     update(dt) { if (cheer >= 0) { cheer += dt; if (cheer > 1.6) { cheer = -1; made++; if (made >= need) { done = true; api.win(L.paintDone); } else make(); } } },
-    draw(c: Ctx) { const t = api.t(); c.fillStyle = '#fff6d6'; c.fillRect(0, 0, W, 844); c.fillStyle = '#fff'; rr(c, 30, 130, W - 60, 540, 24); c.fill(); c.strokeStyle = '#ffd27a'; c.lineWidth = 6; c.stroke();
+    draw(c: Ctx) { const t = api.t(); c.fillStyle = '#fff6d6'; band(c, 0, 844); c.fillStyle = '#fff'; rr(c, 30, 130, W - 60, 540, 24); c.fill(); c.strokeStyle = '#ffd27a'; c.lineWidth = 6; c.stroke();
       for (const p of parts) { c.fillStyle = p.got || '#ffffff'; c.strokeStyle = '#2b2140'; c.lineWidth = 6; c.beginPath(); if (p.k === 'c') c.arc(p.x, p.y, p.w / 2, 0, 6.28); else rr(c, p.x, p.y, p.w, p.h, 8); c.fill(); c.stroke();
         if (p.got !== p.want) { const q = spot(p); c.fillStyle = p.want; c.beginPath(); c.arc(q.x, q.y, 11 + Math.sin(t * 4) * 1.5, 0, 6.28); c.fill(); c.strokeStyle = '#fff'; c.lineWidth = 3; c.stroke(); } }
       PAL.forEach((col, i) => { const b = pot(i), up = sel === i ? -14 : 0; c.fillStyle = '#b8b0c8'; rr(c, b.x - 22, b.y - 6 + up, 44, 40, 10); c.fill(); c.fillStyle = col; c.beginPath(); c.ellipse(b.x, b.y - 6 + up, 22, 12, 0, 0, 6.28); c.fill(); if (sel === i) { c.strokeStyle = '#2b2140'; c.lineWidth = 4; c.stroke(); } });

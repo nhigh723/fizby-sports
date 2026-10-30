@@ -1,6 +1,10 @@
 // Everything is drawn in code on canvas: the mascot (on-model to brand/mascot-model-sheet.jpg), the demo hand, blocks, critters, scenes.
 export type Ctx = CanvasRenderingContext2D;
 export const W = 390, H = 844, INK = '#2b2140';
+/** Extra logical px visible beyond the 390x844 play area on each side (iPad / tall phones). Backgrounds paint the full bleed. */
+export const bleed = { x: 0, y: 0 };
+/** A full-width horizontal band from y to y+h; bands touching the top or bottom edge extend into the bleed. */
+export function band(c: CanvasRenderingContext2D, y: number, h: number) { const top = y <= 0 ? -bleed.y : y, bot = y + h >= H - 4 ? H + bleed.y : y + h; c.fillRect(-bleed.x, top, W + 2 * bleed.x, bot - top); }
 export const COLORS = ['#ff3b6b', '#ff9f1c', '#ffd60a', '#3ddc4a', '#1fb6ff', '#9b5cff', '#ff5fd2'];
 export function rr(c: Ctx, x: number, y: number, w: number, h: number, r: number) { r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
 export function shade(hex: string, k: number) { const n = parseInt(hex.slice(1), 16); let r = n >> 16, g = (n >> 8) & 255, b = n & 255;
@@ -126,10 +130,10 @@ export function critter(c: Ctx, kind: number, x: number, y: number, s: number, t
 // ---- scenes ----
 const cloud = (c: Ctx, x: number, y: number, r: number) => { c.beginPath(); c.arc(x, y, r, 0, 6.28); c.arc(x + r, y + r * 0.2, r * 0.8, 0, 6.28); c.arc(x - r, y + r * 0.25, r * 0.7, 0, 6.28); c.fill(); };
 export function sky(c: Ctx, top: string, bot: string, t: number, groundY: number, g1 = '#5fd83a', g2 = '#3fbf2c', sun = true) {
-  const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, top); g.addColorStop(1, bot); c.fillStyle = g; c.fillRect(0, 0, W, H);
+  const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, top); g.addColorStop(1, bot); c.fillStyle = g; band(c, 0, H);
   if (sun) { c.fillStyle = '#fff59a'; c.beginPath(); c.arc(320, 120, 46, 0, 6.28); c.fill(); c.fillStyle = '#ffd60a'; c.beginPath(); c.arc(320, 120, 34, 0, 6.28); c.fill(); }
-  c.fillStyle = 'rgba(255,255,255,0.95)'; for (let i = 0; i < 3; i++) cloud(c, ((i * 160 + t * 8) % (W + 160)) - 60, 90 + i * 55, 22 + i * 4);
-  c.fillStyle = g1; c.beginPath(); c.ellipse(80, groundY + 10, 260, 50, 0, 0, 6.28); c.fill(); c.fillStyle = g2; c.fillRect(0, groundY, W, H - groundY);
+  c.fillStyle = 'rgba(255,255,255,0.95)'; for (let i = 0; i < 3 + Math.ceil(bleed.x / 120); i++) cloud(c, ((i * 160 + t * 8) % (W + 160 + 2 * bleed.x)) - 60 - bleed.x, 90 + (i % 3) * 55, 22 + (i % 3) * 4);
+  c.fillStyle = g1; c.beginPath(); c.ellipse(80, groundY + 10, 260 + bleed.x, 50, 0, 0, 6.28); c.fill(); c.fillStyle = g2; band(c, groundY, H - groundY);
   c.fillStyle = 'rgba(255,255,255,0.18)'; for (let i = 0; i < 12; i++) c.fillRect((i * 67) % W, groundY + 20 + (i % 4) * 30, 18, 6);
 }
 export function confettiDraw(c: Ctx, ps: { x: number; y: number; vx: number; vy: number; r: number; col: string; life: number }[]) {

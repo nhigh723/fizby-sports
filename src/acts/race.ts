@@ -1,6 +1,6 @@
 // Racing: a go-kart in 3 lanes; tap the left or right side to change lanes. Grab stars, steer around cones. Teaches left/right, counting, colours.
 // L0 3 stars - L1 5 stars - L2 stars + cones - L3 count 5 stars with cones - L4 drive through the colour gate Fizby says. 5+: remixes.
-import { type Ctx, W } from '../art';
+import { type Ctx, W, band } from '../art';
 import { star } from '../sports';
 import { L, NUM, gateLine } from '../lines';
 import type { Activity, Api, Pt } from '../kit';
@@ -21,7 +21,7 @@ export function race(api: Api, level: number): Activity {
         if (t.kind === 'cone') { bonk = 0.8; api.sfx.boing(); api.say(L.cone, false); }
         if (t.kind === 'gate') { things.filter(o => o.kind === 'gate' && Math.abs(o.y - t.y) < 2).forEach(o => o.hit = true); if (t.col === want) { got++; api.sfx.cheer(); api.say(NUM[got - 1]); } else { api.sfx.wrong(); api.say(L.wrongGate); } } } }
       things = things.filter(t => t.y < 900); if (got >= need) { done = true; api.win(L.finish); } },
-    draw(c: Ctx) { const t = api.t(); c.fillStyle = '#3ddc4a'; c.fillRect(0, 0, W, 844); c.fillStyle = '#6a6080'; c.fillRect(55, 0, 280, 844);
+    draw(c: Ctx) { const t = api.t(); c.fillStyle = '#3ddc4a'; band(c, 0, 844); c.fillStyle = '#6a6080'; c.fillRect(55, 0, 280, 844);
       for (let y = -60 + (road % 60); y < 844; y += 60) { c.fillStyle = (Math.floor((y - road) / 60) % 2) ? '#ff3b6b' : '#fff'; c.fillRect(45, y, 10, 60); c.fillRect(335, y, 10, 60); c.fillStyle = '#fff'; c.fillRect(148, y, 6, 30); c.fillRect(238, y, 6, 30); }
       for (const o of things) { if (o.hit && o.kind !== 'cone') continue; const x = LANES[o.lane];
         if (o.kind === 'star') star(c, x, o.y, 22 + Math.sin(t * 6) * 2);

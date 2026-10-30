@@ -1,6 +1,6 @@
 // Tennis: a friendly pal hits the ball over the net; tap the ball when it reaches your glowing zone to hit it back. Teaches timing, tracking, counting the rally, left/right.
 // L0 slow, middle - L1 a bit faster, either side - L2 faster - L3 count a rally of 5 - L4 Fizby says which side it is coming to. 5+: remixes.
-import { type Ctx, W } from '../art';
+import { type Ctx, W, band } from '../art';
 import { ball, keeper } from '../sports';
 import { L, NUM } from '../lines';
 import type { Activity, Api, Pt } from '../kit';
@@ -17,7 +17,7 @@ export function tennis(api: Api, level: number): Activity {
         if (phase === 'in' && by > ZY1 + 40) { phase = 'miss'; wt = 1; api.say(L.tennisMiss, false); }
         if (phase === 'out' && by < 210) { phase = 'wait'; wt = 0.5; if (hits >= need) { done = true; api.win(L.rally); } } }
       else if (phase === 'miss') { wt -= dt; if (wt <= 0) { phase = 'wait'; wt = 0.6; } } void t; },
-    draw(c: Ctx) { const t = api.t(); c.fillStyle = '#1fb6ff'; c.fillRect(0, 0, W, 844); c.fillStyle = '#3ddc4a'; c.beginPath(); c.moveTo(70, 160); c.lineTo(320, 160); c.lineTo(375, 800); c.lineTo(15, 800); c.fill();
+    draw(c: Ctx) { const t = api.t(); c.fillStyle = '#1fb6ff'; band(c, 0, 844); c.fillStyle = '#3ddc4a'; c.beginPath(); c.moveTo(70, 160); c.lineTo(320, 160); c.lineTo(375, 800); c.lineTo(15, 800); c.fill();
       c.strokeStyle = '#fff'; c.lineWidth = 5; c.beginPath(); c.moveTo(70, 160); c.lineTo(320, 160); c.lineTo(375, 800); c.lineTo(15, 800); c.closePath(); c.moveTo(195, 160); c.lineTo(195, 800); c.stroke();
       keeper(c, px, 175, t, '#ff9f1c');
       c.fillStyle = 'rgba(255,255,255,0.85)'; c.fillRect(30, NET - 4, 330, 26); c.strokeStyle = '#2b2140'; c.lineWidth = 1; for (let x = 30; x < 360; x += 10) { c.beginPath(); c.moveTo(x, NET - 4); c.lineTo(x, NET + 22); c.stroke(); } c.fillStyle = '#fff'; c.fillRect(30, NET - 8, 330, 6);

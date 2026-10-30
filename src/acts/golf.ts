@@ -1,6 +1,6 @@
 // Mini-golf (top-down): pull back and let go to putt. Teaches force (pull more = rolls farther) and angles (bank shots off walls).
 // L0 short straight - L1 long diagonal - L2 block in the middle: bounce off the right wall - L3 bounce off the left wall - L4 small far hole + block. 2 holes per level. 5+: remixes.
-import { type Ctx, W, rr } from '../art';
+import { type Ctx, W, rr, band } from '../art';
 import { ball } from '../sports';
 import { L } from '../lines';
 import type { Activity, Api, Pt } from '../kit';
@@ -27,7 +27,7 @@ export function golf(api: Api, level: number, hockey = false): Activity {
         if (C.bar) { const [a, b, y] = C.bar; if (bx > a - BR && bx < b + BR && Math.abs(by - y) < 10 + BR) { if (Math.abs(by - y) > 10) { vy = -vy; by = y + Math.sign(by - y) * (10 + BR); } else { vx = -vx; } api.sfx.thud(); } }
         const d = Math.hypot(bx - C.h[0], by - C.h[1]); minD = Math.min(minD, d); if (d < C.hr - 4 + (hockey ? 10 : 0) + Math.min(18, tries * 6) && (hockey || Math.hypot(vx, vy) < 700)) { roll = false; sink = 0; bx = C.h[0]; by = C.h[1]; api.sfx.pop(); api.sfx.cheer(); api.burst(bx, by, 24); api.say(hockey ? L.goal : L.holeIn); return; } }
       if (!roll && sink < 0) { tries++; const far = Math.hypot(bx - C.b[0], by - C.b[1]) > Math.hypot(C.h[0] - C.b[0], C.h[1] - C.b[1]) + 40; api.say(far ? L.golfLess : minD < 80 ? L.golfMore : (C.bank ? L.golfBank : L.golfMore)); setTimeout(() => { if (!roll && sink < 0) reset(); }, 700); } },
-    draw(c: Ctx) { const t = api.t(); c.fillStyle = hockey ? '#1fb6ff' : '#ff9f1c'; c.fillRect(0, 0, W, 844); c.fillStyle = hockey ? '#e8f6ff' : '#5fd83a'; rr(c, X0, Y0, X1 - X0, Y1 - Y0, 20); c.fill();
+    draw(c: Ctx) { const t = api.t(); c.fillStyle = hockey ? '#1fb6ff' : '#ff9f1c'; band(c, 0, 844); c.fillStyle = hockey ? '#e8f6ff' : '#5fd83a'; rr(c, X0, Y0, X1 - X0, Y1 - Y0, 20); c.fill();
       c.strokeStyle = hockey ? '#ff3b6b' : '#fff'; c.lineWidth = 8; rr(c, X0, Y0, X1 - X0, Y1 - Y0, 20); c.stroke();
       if (C.bar) { const [a, b, y] = C.bar; c.fillStyle = hockey ? '#9b5cff' : '#b07a3a'; rr(c, a, y - 10, b - a, 20, 8); c.fill(); }
       if (C.bank && !roll && sink < 0) { const wx = C.bank > 0 ? X1 - 14 : X0 + 14, a = Math.sin(t * 5) * 0.5 + 0.5; c.globalAlpha = a; c.fillStyle = '#ffd60a'; c.beginPath(); c.arc(wx, (C.b[1] + C.h[1]) / 2 + 10, 12, 0, 6.28); c.fill(); c.globalAlpha = 1; }

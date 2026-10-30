@@ -1,6 +1,6 @@
 // Gymnastics: Fizby's gymnast pal shows a routine of moves; copy it by tapping the moves in the same order. Teaches memory, sequencing, shapes (star, ball, arrow up, split line), counting.
 // L0 one move - L1 two - L2 three - L3 three, quicker show - L4 four. 3 routines per level. 5+: remixes (3-5 moves).
-import { type Ctx, W, rr } from '../art';
+import { type Ctx, W, rr, band } from '../art';
 import { L } from '../lines';
 import type { Activity, Api, Pt } from '../kit';
 const MOVES = ['star', 'ball', 'arms', 'split'] as const; type Move = typeof MOVES[number];
@@ -32,7 +32,7 @@ export function gym(api: Api, level: number): Activity {
       if (wait > 0) { wait -= dt; if (wait <= 0) make(); return; }
       if (show >= 0) { st += dt; if (st < 0) return; const k = Math.floor(st / gap); if (k < seq.length) { if (k !== show || cur === null) { show = k; cur = seq[k]; api.sfx.pop(); api.say(NAME[cur]); } } else { show = -1; cur = null; api.say(L.gymYour); } }
       if (cheer >= 0) { cheer += dt; if (cheer > 1.4) { cheer = -1; routines++; if (routines >= need) { done = true; api.win(L.bravo); } else make(); } } },
-    draw(c: Ctx) { const t = api.t(); c.fillStyle = '#ff5fd2'; c.fillRect(0, 0, W, 844); c.fillStyle = '#9b5cff'; rr(c, 20, 470, W - 40, 180, 30); c.fill(); c.fillStyle = '#ffd6f4'; c.fillRect(0, 600, W, 40);
+    draw(c: Ctx) { const t = api.t(); c.fillStyle = '#ff5fd2'; band(c, 0, 844); c.fillStyle = '#9b5cff'; rr(c, 20, 470, W - 40, 180, 30); c.fill(); c.fillStyle = '#ffd6f4'; band(c, 600, 40);
       c.fillStyle = '#fff'; rr(c, 90, 140, 210, 230, 24); c.fill(); gymnast(c, 195, 290, show >= 0 ? cur : null, t, '#ff9f1c'); // the pal shows
       gymnast(c, 195, 560, pose > 0 ? cur : cheer >= 0 ? 'star' : null, t, '#ff5fd2'); // you copy
       for (let i = 0; i < seq.length; i++) { const x = W / 2 + (i - (seq.length - 1) / 2) * 50, on = i < idx; c.fillStyle = on ? COL[seq[i]] : 'rgba(255,255,255,0.4)'; c.beginPath(); c.arc(x, 410, 18, 0, 6.28); c.fill(); if (on) icon(c, seq[i], x, 410, 0.6); }

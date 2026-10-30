@@ -1,6 +1,6 @@
 // Swimming: tap the arm buttons to swim to the far wall. Teaches left/right and taking turns (alternating), counting strokes.
 // L0 any arm - L1 take turns left/right - L2 longer pool, take turns - L3 Fizby calls "Left!"/"Right!" - L4 count the buoys as you pass. 5+: remixes.
-import { type Ctx, W } from '../art';
+import { type Ctx, W, band } from '../art';
 import { L, NUM } from '../lines';
 import type { Activity, Api, Pt } from '../kit';
 const LB = { x: 90, y: 760 }, RB = { x: 300, y: 760 }, TOP = 170, BOT = 640;
@@ -12,7 +12,7 @@ export function swim(api: Api, level: number): Activity {
   return {
     intro: mode === 0 ? L.swimGo : mode === 2 ? L.swimGo : L.swimAlt,
     update(dt) { y += (ty - y) * Math.min(1, dt * 6); arm = Math.max(0, arm - dt * 3); duckY = Math.max(TOP + 40, duckY - dt * 12); if (!done && n >= strokes && Math.abs(y - ty) < 4) { done = true; api.win(L.splash); } },
-    draw(c: Ctx) { const t = api.t(); c.fillStyle = '#e8f6ff'; c.fillRect(0, 0, W, 844); c.fillStyle = '#22d3ee'; c.fillRect(40, TOP - 40, W - 80, BOT - TOP + 90);
+    draw(c: Ctx) { const t = api.t(); c.fillStyle = '#e8f6ff'; band(c, 0, 844); c.fillStyle = '#22d3ee'; c.fillRect(40, TOP - 40, W - 80, BOT - TOP + 90);
       for (let i = 0; i < 6; i++) { c.strokeStyle = 'rgba(255,255,255,0.4)'; c.lineWidth = 3; c.beginPath(); for (let x = 40; x < W - 40; x += 10) c.lineTo(x, TOP + i * 90 + Math.sin(x / 20 + t * 3 + i) * 4); c.stroke(); }
       for (const lx of [130, 260]) for (let yy = TOP - 30; yy < BOT + 40; yy += 22) { c.fillStyle = (yy / 22) % 2 < 1 ? '#ff3b6b' : '#fff'; c.beginPath(); c.arc(lx, yy, 7, 0, 6.28); c.fill(); }
       c.fillStyle = '#ffd60a'; c.fillRect(40, TOP - 46, W - 80, 10);

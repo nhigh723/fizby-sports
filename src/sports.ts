@@ -1,6 +1,6 @@
 // Fizby Sports art, all drawn in code (original designs): balls, goal, hoop, pins, the keeper pal, trophies, stickers, fields.
 import { kid, setKitCtx, type KidLook } from './fkit';
-import { type Ctx, rr, shade, W } from './art';
+import { type Ctx, rr, shade, W, band } from './art';
 export type BallKind = 'soccer' | 'basket' | 'bowl' | 'tee' | 'swim' | 'golf' | 'tennis' | 'race' | 'hockey' | 'gym' | 'paint';
 /** hub order: the icon for each sport (stickers and trophies use it too) */
 export const KINDS: BallKind[] = ['soccer', 'basket', 'bowl', 'tee', 'swim', 'golf', 'tennis', 'race', 'hockey', 'gym', 'paint'];
@@ -25,7 +25,7 @@ export function ball(c: Ctx, kind: BallKind, x: number, y: number, r: number, ro
   if (kind === 'paint') { c.fillStyle = '#ffe0b0'; c.beginPath(); c.ellipse(0, 0, r, r * 0.82, 0, 0, 6.28); c.fill(); ['#ff3b6b', '#1fb6ff', '#3ddc4a', '#ffd60a'].forEach((col, k) => { c.fillStyle = col; c.beginPath(); c.arc(Math.cos(-2.4 + k * 0.9) * r * 0.55, Math.sin(-2.4 + k * 0.9) * r * 0.5, r * 0.2, 0, 6.28); c.fill(); }); c.fillStyle = '#fff'; c.beginPath(); c.arc(r * 0.35, r * 0.3, r * 0.17, 0, 6.28); c.fill(); }
   c.fillStyle = 'rgba(255,255,255,0.45)'; c.beginPath(); c.ellipse(-r * 0.38, -r * 0.45, r * 0.25, r * 0.14, -0.6, 0, 6.28); c.fill(); c.restore();
 }
-export function field(c: Ctx, top: number, col = '#3ddc4a') { for (let i = 0; i * 60 < 900; i++) { c.fillStyle = i % 2 ? col : shade(col, -0.08); c.fillRect(0, top + i * 60, W, 60); } }
+export function field(c: Ctx, top: number, col = '#3ddc4a') { for (let i = 0; i * 60 < 900; i++) { c.fillStyle = i % 2 ? col : shade(col, -0.08); band(c, top + i * 60, 60); } }
 export function goal(c: Ctx, x: number, y: number, w: number, h = 110, col = '#ffffff') {
   c.save(); c.fillStyle = 'rgba(255,255,255,0.25)'; c.fillRect(x - w / 2, y - h, w, h); c.strokeStyle = 'rgba(255,255,255,0.7)'; c.lineWidth = 2;
   for (let gx = x - w / 2; gx <= x + w / 2; gx += 16) { c.beginPath(); c.moveTo(gx, y - h); c.lineTo(gx, y); c.stroke(); } for (let gy = y - h; gy <= y; gy += 16) { c.beginPath(); c.moveTo(x - w / 2, gy); c.lineTo(x + w / 2, gy); c.stroke(); }
