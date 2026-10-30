@@ -35,3 +35,8 @@ Source: /workspace/fs-qa-independent/REPORT.md. Newest first.
 ## QA round 2: update (Oct 30, 2026 ~10:30 EDT)
 - B1 root cause: the box itself freezes. The host-stall monitor (/workspace/fs-logs/lagmon.mjs, a plain Node 100 ms timer) logged gaps of 80 s, 332 s, 86 s, 99 s and 67 s (lagmon.log). Over the same windows the page shows frame gaps with no long JS task (__snap.perf). Bowl, paint and tee "stalls" happen only inside these windows. Once the box is frozen past the timeout, the game's own real-time watchdog restarted turns, which made more noise. That watchdog is removed. What remains is a game-time detector (logs only), and play-all fails if it ever triggers.
 - play-all now budgets each level in game time. Full run: 110 ok / 0 FAIL, 0 detector hits (fs-logs/qa-final2/full-1.log).
+
+## 2026-10-30 ~12:50 EDT: final verification
+- Parity screenshots regenerated (screenshots/parity, 26 shots, no page errors).
+- Live qa (game-time budget, qa-evidence/qa-gt.mjs): iPhone 78/78 levels ok, iPad 78/78 levels ok, 0 FAIL, 0 STUCK. The real-time qa.mjs FAILs line up with host freezes recorded by lagmon (B1).
+- Found and fixed a real bug: the parent gate hold counted frames, not time, so it never completed on iPad (BUGS.md #15). Deployed as fs5-0c3f9b3d4c.
