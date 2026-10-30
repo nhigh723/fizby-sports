@@ -1,8 +1,8 @@
 // Audio: music plays (hub loop on the hub, sports loop in a game), recorded narration never overlaps even when lines are spammed, no errors.
 import { chromium } from 'playwright-core';
 const URL = process.env.URL || 'http://localhost:4182/';
-const b = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--autoplay-policy=no-user-gesture-required'] }); const page = await (await b.newContext({ viewport: { width: 390, height: 844 } })).newPage();
-const errors = []; page.on('pageerror', e => errors.push(e.message)); page.on('console', m => m.type() === 'error' && errors.push(m.text())); let fails = 0; const ok = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') + m); if (!c) fails++; };
+const b = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--autoplay-policy=no-user-gesture-required'] }); const bctx = await b.newContext({ viewport: { width: 390, height: 844 } }); const page = await bctx.newPage(); bctx.on('response', r => r.status() >= 400 && errors.push(r.status() + ' ' + r.url()));
+const errors = []; page.on('pageerror', e => errors.push(e.message)); page.on('console', m => m.type() === 'error' && errors.push(m.text())); page.on('response', r => r.status() >= 400 && errors.push(r.status() + ' ' + r.url())); let fails = 0; const ok = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') + m); if (!c) fails++; };
 await page.goto(URL); await page.evaluate(() => localStorage.clear()); await page.reload(); await page.waitForTimeout(800);
 const S = (f, a) => page.evaluate(f, a), W = ms => page.waitForTimeout(ms);
 const p = await page.evaluate(() => window.__snap.toScreen(195, 760)); await page.mouse.click(p.x, p.y); await W(4000);
