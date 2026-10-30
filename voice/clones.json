@@ -629,6 +629,24 @@
 "text": "Right!",
 "trimmed_sim": 0.76
 },
+"1lpgo4l": {
+"check": {
+"bad": [],
+"edge_in": -22.3,
+"edge_out": -33.7,
+"heard": "Catch the ball!",
+"islands": 1,
+"lead": 55,
+"lufs": -16.44,
+"trail": 55
+},
+"heard": "Catch the ball!",
+"padded": true,
+"sim": 0.95,
+"take": "1lpgo4l~1",
+"text": "Catch the ball!",
+"trimmed_sim": 0.848
+},
 "1lpwhbc": {
 "check": {
 "bad": [],
@@ -1565,6 +1583,24 @@
 "text": "Gymnastics!",
 "trimmed_sim": 0.849
 },
+"fahep8": {
+"check": {
+"bad": [],
+"edge_in": -16.7,
+"edge_out": -38.4,
+"heard": "Wait for the green light!",
+"islands": 1,
+"lead": 55,
+"lufs": -16.43,
+"trail": 55
+},
+"heard": "Wait for the green light!",
+"padded": true,
+"sim": 0.945,
+"take": "fahep8~1",
+"text": "Wait for the green light!",
+"trimmed_sim": 0.89
+},
 "fy356f": {
 "check": {
 "bad": [],
@@ -1690,6 +1726,24 @@
 "take": "hjdyqh~0",
 "text": "Shoot in the purple hoop!",
 "trimmed_sim": 0.874
+},
+"ijm7to": {
+"check": {
+"bad": [],
+"edge_in": -15.8,
+"edge_out": -35.7,
+"heard": "Go dive in!",
+"islands": 2,
+"lead": 50,
+"lufs": -16.39,
+"trail": 50
+},
+"heard": "Go dive in!",
+"padded": true,
+"sim": 0.954,
+"take": "ijm7to~3",
+"text": "Go! Dive in!",
+"trimmed_sim": 0.885
 },
 "ja9w4k": {
 "check": {
@@ -2213,6 +2267,24 @@
 "text": "Now shoot!",
 "trimmed_sim": 0.823
 },
+"y0spqi": {
+"check": {
+"bad": [],
+"edge_in": -37.2,
+"edge_out": -35.3,
+"heard": "Hit it to the bucket!",
+"islands": 1,
+"lead": 55,
+"lufs": -16.68,
+"trail": 55
+},
+"heard": "Hit it to the bucket.",
+"padded": true,
+"sim": 0.92,
+"take": "y0spqi~2",
+"text": "Hit it to the bucket!",
+"trimmed_sim": 0.849
+},
 "yjzuyw": {
 "check": {
 "bad": [],
@@ -2374,5 +2446,23 @@
 "take": "zmxy5n~1",
 "text": "You are a champion!",
 "trimmed_sim": 0.876
+},
+"zwtc2k": {
+"check": {
+"bad": [],
+"edge_in": -34.6,
+"edge_out": -34.1,
+"heard": "How many pins fell down?",
+"islands": 1,
+"lead": 50,
+"lufs": -16.51,
+"trail": 60
+},
+"heard": "How many pins fell down?",
+"padded": true,
+"sim": 0.943,
+"take": "zwtc2k~3",
+"text": "How many pins fell down?",
+"trimmed_sim": 0.832
 }
 }

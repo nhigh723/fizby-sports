@@ -44,14 +44,19 @@ const SKILLS: Record<string, string[]> = { soccer: ['Aiming (direction)', 'Count
 // ---- state ----
 type Screen = 'title' | 'setup' | 'hub' | 'play' | 'town' | 'parents';
 let newSticker = -1, freeRemix = false;
+const slow = { ms: 0, what: '' };
 let screen: Screen = 'title', T = 0, actI = 0, level = 0, act: Activity | null = null, winT = -1, winLine = '', idle = 0, demo: { a: Action; t: number } | null = null, demoShown = new Set<string>();
 let modal: null | { kind: 'gate' } | { kind: 'unlock'; sport: number; t: number } = null, shake = 0, mascotPose: Mood = 'stand', mascotPoseT = 0, lockWiggle = -1, lockT = 0, townX = 0, townDrag: { x: number; sx: number; moved: boolean } | null = null;
 const parts: { x: number; y: number; vx: number; vy: number; r: number; col: string; life: number }[] = [];
 function burst(x: number, y: number, n = 20, cols: string[] = COLORS) { for (let i = 0; i < n && parts.length < 400; i++) { const a = Math.random() * 6.28, s = 120 + Math.random() * 380; parts.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 200, r: 4 + Math.random() * 5, col: cols[i % cols.length], life: 1.2 + Math.random() * 0.6 }); } }
 /** force: a fresh line drops whatever is queued (the current sentence still finishes); otherwise it is skipped while Fizby talks */
-function say(text: string, force = true) { if (!text) return; if (!force && isSpeaking()) return; if (force) stopVoice(false); voiceSay(text); }
+function say(text: string, force = true) { const t0 = performance.now(); sayRaw(text, force); const d = performance.now() - t0; if (d > slow.ms) { slow.ms = Math.round(d); slow.what = 'say ' + text.slice(0, 30); } }
+function sayRaw(text: string, force = true) { if (!text) return; if (!force && isSpeaking()) return; if (force) stopVoice(false); voiceSay(text); }
 let misses = 0, winStars = 0; const pops: { x: number; y: number; t: number }[] = [];
 const sfxApi = { ...sfx, wrong: () => { sfx.wrong(); misses++; mascotPose = 'oops'; mascotPoseT = 1.4; } };
+/** stall diagnostics: the slowest single call into audio/voice (name and ms) */
+const timed = <F extends (...a: any[]) => any>(name: string, f: F): F => ((...a: any[]) => { const t0 = performance.now(); try { return f(...a); } finally { const d = performance.now() - t0; if (d > slow.ms) { slow.ms = Math.round(d); slow.what = name + ' ' + String(a[0] ?? '').slice(0, 30); } } }) as F;
+for (const k of Object.keys(sfx)) (sfx as any)[k] = timed('sfx.' + k, (sfx as any)[k]);
 const api: Api = {
   say, sfx: sfxApi, burst: (x: number, y: number, n?: number, cols?: string[]) => { burst(x, y, n, cols); if (winT < 0 && pops.length < 6) pops.push({ x, y, t: 0 }); }, t: () => T, shake: (a) => { shake = Math.max(shake, a); },
   win(line: string) { if (winT >= 0 || !act) return; winT = 0; winLine = line; winStars = misses === 0 ? 3 : misses <= 2 ? 2 : 1; { const k = actI + ':' + level, st = save.stars || (save.stars = {}); st[k] = Math.max(st[k] || 0, winStars); } sfx.cheer(); burst(195, 300, 60); say(line); voiceSay(FACT[actI]); if (isBig()) { sfx.crowd(); burst(100, 200, 40, ['#ffd60a', '#fff']); burst(290, 200, 40, ['#ffd60a', '#fff']); } mascotPose = 'cheer'; mascotPoseT = 3; credit(); },
@@ -313,7 +318,8 @@ let raf = 0, lastTick = performance.now(), stalls = 0;
 setInterval(() => { if (!document.hidden && performance.now() - lastTick > 400) { stalls++; if (raf) cancelAnimationFrame(raf); raf = 0; frame(performance.now()); } }, 250);
 let lastHeal: unknown = null, maxFrame = 0, maxFrameAt = '', maxTask = 0;
 try { new PerformanceObserver(l => { for (const e of l.getEntries()) maxTask = Math.max(maxTask, e.duration); }).observe({ entryTypes: ['longtask'] }); } catch { /* not supported */ }
-function frame(now: number) { const f0 = performance.now(); try { frameBody(now); } finally { const d = performance.now() - f0; if (d > maxFrame) { maxFrame = d; maxFrameAt = screen + ':' + actI + ':' + level; } } }
+let prevF = 0, maxGap = 0, maxGapAt = ''; const gaps: string[] = [];
+function frame(now: number) { const f0 = performance.now(); if (prevF && f0 - prevF > 1000) { const g = Math.round(f0 - prevF); gaps.push(g + 'ms@' + screen + ':' + actI + ':' + level + (modal ? ':' + modal.kind : '') + (winT >= 0 ? ':win' : '')); if (gaps.length > 12) gaps.shift(); if (g > maxGap) { maxGap = g; maxGapAt = gaps[gaps.length - 1]; } } prevF = f0; try { frameBody(now); } finally { const d = performance.now() - f0; if (d > maxFrame) { maxFrame = d; maxFrameAt = screen + ':' + actI + ':' + level; } } }
 function frameBody(now: number) {
   raf = 0; lastTick = performance.now(); if (now < last) now = last;
   const dt = Math.min(0.25, (now - last) / 1000); last = now; /* slow/starved frames still advance real time (physics runs in 1/120 s substeps) */ T += dt; if (!raf) raf = requestAnimationFrame(frame);
@@ -369,7 +375,7 @@ function renderArt(kind: 'icon' | 'splash') {
 }
 (window as any).__snap = { renderArt,
   get screen() { return screen; }, get audio() { return { ...audioStats, track: audioStats.track, ctx: audioStats.ctx }; }, get winStars() { return winStars; }, get hintDelay() { return hintCfg.delay; }, get slack() { return tune.slack; }, get kid() { return profiles().cur; }, get act() { return actI; }, get level() { return level; }, get winT() { return winT; }, get modal() { return modal ? modal.kind : null; }, levels: ACTS.map(a => a.levels), get freeRemix() { return freeRemix; }, get demo() { return demo ? demo.a : null; },
-  buttons: () => btns.map(b => ({ id: b.id, x: b.x, y: b.y, w: b.w, h: b.h })), next: () => act?.next() ?? null, busy: () => !!intro || !!poke || !!act?.busy?.(), get heals() { return heals; }, get inp() { return { ...inp, pointerId, screenAgo: Math.round(performance.now() - screenAt) }; }, get lastHeal() { return lastHeal; }, get actDbg() { return act?.dbg?.() ?? null; }, get perf() { return { maxFrame: Math.round(maxFrame), maxFrameAt, maxTask: Math.round(maxTask) }; }, get busyT() { return busyT ? performance.now() - busyT : 0; }, get dbg() { return { screen, act: !!act, winT, modal: !!modal, poke: !!poke, intro: !!intro, ab: !!act?.busy?.() }; }, get stalls() { return stalls; }, get T() { return T; }, get intro() { return !!intro; }, get onboard() { return onboard; },
+  buttons: () => btns.map(b => ({ id: b.id, x: b.x, y: b.y, w: b.w, h: b.h })), next: () => act?.next() ?? null, busy: () => !!intro || !!poke || !!act?.busy?.(), get heals() { return heals; }, get inp() { return { ...inp, pointerId, screenAgo: Math.round(performance.now() - screenAt) }; }, get lastHeal() { return lastHeal; }, get actDbg() { return act?.dbg?.() ?? null; }, get perf() { return { maxFrame: Math.round(maxFrame), maxFrameAt, maxTask: Math.round(maxTask), maxGap, maxGapAt, gaps, slow }; }, get busyT() { return busyT ? performance.now() - busyT : 0; }, get dbg() { return { screen, act: !!act, winT, modal: !!modal, poke: !!poke, intro: !!intro, ab: !!act?.busy?.() }; }, get stalls() { return stalls; }, get T() { return T; }, get intro() { return !!intro; }, get onboard() { return onboard; },
   toScreen: (x: number, y: number) => { const r = cv.getBoundingClientRect(); return { x: r.left + (ox + x * scale) / dpr, y: r.top + (oy + y * scale) / dpr }; },
   start: (i: number, l: number) => start(i, l), go, save: () => JSON.parse(JSON.stringify(save)), setSave: (s: Save) => { save = s; persist(); }, closeModal: () => { modal = null; afterWin(); },
   store: () => ({ club: hasClub(), sim: store.sim, msg: store.msg }), storeTest, products: PRODUCTS, lines: allLines, lineId, missing: () => [...missing], get gate() { return { ...gate }; },
