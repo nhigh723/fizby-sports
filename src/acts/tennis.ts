@@ -25,10 +25,10 @@ export function tennis(api: Api, level: number): Activity {
       if (phase !== 'wait') { const s = 0.7 + (by - 200) / 600; c.fillStyle = 'rgba(0,0,0,0.2)'; c.beginPath(); c.ellipse(bx, by + 4, 12 * s, 5 * s, 0, 0, 6.28); c.fill(); ball(c, 'tennis', bx, by - z, 14 * s, t * 8); }
       c.save(); c.translate(phase === 'out' || swing ? bx : 195, 760); c.rotate(-0.4 + swing * 1.2); c.strokeStyle = '#ff3b6b'; c.lineWidth = 8; c.beginPath(); c.ellipse(0, -40, 26, 32, 0, 0, 6.28); c.stroke(); c.fillStyle = '#2b2140'; c.fillRect(-5, -8, 10, 44); c.restore();
       for (let i = 0; i < need; i++) { c.globalAlpha = i < hits ? 1 : 0.35; ball(c, 'tennis', W / 2 + (i - (need - 1) / 2) * 36, 824, 11); c.globalAlpha = 1; } },
-    down(p: Pt) { if (done || phase !== 'in') return; if (by < ZY0 - 40 || Math.hypot(p.x - bx, p.y - (by - z)) > 90) return;
+    down(p: Pt) { if (done || phase !== 'in') return; if (by < ZY0 - 110 || Math.hypot(p.x - bx, p.y - (by - z)) > 100) return; // generous early window: little kids swing early
       hits++; swing = 1; phase = 'out'; tx = 90 + rnd() * 210; const T = (by - 200) / (speed * 0.9); vx = (tx - bx) / T; vy = -speed * 0.9; api.sfx.pop(); api.burst(bx, by, 10); api.say(level === 3 ? NUM[hits - 1] : [L.yes, L.great, L.point][hits % 3]); },
     move() { /* */ }, up() { /* */ },
-    next() { if (done) return null; if (phase === 'in' && by > ZY0 - 30) return { type: 'tap', x: bx + vx * 0.08, y: by - z + vy * 0.08 }; return { type: 'wait', ms: 30 }; },
+    next() { if (done) return null; if (phase === 'in' && by > ZY0 - 100) return { type: 'tap', x: bx + vx * 0.08, y: by - z + vy * 0.08 }; return { type: 'wait', ms: 30 }; },
     busy: () => done || phase === 'out' || phase === 'miss',
   };
 }

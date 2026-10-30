@@ -431,6 +431,24 @@
 "text": "Hockey!",
 "trimmed_sim": 0.75
 },
+"1efno5z": {
+"check": {
+"bad": [],
+"edge_in": -31.7,
+"edge_out": -34.5,
+"heard": "green",
+"islands": 1,
+"lead": 50,
+"lufs": -16.42,
+"trail": 50
+},
+"heard": "green",
+"padded": true,
+"sim": 0.934,
+"take": "1efno5z~5",
+"text": "Green!",
+"trimmed_sim": 0.719
+},
 "1eh1rly": {
 "check": {
 "bad": [],
@@ -448,6 +466,24 @@
 "take": "1eh1rly~2",
 "text": "Put your arms up high!",
 "trimmed_sim": 0.871
+},
+"1fo222q": {
+"check": {
+"bad": [],
+"edge_in": -25.3,
+"edge_out": -31.9,
+"heard": "Yellow!",
+"islands": 1,
+"lead": 55,
+"lufs": -16.43,
+"trail": 50
+},
+"heard": "Yellow!",
+"padded": true,
+"sim": 0.939,
+"take": "1fo222q~5",
+"text": "Yellow!",
+"trimmed_sim": 0.728
 },
 "1fz1tgo": {
 "check": {
@@ -682,6 +718,24 @@
 "take": "1muej46~1",
 "text": "Tap left or right to steer! Grab the stars!",
 "trimmed_sim": 0.907
+},
+"1ndi1s2": {
+"check": {
+"bad": [],
+"edge_in": -17.4,
+"edge_out": -37.7,
+"heard": "Orange",
+"islands": 1,
+"lead": 55,
+"lufs": -16.31,
+"trail": 55
+},
+"heard": "Orange",
+"padded": true,
+"sim": 0.931,
+"take": "1ndi1s2~3",
+"text": "Orange!",
+"trimmed_sim": 0.743
 },
 "1nx8xk1": {
 "check": {
@@ -1097,6 +1151,24 @@
 "text": "Ball!",
 "trimmed_sim": 0.717
 },
+"3kuyb2": {
+"check": {
+"bad": [],
+"edge_in": -31.4,
+"edge_out": -29.3,
+"heard": "Blue!",
+"islands": 1,
+"lead": 55,
+"lufs": -16.45,
+"trail": 60
+},
+"heard": "Blue!",
+"padded": true,
+"sim": 0.968,
+"take": "3kuyb2~1",
+"text": "Blue!",
+"trimmed_sim": 0.743
+},
 "3nmc7k": {
 "check": {
 "bad": [],
@@ -1186,6 +1258,24 @@
 "take": "3t9hzk~1",
 "text": "Nine!",
 "trimmed_sim": 0.76
+},
+"3uoc9k": {
+"check": {
+"bad": [],
+"edge_in": -19.1,
+"edge_out": -36.4,
+"heard": "pink",
+"islands": 1,
+"lead": 50,
+"lufs": -16.35,
+"trail": 45
+},
+"heard": "pink?",
+"padded": true,
+"sim": 0.945,
+"take": "3uoc9k~1",
+"text": "Pink!",
+"trimmed_sim": 0.702
 },
 "3vt1dr": {
 "check": {
@@ -1348,6 +1438,24 @@
 "take": "b5j23u~1",
 "text": "Hit it to the right!",
 "trimmed_sim": 0.854
+},
+"bz8try": {
+"check": {
+"bad": [],
+"edge_in": -27.5,
+"edge_out": -36.3,
+"heard": "Purple!",
+"islands": 1,
+"lead": 50,
+"lufs": -16.42,
+"trail": 50
+},
+"heard": "Purple!",
+"padded": true,
+"sim": 0.944,
+"take": "bz8try~5",
+"text": "Purple!",
+"trimmed_sim": 0.759
 },
 "bzb8st": {
 "check": {
@@ -1583,6 +1691,24 @@
 "text": "Watch me first, then copy my moves!",
 "trimmed_sim": 0.891
 },
+"jk9lnx": {
+"check": {
+"bad": [],
+"edge_in": -24.3,
+"edge_out": -31.9,
+"heard": "Batter up!",
+"islands": 1,
+"lead": 55,
+"lufs": -16.42,
+"trail": 65
+},
+"heard": "Batter up!",
+"padded": true,
+"sim": 0.951,
+"take": "jk9lnx~0",
+"text": "Batter up!",
+"trimmed_sim": 0.794
+},
 "ku1bwh": {
 "check": {
 "bad": [],
@@ -1798,6 +1924,24 @@
 "take": "pjmgfj~2",
 "text": "The wall can help you!",
 "trimmed_sim": 0.855
+},
+"puv4gr": {
+"check": {
+"bad": [],
+"edge_in": -14.9,
+"edge_out": -33.6,
+"heard": "Basketball!",
+"islands": 1,
+"lead": 50,
+"lufs": -16.41,
+"trail": 45
+},
+"heard": "Basketball!",
+"padded": true,
+"sim": 0.928,
+"take": "puv4gr~5",
+"text": "Basketball!",
+"trimmed_sim": 0.847
 },
 "pym5rj": {
 "check": {
@@ -2050,6 +2194,24 @@
 "take": "yjzuyw~0",
 "text": "One!",
 "trimmed_sim": 0.772
+},
+"yk1ykh": {
+"check": {
+"bad": [],
+"edge_in": -19.3,
+"edge_out": -34.0,
+"heard": "Red!",
+"islands": 1,
+"lead": 60,
+"lufs": -16.4,
+"trail": 60
+},
+"heard": "Red!",
+"padded": true,
+"sim": 0.952,
+"take": "yk1ykh~1",
+"text": "Red!",
+"trimmed_sim": 0.727
 },
 "yk2u62": {
 "check": {
