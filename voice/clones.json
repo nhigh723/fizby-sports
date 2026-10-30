@@ -935,6 +935,24 @@
 "text": "Left arm, right arm! Take turns!",
 "trimmed_sim": 0.88
 },
+"1tx8xe1": {
+"check": {
+"bad": [],
+"edge_in": -38.9,
+"edge_out": -34.6,
+"heard": "Who is playing? Pick your ball and how old you are.",
+"islands": 2,
+"lead": 60,
+"lufs": -16.44,
+"trail": 60
+},
+"heard": "Who is playing? Pick your ball and how old you are.",
+"padded": true,
+"sim": 0.948,
+"take": "1tx8xe1~1",
+"text": "Who is playing? Pick your ball and how old you are!",
+"trimmed_sim": 0.92
+},
 "1u6brdw": {
 "check": {
 "bad": [],
@@ -1402,6 +1420,24 @@
 "take": "9ej7f5~1",
 "text": "Swimming!",
 "trimmed_sim": 0.763
+},
+"aond6j": {
+"check": {
+"bad": [],
+"edge_in": -35.5,
+"edge_out": -34.7,
+"heard": "Handstand!",
+"islands": 1,
+"lead": 50,
+"lufs": -16.38,
+"trail": 60
+},
+"heard": "Handstand!",
+"padded": true,
+"sim": 0.936,
+"take": "aond6j~2",
+"text": "Handstand!",
+"trimmed_sim": 0.836
 },
 "avug20": {
 "check": {
