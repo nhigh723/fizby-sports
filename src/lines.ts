@@ -5,11 +5,12 @@ export const NAMED = { title: `Hi! I'm ${MASCOT_NAME}. Let's play sports!` };
 export const NAMED_LINES = Object.values(NAMED);
 export const NUM = ['One!', 'Two!', 'Three!', 'Four!', 'Five!', 'Six!', 'Seven!', 'Eight!', 'Nine!', 'Ten!'];
 export const COLOR_NAME: Record<string, string> = { '#ff3b6b': 'red', '#1fb6ff': 'blue', '#ffd60a': 'yellow', '#3ddc4a': 'green', '#ff9f1c': 'orange', '#9b5cff': 'purple', '#ff5fd2': 'pink' };
-export const SPORT_NAME = ['Soccer!', 'Basketball!', 'Bowling!', 'Let us play tee-ball!', 'Swimming!', 'Mini-golf!', 'Tennis!', 'Racing!', 'Hockey!', 'Gymnastics!', 'Let us do some painting!'];
+export const SPORT_NAME = ['Soccer!', 'Basketball!', 'Bowling!', 'Batter up!', 'Swimming!', 'Mini-golf!', 'Tennis!', 'Racing!', 'Hockey!', 'Gymnastics!', 'Let us do some painting!'];
 /** Teaching moment after a win (F&L learn.ts style): Fizby names what the child practised. One per sport. */
 export const FACT = ['You kicked with your feet!', 'Soft or hard, you found it!', 'Ten pins! You counted them!', 'Watch, wait, then hit!', 'Left, right, left, right!',
   'The wall can help you!', 'You watched the ball!', 'You steered left and right!', 'Pass, then shoot!', 'You remembered every move!', 'Lovely colors!'];
-export const colorLine = (col: string) => `Find the ${COLOR_NAME[col]} one!`;
+/** Paint: Fizby names the colour to find (single colour words come from the shared Fizby voice library). */
+export const colorLine = (col: string) => `${COLOR_NAME[col][0].toUpperCase()}${COLOR_NAME[col].slice(1)}!`;
 export const gateLine = (col: string) => `Drive through the ${COLOR_NAME[col]} gate!`;
 export const hoopLine = (col: string) => `Shoot in the ${COLOR_NAME[col]} hoop!`;
 export const L = {

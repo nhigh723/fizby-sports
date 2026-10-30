@@ -1,12 +1,7 @@
 {
- "voiced": 118,
+ "voiced": 123,
  "total": 124,
  "silent": [
-  "Let us play tee-ball!",
-  "Find the red one!",
-  "Find the blue one!",
-  "Find the green one!",
-  "Find the orange one!",
-  "Find the purple one!"
+  "Batter up!"
  ]
 }
