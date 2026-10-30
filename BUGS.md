@@ -11,3 +11,7 @@ Open: **0**
 | 5 | Racing and Mini-golf were flaky under heavy CPU load. Big frame steps changed how far a putt rolled, and the kart missed stars it was steering into. | play-all under load | `src/main.ts` runs activity physics in fixed 1/120 s substeps. Racing counts a star when the kart is moving into its lane. | Fixed |
 | 6 | Lines talked over each other (`say()` cancelled the line before). | audit row 3 | Shared recorded-voice queue. `tests/audio-check.mjs` checks at most 1 line sounds at once. | Fixed |
 | 7 | Clips for short lines failed the clone checks (padding or carrier words heard). | voice pass 3 | Reworded to slightly longer lines, then cloned again. Any line without a clip falls back to the device voice. `voice/coverage.json` lists them. | Fixed |
+| 8 | Bowling hard level (L5) was unwinnable at times. Off-centre 10-pin racks put the back pins outside the lane, so every roll at them went into the gutter. | play-all (reproduced 3/3 with `ONLY=2 LVL=5`) | The rack offset is limited so the whole rack stays inside the lane. The hint aims inside the lane. Hard level uses 2 racks. Now passes. | Fixed |
+| 9 | Tennis remix: the hit window was too tight (about 0.5 s). | play-all | The early window is wider (little kids swing early). | Fixed |
+| 10 | Racing: a stall seen once in a full run, no stars coming. Could not reproduce (3/3 passes alone). | play-all | Spawn watchdog: if nothing has spawned for 3 s, a new star appears anyway. | Fixed |
+

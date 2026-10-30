@@ -2,6 +2,7 @@
 
 Commits push after each chunk. Newest first.
 
+- 00:50 EDT. Found and fixed the real bowling L5 bug (BUGS #8). Racing watchdog added. Full play-all rerun.
 - 00:15 EDT. Voice 124/124. Tennis early window and bowling 2 racks fixed. Final play-all rerun (fs-logs/final/play-all.log); previous run green except bowling L5 (Gymnastics L4 passed).
 - 23:45 EDT. monkey ALL PASSED (fs-logs/final/monkey.log). Voice 123/124 (colours from shared library). Pass 3c (Batter up!) gating. Final play-all running.
 - 22:20 EDT. Steps 1-6 are committed. Voice pass 3b is running (`voice/pass3.sh`: 18 reworded or missing lines). The final play-all is running, log at `/workspace/fs-logs/final/play-all.log`. Fixed so far: Gymnastics stall, gate modal, favicon 404, golf near-miss loop, physics substeps. Investigating a Racing L0 flake.
