@@ -46,7 +46,7 @@ Neither app has haptics or accessibility features beyond the basics. Those rows 
 7. **Voice:** clone every new line and close the 23 missing ones, then publish an unvoiced-lines list (row 4).
 8. **Proof:** side-by-side screenshots in `screenshots/parity/`, then play-all, monkey, offline-check, deploy and live-check. Docs (row 28). Small haptics if approved (row 25).
 
-## Closure (Oct 29, 2026)
+## Closure (Oct 29-30, 2026): all 29 rows closed or at parity
 Every row below has been checked against F&L. Proof is in `screenshots/parity/`: each file shows F&L on the left and Sports on the right.
 
 | # | Gap | Status | How it was closed | Proof |
@@ -54,7 +54,7 @@ Every row below has been checked against F&L. Proof is in `screenshots/parity/`:
 | 1 | Character art | Closed | F&L 2D poses copied in as `public/art/fizby-*.webp`. `src/fizby2d.ts` draws them | 01, 02, 09 |
 | 2 | Mascot presence | Closed | Pose follows context: oops on a miss, think when idle over 12 s, cheer on a win, point on a hint, explain at rest | 06, 07, 14 |
 | 3 | Narration engine | Closed | `src/voicePlayback.ts` queue. Lines never overlap (audio-check: max 1 sounding at once) | `fs-logs/final/audio-check.log` |
-| 4 | Voice coverage | Closed | Shared Fizby phrase library merged in. Cloning passes 3 and 3b cover the new and missing lines. `voice/coverage.json` lists any line still silent, which falls back to the device voice | `voice/coverage.json` |
+| 4 | Voice coverage | Closed | **124/124 lines voiced.** Own cloned clips, plus colour words from the shared Fizby library. Device-voice fallback is no longer needed | `voice/coverage.json` |
 | 5 | Teaching prompts | Closed | A `FACT` teaching line per sport after each win, plus the counting and colour lines. See `docs/LEARNING-MAP.md` | 09 |
 | 6 | Music | Closed | F&L `hub.mp3` and `sports.mp3` loops, ducked under the voice. audio-check confirms the hub and sports tracks | audio-check |
 | 7 | SFX | Closed | All 85 F&L CC0 samples. Sports names map to them (crowd, bounce, kick, whistle, fanfare) | `docs/LICENSES.md` |
@@ -80,3 +80,16 @@ Every row below has been checked against F&L. Proof is in `screenshots/parity/`:
 | 27 | Offline | Closed | `docs/FAQ-OFFLINE.md`. offline-check passes | `fs-logs/final/offline-check.log` |
 | 28 | Docs | Closed | `docs/` DESIGN, LEARNING-MAP, NARRATION-HOOKS, FAQ-OFFLINE, LICENSES | |
 | 29 | Tests / Gymnastics stall | Closed | Gymnastics replay bug fixed (BUGS.md #1). Tests: play-all, monkey, offline-check, audio-check, profiles-check, parity-shots | `fs-logs/final/` |
+
+### Final verification (Oct 30, 2026, ~02:30 EDT, build `fs5-a51bf0525b`)
+All logs are in `/workspace/fs-logs/final/`:
+- `play-all.log`: every level of all 11 games plus 2 remixes each, UI, gate and purchase. ALL PASSED, EXIT 0. Includes Gymnastics L4.
+- `monkey.log`: ALL PASSED.
+- `audio-check.log`: music plays (hub and sports loops), narration never overlaps (max 1 line at once), zero console errors.
+- `offline-check.log`: passes.
+- `profiles-check.log`: passes.
+- `parity-shots.log`: 26 side-by-side pairs in `screenshots/parity/`.
+- Deployed with `scripts/deploy.sh`, then checked live:
+  - `live-check.log`
+  - `live-offline-check.log`
+  - `live-audio-check.log`

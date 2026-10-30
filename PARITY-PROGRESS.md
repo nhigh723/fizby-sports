@@ -1,4 +1,7 @@
-# Parity progress log (restart-safe)
+# Parity progress log
+
+**COMPLETE: Oct 30, 2026, ~02:30 EDT.** All steps 1-8 are done. PARITY-AUDIT.md is closed and BUGS.md has 0 open. Every test is green locally and live. Logs are in /workspace/fs-logs/final/.
+
 
 Commits push after each chunk. Newest first.
 
