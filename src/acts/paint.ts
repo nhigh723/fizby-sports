@@ -1,8 +1,10 @@
 // Sports Day Paint Studio: colour sports pictures. Pick a paint pot, tap a part to fill it. Teaches colour names, matching, fine motor.
+// L2+: when the picture is done, tap the 3 sparkle stamps onto it (counting 1-2-3).
 // L0 medal (match the dots) - L1 ball - L2 trophy - L3 jersey - L4 flag; Fizby names the colour to find. 5+: remixes (any picture, new colours).
 // Each level: when every part matches its dot, the picture is done (2 pictures per level).
 import { type Ctx, W, rr, band } from '../art';
-import { L, colorLine } from '../lines';
+import { L, colorLine, NUM } from '../lines';
+import { star } from '../sports';
 import type { Activity, Api, Pt } from '../kit';
 const PAL = ['#ff3b6b', '#ff9f1c', '#ffd60a', '#3ddc4a', '#1fb6ff', '#9b5cff', '#ff5fd2'];
 type Part = { path: Path2D; d: Pt; want: string; got: string | null };
@@ -33,8 +35,8 @@ const PICS: (() => Pic)[] = [
 const PICS_FLAG = pth(p => { p.moveTo(110, 170); p.bezierCurveTo(170, 140, 220, 210, 310, 175); p.lineTo(310, 285); p.bezierCurveTo(220, 320, 170, 250, 110, 280); p.closePath(); });
 let hc: CanvasRenderingContext2D | null = null;
 export function paint(api: Api, level: number): Activity {
-  const rnd = Math.random, need = 2; let pic = 0, deco: Pic['deco'] = () => {}, parts: Part[] = [], sel = -1, made = 0, done = false, cheer = -1;
-  const make = () => { pic = level >= 5 ? Math.floor(rnd() * PICS.length) : (level + made) % PICS.length; const pc = PICS[pic](); parts = pc.parts; deco = pc.deco; const cs = [...PAL].sort(() => rnd() - 0.5); parts.forEach((p, i) => p.want = cs[i % cs.length]); if (level === 4 || level >= 5) api.say(colorLine(parts[0].want)); };
+  const rnd = Math.random, need = 2; let stamps: Pt[] = [], stamped = 0, pic = 0, deco: Pic['deco'] = () => {}, parts: Part[] = [], sel = -1, made = 0, done = false, cheer = -1;
+  const make = () => { pic = level >= 5 ? Math.floor(rnd() * PICS.length) : (level + made) % PICS.length; const pc = PICS[pic](); parts = pc.parts; deco = pc.deco; stamps = []; stamped = 0; const cs = [...PAL].sort(() => rnd() - 0.5); parts.forEach((p, i) => p.want = cs[i % cs.length]); if (level === 4 || level >= 5) api.say(colorLine(parts[0].want)); };
   make();
   const hit = (p: Part, q: Pt) => { hc = hc || document.createElement('canvas').getContext('2d'); return !!hc && hc.isPointInPath(p.path, q.x, q.y); };
   /** a point that really paints part p: inside it and not covered by a part drawn on top (also where the colour dot goes) */
@@ -49,16 +51,17 @@ export function paint(api: Api, level: number): Activity {
       for (const p of parts) { c.fillStyle = p.got || '#ffffff'; c.fill(p.path); if (p.got) { c.save(); c.clip(p.path); const g = c.createLinearGradient(0, 130, 0, 670); g.addColorStop(0, 'rgba(255,255,255,0.28)'); g.addColorStop(1, 'rgba(43,33,64,0.18)'); c.fillStyle = g; c.fillRect(0, 130, W, 540); c.restore(); }
         c.strokeStyle = INKC; c.lineWidth = 6; c.lineJoin = 'round'; c.stroke(p.path); }
       deco(c, t);
+      for (const o of stamps) { const k = 1 + Math.sin(t * 6 + o.x) * 0.12; c.fillStyle = 'rgba(255,255,255,0.8)'; c.beginPath(); c.arc(o.x, o.y, 32 * k, 0, 6.28); c.fill(); star(c, o.x, o.y, 24 * k, '#ffd60a'); }
       for (const p of parts) if (p.got !== p.want) { const q = spot(p); c.fillStyle = p.want; c.beginPath(); c.arc(q.x, q.y, 11 + Math.sin(t * 4) * 1.5, 0, 6.28); c.fill(); c.strokeStyle = '#fff'; c.lineWidth = 3; c.stroke(); }
       PAL.forEach((col, i) => { const b = pot(i), up = sel === i ? -14 : 0; const pg = c.createLinearGradient(b.x - 22, 0, b.x + 22, 0); pg.addColorStop(0, '#e9e4f2'); pg.addColorStop(1, '#a9a0bd'); c.fillStyle = pg; rr(c, b.x - 22, b.y - 6 + up, 44, 40, 10); c.fill(); c.strokeStyle = INKC; c.lineWidth = 3; c.stroke(); c.fillStyle = col; c.beginPath(); c.ellipse(b.x, b.y - 6 + up, 22, 12, 0, 0, 6.28); c.fill(); c.stroke(); c.fillStyle = 'rgba(255,255,255,0.5)'; c.beginPath(); c.ellipse(b.x - 7, b.y - 9 + up, 7, 3, 0, 0, 6.28); c.fill(); c.fillStyle = col; c.beginPath(); c.ellipse(b.x + 12, b.y + 6 + up, 4, 9, 0, 0, 6.28); c.fill(); if (sel === i) { c.strokeStyle = '#2b2140'; c.lineWidth = 4; c.stroke(); } });
       for (let i = 0; i < need; i++) { c.fillStyle = i < made ? '#ffd60a' : 'rgba(43,33,64,0.15)'; c.beginPath(); c.arc(180 + i * 30, 825, 9, 0, 6.28); c.fill(); }
       if (sel >= 0) { c.fillStyle = PAL[sel]; c.beginPath(); c.arc(W - 40, 130, 16, 0, 6.28); c.fill(); } },
-    down(q: Pt) { if (done || cheer >= 0) return; const pi = PAL.findIndex((_, i) => Math.hypot(q.x - pot(i).x, q.y - pot(i).y) < 28); if (pi >= 0) { sel = pi; api.sfx.pick(); return; }
+    down(q: Pt) { if (done || cheer >= 0) return; if (stamps.length) { const k = stamps.findIndex(o => Math.hypot(o.x - q.x, o.y - q.y) < 44); if (k >= 0) { const o = stamps.splice(k, 1)[0]; stamped++; api.burst(o.x, o.y, 14); api.sfx.unlock(); api.say(NUM[stamped - 1]); if (!stamps.length) { cheer = 0; api.sfx.cheer(); api.burst(195, 400, 40); } } return; } const pi = PAL.findIndex((_, i) => Math.hypot(q.x - pot(i).x, q.y - pot(i).y) < 28); if (pi >= 0) { sel = pi; api.sfx.pick(); return; }
       if (sel < 0) return; const byDot = parts.find(p => p.got !== p.want && Math.hypot(spot(p).x - q.x, spot(p).y - q.y) < 16); const ps = byDot || [...parts].reverse().find(p => hit(p, q)); if (!ps) return;
       ps.got = PAL[sel]; api.sfx.splash(); if (ps.got !== ps.want) { api.say(L.paintWrong, false); return; }
-      if (parts.every(p => p.got === p.want)) { cheer = 0; api.sfx.cheer(); api.burst(195, 400, 40); } else { const nx = parts.find(p => p.got !== p.want); if (nx && (level === 4 || level >= 5)) api.say(colorLine(nx.want)); } },
+      if (parts.every(p => p.got === p.want)) { if (level >= 2 && !stamps.length && !stamped) { stamps = [{ x: 90, y: 180 }, { x: 300, y: 300 }, { x: 110, y: 560 }]; api.sfx.pop(); } else { cheer = 0; api.sfx.cheer(); api.burst(195, 400, 40); } } else { const nx = parts.find(p => p.got !== p.want); if (nx && (level === 4 || level >= 5)) api.say(colorLine(nx.want)); } },
     move() { /* */ }, up() { /* */ },
-    next() { if (done || cheer >= 0) return null; const p = parts.find(p => p.got !== p.want); if (!p) return null; const i = PAL.indexOf(p.want); if (sel !== i) { const b = pot(i); return { type: 'tap', x: b.x, y: b.y }; } const q = spot(p); return { type: 'tap', x: q.x, y: q.y }; },
+    next() { if (done || cheer >= 0) return null; if (stamps.length) return { type: 'tap', x: stamps[0].x, y: stamps[0].y }; const p = parts.find(p => p.got !== p.want); if (!p) return null; const i = PAL.indexOf(p.want); if (sel !== i) { const b = pot(i); return { type: 'tap', x: b.x, y: b.y }; } const q = spot(p); return { type: 'tap', x: q.x, y: q.y }; },
     busy: () => done || cheer >= 0,
   };
 }
