@@ -313,7 +313,7 @@ let raf = 0, lastTick = performance.now(), stalls = 0;
 setInterval(() => { if (!document.hidden && performance.now() - lastTick > 400) { stalls++; if (raf) cancelAnimationFrame(raf); raf = 0; frame(performance.now()); } }, 250);
 function frame(now: number) {
   raf = 0; lastTick = performance.now(); if (now < last) now = last;
-  const dt = Math.min(0.25, (now - last) / 1000); last = now; // slow/starved frames still advance real time (physics runs in 1/120 s substeps) T += dt; if (!raf) raf = requestAnimationFrame(frame);
+  const dt = Math.min(0.25, (now - last) / 1000); last = now; /* slow/starved frames still advance real time (physics runs in 1/120 s substeps) */ T += dt; if (!raf) raf = requestAnimationFrame(frame);
   fadeT += dt; for (let i = pops.length - 1; i >= 0; i--) { pops[i].t += dt; if (pops[i].t > 0.9) pops.splice(i, 1); } if (intro) { intro.t += dt; idle = 0; if (intro.t > 2.4) intro = null; } if (tut >= 0) { tut += dt; if (tut > 4.5) tut = -1; } if (onboard >= 0) onboard += dt;
   if (poke) { poke.t += dt; if (poke.t > 0.3) { const i = poke.i; poke = null; if (screen === 'hub') start(i, save.lv[i], true); } }
   if (lockT > 0) lockT -= dt; if (mascotPoseT > 0) { mascotPoseT -= dt; if (mascotPoseT <= 0) mascotPose = 'stand'; } if (shake > 0) shake = Math.max(0, shake - dt * 30);

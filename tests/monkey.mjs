@@ -31,7 +31,7 @@ for (let i = 0; i < 11; i++) { if (process.env.ONLY && !process.env.ONLY.split("
   await chaos(+(process.env.CHAOS || 20)); const scr = await S(() => window.__snap.screen);
   const inAct = scr === 'play' && await S(() => window.__snap.act) === i && !(await S(() => window.__snap.modal));
   if (!inAct) { await S(() => window.__snap.closeModal()); await S(i => window.__snap.start(i, 0), i); } else if ((await S(() => window.__snap.winT)) >= 0) { await wait(3600); await S(() => window.__snap.closeModal()); await S(i => window.__snap.start(i, 1), i); }
-  await wait(2500); const won = await beat(i); if (!won) { await page.screenshot({ path: `/tmp/monkey-fail-${i}.png` }); console.log('  state', JSON.stringify(await S(() => ({ n: window.__snap.next(), busy: window.__snap.busy(), w: window.__snap.winT, d: window.__snap.dbg && window.__snap.dbg() })))); }
+  await wait(2500); const won = await beat(i); if (!won) { await page.screenshot({ path: `/tmp/monkey-fail-${i}.png` }); console.log('  state', JSON.stringify(await S(() => ({ n: window.__snap.next(), busy: window.__snap.busy(), w: window.__snap.winT, d: window.__snap.dbg })))); }
   ok(won, `activity ${i}: still winnable after 20 s of random taps, mashing, off-screen drags and two fingers (left via ${scr})`);
 }
 // Back spam everywhere

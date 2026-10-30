@@ -8,7 +8,7 @@ const errors = []; page.on('pageerror', e => errors.push(e.message)); page.on('c
 await page.goto(URL); await page.evaluate(() => localStorage.clear()); await page.reload(); await page.waitForTimeout(500);
 const S = (fn, a) => page.evaluate(fn, a), wait = ms => page.waitForTimeout(ms);
 const pt = (x, y) => S(([x, y]) => window.__snap.toScreen(x, y), [x, y]);
-async function tapBtn(id) { const bt = await S(id => window.__snap.buttons().find(b => b.id === id), id); if (!bt) throw new Error('no button ' + id); const p = await pt(bt.x + bt.w / 2, bt.y + bt.h / 2); await page.mouse.click(p.x, p.y); await wait(250); }
+async function tapBtn(id) { let bt = null; for (let k = 0; k < 20 && !bt; k++) { bt = await S(id => window.__snap.buttons().find(b => b.id === id), id); if (!bt) await wait(100); } if (!bt) throw new Error('no button ' + id); const p = await pt(bt.x + bt.w / 2, bt.y + bt.h / 2); await page.mouse.click(p.x, p.y); await wait(250); }
 async function run(a) {
   if (a.type === 'wait') return wait(a.ms);
   if (a.type === 'tap') { const p = await pt(a.x, a.y); await page.mouse.move(p.x, p.y); await page.mouse.down(); await wait(40); await page.mouse.up(); return wait(150); }
