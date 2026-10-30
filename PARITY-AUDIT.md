@@ -45,3 +45,38 @@ Neither app has haptics or accessibility features beyond the basics. Those rows 
 6. **Stickers and celebrations:** a paged book with silhouettes and the fly-in, plus crowd and cheer SFX (rows 16 and 17).
 7. **Voice:** clone every new line and close the 23 missing ones, then publish an unvoiced-lines list (row 4).
 8. **Proof:** side-by-side screenshots in `screenshots/parity/`, then play-all, monkey, offline-check, deploy and live-check. Docs (row 28). Small haptics if approved (row 25).
+
+## Closure (Oct 29, 2026)
+Every row below has been checked against F&L. Proof is in `screenshots/parity/`: each file shows F&L on the left and Sports on the right.
+
+| # | Gap | Status | How it was closed | Proof |
+|---|---|---|---|---|
+| 1 | Character art | Closed | F&L 2D poses copied in as `public/art/fizby-*.webp`. `src/fizby2d.ts` draws them | 01, 02, 09 |
+| 2 | Mascot presence | Closed | Pose follows context: oops on a miss, think when idle over 12 s, cheer on a win, point on a hint, explain at rest | 06, 07, 14 |
+| 3 | Narration engine | Closed | `src/voicePlayback.ts` queue. Lines never overlap (audio-check: max 1 sounding at once) | `fs-logs/final/audio-check.log` |
+| 4 | Voice coverage | Closed | Shared Fizby phrase library merged in. Cloning passes 3 and 3b cover the new and missing lines. `voice/coverage.json` lists any line still silent, which falls back to the device voice | `voice/coverage.json` |
+| 5 | Teaching prompts | Closed | A `FACT` teaching line per sport after each win, plus the counting and colour lines. See `docs/LEARNING-MAP.md` | 09 |
+| 6 | Music | Closed | F&L `hub.mp3` and `sports.mp3` loops, ducked under the voice. audio-check confirms the hub and sports tracks | audio-check |
+| 7 | SFX | Closed | All 85 F&L CC0 samples. Sports names map to them (crowd, bounce, kick, whistle, fanfare) | `docs/LICENSES.md` |
+| 8 | Menus and transitions | Closed | Sport intro card (sunburst, zooming picture, Fizby, narration, tap to skip). White fade on every screen change | 04 |
+| 9 | Hub | Closed | Living stadium: the crowd does the wave, flags flap, a ball rolls by. Cards poke and the crowd cheers | 02, 03 |
+| 10 | Navigation | Closed | One-tap Back, plus a **?** walkthrough and restart in every game. No sub-menus are needed because all 11 sports fit one screen | 08 |
+| 11 | Hint system | Closed | F&L `hint.ts`: hand after the age-band delay, then a pulsing target and the spoken goal every 15 s | 06, 07 |
+| 12 | Tutorials | Closed | **?** dims the scene, the hint hand acts out the next gesture and Fizby says it | 08 |
+| 13 | Progression and difficulty | Closed | 1-3 stars per level. The last level is the Big game (crowd strip, bigger celebration, trophy). Remixes vary. Age bands set hint timing and touch slack | 15 |
+| 14 | Per-game depth | Closed | Shared `kid()` team pals (keepers, goalie, tennis rival), floating score stars, Big game, teaching lines. Fixed physics substeps. Golf cup assist after misses | 16-26 |
+| 15 | Characters | Closed | `src/fkit.ts` `kid()` with 4 looks, used for every team pal | 16, 24 |
+| 16 | Stickers | Closed | Sticker Book with a page per sport, "?" silhouettes for missing stickers, page tabs, and a fly-in to the book icon | 10 |
+| 17 | Celebrations | Closed | Cheer-jump pose, confetti, crowd and fanfare, star rating, sticker fly-in | 09 |
+| 18 | Parent area | Closed | Per-child skills, trophy and sticker counts, plans, Restore/Manage/Terms/Privacy, settings. The gift-a-month offer depends on App Store offer codes, so it moves to M4 with the store work (no store submission now, per the rules) | 11 |
+| 19 | Gate | OK | Unchanged | 13 |
+| 20 | Profiles | Closed | `src/profiles.ts`: 3 children, each with a name, face and age band, and separate saves (profiles-check) | 11 |
+| 21 | Settings | Closed | Music and Sounds volume (0-3), Voice on/off, saved | 11 |
+| 22 | Purchase | OK | Same StoreKit code. The Capacitor iOS project is M4 | 12 |
+| 23 | Onboarding | Closed | First hub visit: Fizby slides in pointing, a hand taps the first card, voice greeting | 02 |
+| 24 | Accessibility | Closed | Touch slack by age band, ARIA label on the canvas | |
+| 25 | Haptics | Parity | F&L has none either | |
+| 26 | Performance | OK | webp art, a 197-file precache, 120 Hz physics substeps | |
+| 27 | Offline | Closed | `docs/FAQ-OFFLINE.md`. offline-check passes | `fs-logs/final/offline-check.log` |
+| 28 | Docs | Closed | `docs/` DESIGN, LEARNING-MAP, NARRATION-HOOKS, FAQ-OFFLINE, LICENSES | |
+| 29 | Tests / Gymnastics stall | Closed | Gymnastics replay bug fixed (BUGS.md #1). Tests: play-all, monkey, offline-check, audio-check, profiles-check, parity-shots | `fs-logs/final/` |
