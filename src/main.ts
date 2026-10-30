@@ -308,8 +308,12 @@ function drawModal() {
 function afterWin() { if (screen !== 'play') return; const A = ACTS[actI]; if (A.levels) start(actI); }
 // ---- loop ----
 let last = performance.now();
+let raf = 0, lastTick = performance.now(), stalls = 0;
+/** rAF can stall (busy device, webview hiccup); a slow interval keeps the game ticking so nothing freezes mid-turn. */
+setInterval(() => { if (!document.hidden && performance.now() - lastTick > 400) { stalls++; if (raf) cancelAnimationFrame(raf); raf = 0; frame(performance.now()); } }, 250);
 function frame(now: number) {
-  const dt = Math.min(0.05, (now - last) / 1000); last = now; T += dt; requestAnimationFrame(frame);
+  raf = 0; lastTick = performance.now(); if (now < last) now = last;
+  const dt = Math.min(0.25, (now - last) / 1000); last = now; // slow/starved frames still advance real time (physics runs in 1/120 s substeps) T += dt; if (!raf) raf = requestAnimationFrame(frame);
   fadeT += dt; for (let i = pops.length - 1; i >= 0; i--) { pops[i].t += dt; if (pops[i].t > 0.9) pops.splice(i, 1); } if (intro) { intro.t += dt; idle = 0; if (intro.t > 2.4) intro = null; } if (tut >= 0) { tut += dt; if (tut > 4.5) tut = -1; } if (onboard >= 0) onboard += dt;
   if (poke) { poke.t += dt; if (poke.t > 0.3) { const i = poke.i; poke = null; if (screen === 'hub') start(i, save.lv[i], true); } }
   if (lockT > 0) lockT -= dt; if (mascotPoseT > 0) { mascotPoseT -= dt; if (mascotPoseT <= 0) mascotPose = 'stand'; } if (shake > 0) shake = Math.max(0, shake - dt * 30);
@@ -348,7 +352,7 @@ addEventListener('blur', () => { if (pointerId !== null && act) act.up({ x: 0, y
 document.title = GAME_TITLE;
 // offline: the web build registers dist/sw.js (made by scripts/precache.mjs). The iOS app bundles its files, so it needs none.
 if ('serviceWorker' in navigator && location.protocol.startsWith('http') && !(window as any).Capacitor?.isNativePlatform?.()) navigator.serviceWorker.register('./sw.js').catch(() => { /* */ });
- void initStore(); requestAnimationFrame(frame); setTimeout(() => { if (screen === 'title') say(L.title, false); }, 600);
+ void initStore(); raf = requestAnimationFrame(frame); setTimeout(() => { if (screen === 'title') say(L.title, false); }, 600);
 // ---- test hooks ----
 /** Store art, drawn with the game's own art code (scripts/icons.mjs saves it): 'icon' = 1024 full-bleed square, 'splash' = 2732 square launch art. */
 function renderArt(kind: 'icon' | 'splash') {
@@ -360,7 +364,7 @@ function renderArt(kind: 'icon' | 'splash') {
 }
 (window as any).__snap = { renderArt,
   get screen() { return screen; }, get audio() { return { ...audioStats, track: audioStats.track, ctx: audioStats.ctx }; }, get winStars() { return winStars; }, get hintDelay() { return hintCfg.delay; }, get slack() { return tune.slack; }, get kid() { return profiles().cur; }, get act() { return actI; }, get level() { return level; }, get winT() { return winT; }, get modal() { return modal ? modal.kind : null; }, levels: ACTS.map(a => a.levels), get freeRemix() { return freeRemix; }, get demo() { return demo ? demo.a : null; },
-  buttons: () => btns.map(b => ({ id: b.id, x: b.x, y: b.y, w: b.w, h: b.h })), next: () => act?.next() ?? null, busy: () => !!intro || !!poke || !!act?.busy?.(), get heals() { return heals; }, get intro() { return !!intro; }, get onboard() { return onboard; },
+  buttons: () => btns.map(b => ({ id: b.id, x: b.x, y: b.y, w: b.w, h: b.h })), next: () => act?.next() ?? null, busy: () => !!intro || !!poke || !!act?.busy?.(), get heals() { return heals; }, get busyT() { return busyT; }, get dbg() { return { screen, act: !!act, winT, modal: !!modal, poke: !!poke, intro: !!intro, ab: !!act?.busy?.() }; }, get stalls() { return stalls; }, get T() { return T; }, get intro() { return !!intro; }, get onboard() { return onboard; },
   toScreen: (x: number, y: number) => { const r = cv.getBoundingClientRect(); return { x: r.left + (ox + x * scale) / dpr, y: r.top + (oy + y * scale) / dpr }; },
   start: (i: number, l: number) => start(i, l), go, save: () => JSON.parse(JSON.stringify(save)), setSave: (s: Save) => { save = s; persist(); }, closeModal: () => { modal = null; afterWin(); },
   store: () => ({ club: hasClub(), sim: store.sim, msg: store.msg }), storeTest, products: PRODUCTS, lines: allLines, lineId, missing: () => [...missing], get gate() { return { ...gate }; },
