@@ -31,7 +31,7 @@ async function beat(i, l) {
     if ((await S(() => window.__snap.winT)) >= 0) return steps;
     const a = await S(() => window.__snap.busy() ? null : window.__snap.next()); if (!a) { await wait(200); continue; } await run(a); if (a.type !== 'wait') steps++; if (steps > 250) break;
   }
-  console.log("  stuck state", JSON.stringify(await S(() => ({ actDbg: window.__snap.actDbg, perf: window.__snap.perf, dbg: window.__snap.dbg, busyT: window.__snap.busyT, T: window.__snap.T, stalls: window.__snap.stalls, heals: window.__snap.heals, screen: window.__snap.screen, act: window.__snap.act, level: window.__snap.level, winT: window.__snap.winT, modal: window.__snap.modal, busy: window.__snap.busy(), next: window.__snap.next(), intro: window.__snap.intro }))));
+  console.log("  stuck state", JSON.stringify(await S(() => ({ inp: window.__snap.inp, lastHeal: window.__snap.lastHeal, actDbg: window.__snap.actDbg, perf: window.__snap.perf, dbg: window.__snap.dbg, busyT: window.__snap.busyT, T: window.__snap.T, stalls: window.__snap.stalls, heals: window.__snap.heals, screen: window.__snap.screen, act: window.__snap.act, level: window.__snap.level, winT: window.__snap.winT, modal: window.__snap.modal, busy: window.__snap.busy(), next: window.__snap.next(), intro: window.__snap.intro }))));
   return -1;
 }
 const ONLY = process.env.ONLY ? process.env.ONLY.split(',').map(Number) : null;
@@ -63,5 +63,6 @@ await tapBtn('gear'); ok(await S(() => window.__snap.modal) === 'gate', 'gear op
   const ans = g.q[0] + g.q[1], k = g.opts.indexOf(ans); await tapBtn('gateA' + k); ok(await S(() => window.__snap.screen) === 'parents', 'right answer opens grown-ups'); }
 await tapBtn('buy-yearly'); await wait(300); ok((await S(() => window.__snap.store())).club, 'simulated purchase unlocks the mascot Club');
 await tapBtn('back'); await S(() => window.__snap.start(0, 3)); ok(!(await S(() => window.__snap.freeRemix)), 'level 3 is the real level after purchase');
+{ const h = await S(() => ({ n: window.__snap.heals, last: window.__snap.lastHeal })); ok(h.n === 0, 'no watchdog restarts (a stall is a bug) ' + JSON.stringify(h)); }
 ok(!errors.length, 'no page errors ' + JSON.stringify(errors.slice(0, 5)));
 console.log(fails ? `${fails} FAILED` : 'ALL PASSED'); await b.close(); process.exit(fails ? 1 : 0);

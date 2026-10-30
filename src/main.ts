@@ -311,7 +311,7 @@ let last = performance.now();
 let raf = 0, lastTick = performance.now(), stalls = 0;
 /** rAF can stall (busy device, webview hiccup); a slow interval keeps the game ticking so nothing freezes mid-turn. */
 setInterval(() => { if (!document.hidden && performance.now() - lastTick > 400) { stalls++; if (raf) cancelAnimationFrame(raf); raf = 0; frame(performance.now()); } }, 250);
-let maxFrame = 0, maxFrameAt = '', maxTask = 0;
+let lastHeal: unknown = null, maxFrame = 0, maxFrameAt = '', maxTask = 0;
 try { new PerformanceObserver(l => { for (const e of l.getEntries()) maxTask = Math.max(maxTask, e.duration); }).observe({ entryTypes: ['longtask'] }); } catch { /* not supported */ }
 function frame(now: number) { const f0 = performance.now(); try { frameBody(now); } finally { const d = performance.now() - f0; if (d > maxFrame) { maxFrame = d; maxFrameAt = screen + ':' + actI + ':' + level; } } }
 function frameBody(now: number) {
@@ -320,7 +320,7 @@ function frameBody(now: number) {
   fadeT += dt; for (let i = pops.length - 1; i >= 0; i--) { pops[i].t += dt; if (pops[i].t > 0.9) pops.splice(i, 1); } if (intro) { intro.t += dt; idle = 0; if (intro.t > 2.4) intro = null; } if (tut >= 0) { tut += dt; if (tut > 4.5) tut = -1; } if (onboard >= 0) onboard += dt;
   if (poke) { poke.t += dt; if (poke.t > 0.3) { const i = poke.i; poke = null; if (screen === 'hub') start(i, save.lv[i], true); } }
   if (lockT > 0) lockT -= dt; if (mascotPoseT > 0) { mascotPoseT -= dt; if (mascotPoseT <= 0) mascotPose = 'stand'; } if (shake > 0) shake = Math.max(0, shake - dt * 30);
-  { const nowR = performance.now(); if (screen === 'play' && act && winT < 0 && !modal && !intro && act.busy?.()) { if (!busyT) busyT = nowR; else if (nowR - busyT > 12000) { busyT = 0; heals++; start(actI, level); } } else busyT = 0; } // real-time watchdog: a turn can never stay busy for 12 s
+  { const nowR = performance.now(); if (screen === 'play' && act && winT < 0 && !modal && !intro && act.busy?.()) { if (!busyT) busyT = nowR; else if (nowR - busyT > 12000) { busyT = 0; heals++; lastHeal = { at: actI + ':' + level, st: act.dbg?.() ?? null }; console.warn('watchdog restart', JSON.stringify(lastHeal)); start(actI, level); } } else busyT = 0; } // real-time watchdog: a turn can never stay busy for 12 s
   if (screen === 'play' && act) { { const n = Math.ceil(dt / (1 / 120)); for (let k = 0; k < n && act; k++) act.update(dt / n); } // fixed small physics steps: the same shot rolls the same on a slow device
     if (winT >= 0) { const w0 = winT; winT += dt; if (w0 < 1.9 && winT >= 1.9 && newSticker >= 0) { voiceSay(L.sticker); sfx.pop(); } if (w0 < 2.3 && winT >= 2.3 && newSticker >= 0) sfx.stickerIn(); if (winT > 3.2 && !modal) { winT = -1; if (!checkUnlock()) afterWin(); } }
     else if (!modal) { idle += dt; if (act.busy?.()) idle = 0; const cur = act; stepHint(dt, idle, () => cur.next(), () => { if (cur.intro) { say(cur.intro, false); mascotPose = 'point'; mascotPoseT = 2.5; } });
@@ -337,18 +337,19 @@ function frameBody(now: number) {
 // ---- input: one finger at a time; leaving the screen or a cancelled touch counts as letting go ----
 let pointerId: number | null = null, pointerIsDown = false, lastPtr = 0;
 const toLogical = (e: PointerEvent): Pt => { const r = cv.getBoundingClientRect(); return { x: Math.max(-bleed.x, Math.min(W + bleed.x, ((e.clientX - r.left) * dpr - ox) / scale)), y: Math.max(-bleed.y, Math.min(H + bleed.y, ((e.clientY - r.top) * dpr - oy) / scale)) }; };
-cv.addEventListener('pointerdown', e => {
+const inp = { downs: 0, second: 0, guard: 0, btn: '', act: 0, ups: 0, lastId: 0, curId: null as number | null };
+cv.addEventListener('pointerdown', e => { inp.downs++; inp.lastId = e.pointerId; inp.curId = pointerId;
   if (pointerId !== null) { // a second finger: ignore it, unless the first one went quiet (a lost touch end must never freeze input)
-    if (performance.now() - lastPtr < 600) return; const old = pointerId; release({ pointerId: old, clientX: e.clientX, clientY: e.clientY } as PointerEvent); }
+    if (performance.now() - lastPtr < 600) { inp.second++; return; } const old = pointerId; release({ pointerId: old, clientX: e.clientX, clientY: e.clientY } as PointerEvent); }
   pointerId = e.pointerId; lastPtr = performance.now(); pointerIsDown = true; try { cv.setPointerCapture(e.pointerId); } catch { /* */ } initAudio();
-  const p = toLogical(e); if (onboard > 0.6) onboard = -1; idle = 0; demo = null; resetHint(); if (mascotPose === 'think') mascotPose = 'stand'; if (performance.now() - screenAt < 180) return; // a tap that lands as the screen changes must not hit the new screen's buttons
+  const p = toLogical(e); if (onboard > 0.6) onboard = -1; idle = 0; demo = null; resetHint(); if (mascotPose === 'think') mascotPose = 'stand'; if (performance.now() - screenAt < 180) { inp.guard++; return; } // a tap that lands as the screen changes must not hit the new screen's buttons
   const b = [...btns].reverse().find(b => p.x >= b.x && p.x <= b.x + b.w && p.y >= b.y && p.y <= b.y + b.h);
-  if (b && !(screen === 'play' && b.id !== 'back' && b.id !== 'mascot' && !modal && act && hitAct(p))) { b.fn(); if (screen === 'town') townDrag = null; return; }
-  if (screen === 'play' && act && winT < 0 && !modal) act.down(p);
+  if (b && !(screen === 'play' && b.id !== 'back' && b.id !== 'mascot' && !modal && act && hitAct(p))) { inp.btn = b.id; b.fn(); if (screen === 'town') townDrag = null; return; }
+  if (screen === 'play' && act && winT < 0 && !modal) { inp.act++; act.down(p); }
   if (screen === 'town') townDrag = { x: p.x, sx: townX, moved: false };
 });
 function hitAct(p: Pt) { void p; return false; }
-function release(e: PointerEvent) { if (e.pointerId !== pointerId) return; pointerId = null; pointerIsDown = false; const p = toLogical(e); if (screen === 'play' && act) act.up(p); townDrag = null; gate.pressing = false; resetPress = false; }
+function release(e: PointerEvent) { if (e.pointerId !== pointerId) return; inp.ups++; pointerId = null; pointerIsDown = false; const p = toLogical(e); if (screen === 'play' && act) act.up(p); townDrag = null; gate.pressing = false; resetPress = false; }
 cv.addEventListener('pointermove', e => { if (e.pointerId !== pointerId) return; lastPtr = performance.now(); const p = toLogical(e); if (screen === 'play' && act && winT < 0) act.move(p); if (townDrag) { townX = Math.max(0, Math.min(townMax, townDrag.sx - (p.x - townDrag.x))); } });
 cv.addEventListener('pointerup', release); cv.addEventListener('pointercancel', release); cv.addEventListener('lostpointercapture', e => { if (e.pointerId === pointerId) release(e); });
 addEventListener('blur', () => { if (pointerId !== null && act) act.up({ x: 0, y: 0 }); pointerId = null; pointerIsDown = false; });
@@ -368,7 +369,7 @@ function renderArt(kind: 'icon' | 'splash') {
 }
 (window as any).__snap = { renderArt,
   get screen() { return screen; }, get audio() { return { ...audioStats, track: audioStats.track, ctx: audioStats.ctx }; }, get winStars() { return winStars; }, get hintDelay() { return hintCfg.delay; }, get slack() { return tune.slack; }, get kid() { return profiles().cur; }, get act() { return actI; }, get level() { return level; }, get winT() { return winT; }, get modal() { return modal ? modal.kind : null; }, levels: ACTS.map(a => a.levels), get freeRemix() { return freeRemix; }, get demo() { return demo ? demo.a : null; },
-  buttons: () => btns.map(b => ({ id: b.id, x: b.x, y: b.y, w: b.w, h: b.h })), next: () => act?.next() ?? null, busy: () => !!intro || !!poke || !!act?.busy?.(), get heals() { return heals; }, get actDbg() { return act?.dbg?.() ?? null; }, get perf() { return { maxFrame: Math.round(maxFrame), maxFrameAt, maxTask: Math.round(maxTask) }; }, get busyT() { return busyT ? performance.now() - busyT : 0; }, get dbg() { return { screen, act: !!act, winT, modal: !!modal, poke: !!poke, intro: !!intro, ab: !!act?.busy?.() }; }, get stalls() { return stalls; }, get T() { return T; }, get intro() { return !!intro; }, get onboard() { return onboard; },
+  buttons: () => btns.map(b => ({ id: b.id, x: b.x, y: b.y, w: b.w, h: b.h })), next: () => act?.next() ?? null, busy: () => !!intro || !!poke || !!act?.busy?.(), get heals() { return heals; }, get inp() { return { ...inp, pointerId, screenAgo: Math.round(performance.now() - screenAt) }; }, get lastHeal() { return lastHeal; }, get actDbg() { return act?.dbg?.() ?? null; }, get perf() { return { maxFrame: Math.round(maxFrame), maxFrameAt, maxTask: Math.round(maxTask) }; }, get busyT() { return busyT ? performance.now() - busyT : 0; }, get dbg() { return { screen, act: !!act, winT, modal: !!modal, poke: !!poke, intro: !!intro, ab: !!act?.busy?.() }; }, get stalls() { return stalls; }, get T() { return T; }, get intro() { return !!intro; }, get onboard() { return onboard; },
   toScreen: (x: number, y: number) => { const r = cv.getBoundingClientRect(); return { x: r.left + (ox + x * scale) / dpr, y: r.top + (oy + y * scale) / dpr }; },
   start: (i: number, l: number) => start(i, l), go, save: () => JSON.parse(JSON.stringify(save)), setSave: (s: Save) => { save = s; persist(); }, closeModal: () => { modal = null; afterWin(); },
   store: () => ({ club: hasClub(), sim: store.sim, msg: store.msg }), storeTest, products: PRODUCTS, lines: allLines, lineId, missing: () => [...missing], get gate() { return { ...gate }; },

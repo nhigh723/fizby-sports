@@ -31,7 +31,7 @@ export const L = {
   hockeyGo: 'Swipe the puck into the net!', hockeyBank: 'Bounce it off the wall!', hockeyPass: 'Pass to your friend first!', hockeyShoot: 'Now shoot!',
   gymGo: 'Watch me first, then copy my moves!', gymYour: 'Your turn!', gymOops: 'Watch me again!', star: 'Star!', ball: 'Ball!', arms: 'Put your arms up high!', split: 'Splits!', handstand: 'Handstand!', bravo: 'Bravo!',
   paintGo: 'Pick a color, then tap the picture to paint!', paintMatch: 'Paint it to match the dots!', paintDone: 'What a beautiful picture!', paintWrong: 'Try the color on the dot!',
-  yes: 'Yes!', great: 'Great job!', champ: 'You are a champion!', sticker: 'You got a sticker!', trophy: 'You won a trophy!',
+  yes: 'Yes!', great: 'Great job!', catchIt: 'Catch the ball!', howMany: 'How many pins fell down?', dive: 'Go! Dive in!', waitWhistle: 'Wait for the green light!', aimBucket: 'Hit it to the bucket!', champ: 'You are a champion!', sticker: 'You got a sticker!', trophy: 'You won a trophy!',
   shelfHi: 'Look at your trophies and stickers!', shelfEmpty: 'Play a sport to win stickers!',
 };
 export function allLines(): string[] {

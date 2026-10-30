@@ -1,4 +1,5 @@
 // Tee-ball: a ring pulses around the ball on the tee; tap when it hugs the ball to hit. Teaches timing, counting bases, left/right.
+// L1-L2 (and some remixes): after each hit, catch the fly ball as it drops (tap it).
 // L0 slow ring - L1 faster - L2 fastest - L3 hit, then tap bases 1-2-3-home - L4 Fizby says left or right: tap that side of the ball. 5+: remixes.
 import { type Ctx, W, band } from '../art';
 import { ball, field } from '../sports';
@@ -7,8 +8,8 @@ import type { Activity, Api, Pt } from '../kit';
 const BX = 195, BY = 600, BR = 22, GOOD = 60;
 const BASES: [number, number][] = [[300, 470], [195, 360], [90, 470], [195, 640]];
 export function tee(api: Api, level: number): Activity {
-  const remix = level >= 5, rnd = Math.random, sp = [1.4, 2, 2.6, 1.8, 1.6][level] ?? 1.5 + rnd(), runs = level === 3 || (remix && rnd() < 0.4), lr = level === 4 || (remix && !runs && rnd() < 0.6), need = 3;
-  let ph = 0, hits = 0, fly = -1, fx = 0, fy = 0, fvx = 0, fvy = 0, base = -1, done = false, side = rnd() < 0.5 ? -1 : 1, early = 0, runnerT = 0;
+  const remix = level >= 5, rnd = Math.random, sp = [1.4, 2, 2.6, 1.8, 1.6][level] ?? 1.5 + rnd(), runs = level === 3 || (remix && rnd() < 0.4), lr = level === 4 || (remix && !runs && rnd() < 0.6), need = 3, catchMode = level === 1 || level === 2 || (remix && !runs && !lr);
+  let cat: { x: number; y: number; vx: number } | null = null, ph = 0, hits = 0, fly = -1, fx = 0, fy = 0, fvx = 0, fvy = 0, base = -1, done = false, side = rnd() < 0.5 ? -1 : 1, early = 0, runnerT = 0;
   const ringR = () => BR + 8 + 70 * (0.5 + 0.5 * Math.cos(ph));
   const sayDir = () => api.say(side < 0 ? L.teeLeft : L.teeRight);
   if (lr) setTimeout(sayDir, 2600);
@@ -16,7 +17,8 @@ export function tee(api: Api, level: number): Activity {
   return {
     intro: L.teeGo,
     update(dt) { if (fly < 0 && base < 0) ph += dt * sp * 2; early = Math.max(0, early - dt); runnerT += dt;
-      if (fly >= 0) { fly += dt; fx += fvx * dt; fy += fvy * dt; fvy += 300 * dt; if (fly > 1.4) { fly = -1; if (runs) { base = 0; api.say(L.runBases); } else round(); } } },
+      if (fly >= 0) { fly += dt; fx += fvx * dt; fy += fvy * dt; fvy += 300 * dt; if (fly > 1.4) { fly = -1; if (runs) { base = 0; api.say(L.runBases); } else if (catchMode) { cat = { x: 80 + rnd() * 230, y: 120, vx: (rnd() - 0.5) * 60 }; api.say(L.catchIt); } else round(); } }
+      if (cat) { cat.y += dt * (110 + level * 25); cat.x = Math.max(40, Math.min(W - 40, cat.x + cat.vx * dt)); if (cat.y > 720) { cat.y = 120; cat.x = 80 + rnd() * 230; api.sfx.boing(); } } },
     draw(c: Ctx) { const t = api.t(); c.fillStyle = '#7fe3f5'; band(c, 0, 300); field(c, 260, '#3ddc4a');
       c.fillStyle = '#e0a060'; c.beginPath(); c.moveTo(195, 680); c.lineTo(330, 470); c.lineTo(195, 330); c.lineTo(60, 470); c.closePath(); c.fill(); c.fillStyle = '#3ddc4a'; c.beginPath(); c.moveTo(195, 610); c.lineTo(280, 470); c.lineTo(195, 390); c.lineTo(110, 470); c.closePath(); c.fill();
       BASES.forEach(([x, y], i) => { c.fillStyle = base > i ? '#ffd60a' : '#fff'; c.save(); c.translate(x, y); c.rotate(0.785); c.fillRect(-16, -16, 32, 32); c.restore(); if (base === i) { c.strokeStyle = '#ffd60a'; c.lineWidth = 5; c.beginPath(); c.arc(x, y, 30 + Math.sin(t * 8) * 4, 0, 6.28); c.stroke(); } });
@@ -24,15 +26,17 @@ export function tee(api: Api, level: number): Activity {
       c.fillStyle = '#ff9f1c'; c.fillRect(BX - 5, BY + 10, 10, 60); c.fillStyle = '#e07b00'; c.fillRect(BX - 16, BY + 66, 32, 8);
       if (fly < 0 && base < 0) { const r = ringR(), ok = r < GOOD; c.strokeStyle = ok ? '#ffd60a' : '#fff'; c.lineWidth = ok ? 10 : 6; c.beginPath(); c.arc(BX, BY, r, 0, 6.28); c.stroke(); ball(c, 'tee', BX + (early ? Math.sin(t * 40) * 3 : 0), BY, BR); }
       if (fly >= 0) ball(c, 'tee', fx, fy, BR * Math.max(0.4, 1 - fly * 0.4), fly * 10);
-      for (let i = 0; i < need; i++) { c.globalAlpha = i < hits ? 1 : 0.35; ball(c, 'tee', 150 + i * 45, 800, 14); c.globalAlpha = 1; } void runnerT; },
+      for (let i = 0; i < need; i++) { c.globalAlpha = i < hits ? 1 : 0.35; ball(c, 'tee', 150 + i * 45, 800, 14); c.globalAlpha = 1; } void runnerT;
+      if (cat) { c.fillStyle = 'rgba(0,0,0,0.15)'; c.beginPath(); c.ellipse(cat.x, 730, 26, 7, 0, 0, 6.28); c.fill(); ball(c, 'tee', cat.x, cat.y, BR, t * 6); c.save(); c.translate(cat.x, 760); c.fillStyle = '#c98a4b'; c.beginPath(); c.ellipse(0, 0, 34, 26, 0, 0, 6.28); c.fill(); c.strokeStyle = '#2b2140'; c.lineWidth = 3; c.stroke(); c.fillStyle = '#a86b33'; c.beginPath(); c.ellipse(0, -4, 20, 14, 0, 0, 6.28); c.fill(); c.restore(); } },
     down(p: Pt) { if (done || fly >= 0) return;
+      if (cat) { if (Math.hypot(p.x - cat.x, p.y - cat.y) < 64) { api.burst(cat.x, cat.y, 16); api.sfx.snap(); api.say(L.great); cat = null; round(); } return; }
       if (base >= 0) { const [x, y] = BASES[base]; if (Math.hypot(p.x - x, p.y - y) < 50) { api.sfx.hop(); api.say(base < 3 ? NUM[base] : L.homeRun); base++; if (base > 3) { base = -1; round(); } } return; }
       if (Math.hypot(p.x - BX, p.y - BY) > 150) return;
       if (ringR() >= GOOD) { early = 0.4; api.sfx.wrong(); api.say(L.teeEarly, false); return; }
       if (lr && Math.sign(p.x - BX || 1) !== side) { api.sfx.wrong(); api.say(side < 0 ? L.teeLeft : L.teeRight); return; }
       hits++; fly = 0; fx = BX; fy = BY; fvx = lr ? side * 220 : (rnd() - 0.5) * 200; fvy = -520; api.sfx.thud(); api.sfx.cheer(); api.burst(BX, BY, 18); api.say(runs ? L.great : NUM[hits - 1]); },
     move() { /* */ }, up() { /* */ },
-    next() { if (done || fly >= 0) return null; if (base >= 0) { const [x, y] = BASES[base]; return { type: 'tap', x, y }; }
+    next() { if (done || fly >= 0) return null; if (cat) return { type: 'tap', x: cat.x, y: Math.min(700, cat.y + 30) }; if (base >= 0) { const [x, y] = BASES[base]; return { type: 'tap', x, y }; }
       const r = ringR(), shrinking = Math.sin(ph) > 0 && Math.cos(ph) < 0.2; if (r < GOOD - 14 || (shrinking && r < GOOD + 4)) return { type: 'tap', x: BX + (lr ? side * 40 : 0), y: BY }; return { type: 'wait', ms: 30 }; },
     busy: () => done || fly >= 0,
   };
