@@ -26,8 +26,9 @@ await tapBtn('town'); ok(await S(() => window.__snap.screen) === 'town', 'Trophy
 await tapBtn('back'); ok(await S(() => window.__snap.screen) === 'title', 'Back from hub returns to title'); await tapBtn('play');
 // beat every level (authored + 2 remixes) with real input
 async function beat(i, l) {
-  await S(([i, l]) => window.__snap.start(i, l), [i, l]); await wait(300); if ((await S(() => window.__snap.act)) !== i) await S(([i, l]) => window.__snap.start(i, l), [i, l]); const t0 = Date.now(); let steps = 0;
-  while (Date.now() - t0 < 90000) {
+  await S(([i, l]) => window.__snap.start(i, l), [i, l]); await wait(300); if ((await S(() => window.__snap.act)) !== i) await S(([i, l]) => window.__snap.start(i, l), [i, l]); const t0 = Date.now(), g0 = await S(() => window.__snap.T); let steps = 0;
+  // budget in GAME time (60 s): the box itself can freeze for minutes (see lagmon), which must not count as a game stall
+  while (Date.now() - t0 < 900000 && (await S(() => window.__snap.T)) - g0 < 60) {
     if ((await S(() => window.__snap.winT)) >= 0) return steps;
     const a = await S(() => window.__snap.busy() ? null : window.__snap.next()); if (!a) { await wait(200); continue; } await run(a); if (a.type !== 'wait') steps++; if (steps > 250) break;
   }
