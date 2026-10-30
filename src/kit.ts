@@ -40,6 +40,8 @@ export function unstable(bs: Blk[], ground: number, wind = 0): Blk | null {
 /** a falling/tumbling piece (purely visual) */
 export type Tumble = { b: Blk; vx: number; vy: number; rot: number; vr: number; t: number };
 export function stepTumble(ts: Tumble[], dt: number, floor = 900) { for (const k of ts) { k.vy += 1600 * dt; k.b.x += k.vx * dt; k.b.y += k.vy * dt; k.rot += k.vr * dt; k.t += dt; if (k.b.y + k.b.h > floor) { k.b.y = floor - k.b.h; k.vy *= -0.35; k.vx *= 0.7; k.vr *= 0.6; } } }
-export const near = (a: Pt, x: number, y: number, r: number) => Math.hypot(a.x - x, a.y - y) < r;
-export const inBox = (p: Pt, x: number, y: number, w: number, h: number, pad = 0) => p.x > x - pad && p.x < x + w + pad && p.y > y - pad && p.y < y + h + pad;
+/** extra touch slack from the child's age band (profiles.ts tuning) */
+export const tune = { slack: 8 };
+export const near = (a: Pt, x: number, y: number, r: number) => Math.hypot(a.x - x, a.y - y) < r + tune.slack;
+export const inBox = (p: Pt, x: number, y: number, w: number, h: number, pad = 0) => (pad += tune.slack, p.x > x - pad) && p.x < x + w + pad && p.y > y - pad && p.y < y + h + pad;
 export function shuffle<T>(a: T[]) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }

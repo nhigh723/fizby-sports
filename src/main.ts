@@ -3,7 +3,7 @@ import { CLUB_NAME, GAME_TITLE } from './brand';
 import { mascot, mascotBust, preloadArt, type Mood } from './fizby2d';
 import { stepHint, drawHint, resetHint, hint, hintCfg, setHintCtx } from './hint';
 import { W, H, INK, COLORS, hand, sky, confettiDraw, rr, shade, type Ctx, type Pose } from './art';
-import { initAudio, sfx, say as voiceSay, isSpeaking, setMuted, muted, missing, musicScene, stopVoice } from './audio';
+import { initAudio, sfx, say as voiceSay, isSpeaking, missing, musicScene, stopVoice } from './audio';
 import { L, allLines } from './lines';
 import type { Activity, Action, Api, Pt } from './kit';
 import { ball, field, sticker, trophy, star, keeper, pin, hoop, goal, type BallKind } from './sports';
@@ -12,6 +12,9 @@ import { golf } from './acts/golf'; import { hockey } from './acts/hockey'; impo
 import { SPORT_NAME } from './lines';
 import { store, hasClub, levelFree, buy, restore, manage, initStore, PRODUCTS, TERMS_URL, PRIVACY_URL, openLink, storeTest, type Plan } from './store';
 import { lineId } from './voice';
+import { profiles, current, addProfile, setBand, setFace, rename, switchTo, tuning, type Band } from './profiles';
+import { tune } from './kit';
+import { settings, cycleVol, applySettings } from './audio';
 const cv = document.getElementById('c') as HTMLCanvasElement, c = cv.getContext('2d')!; setHintCtx(c); void preloadArt([]); musicScene('hub');
 let scale = 1, ox = 0, oy = 0, dpr = 1;
 function resize() { dpr = Math.min(devicePixelRatio || 1, 3); cv.width = Math.round(innerWidth * dpr); cv.height = Math.round(innerHeight * dpr); scale = Math.min(cv.width / W, cv.height / H); ox = (cv.width - W * scale) / 2; oy = (cv.height - H * scale) / 2; }
@@ -28,7 +31,12 @@ const ACTS = [
 type Save = { lv: number[]; wins: number; seen: number; skills: Record<string, number>; stickers: number[]; trophies: number[] };
 const KEY = 'fs5~save', fresh = (): Save => ({ lv: ACTS.map(() => 0), wins: 0, seen: 0, skills: {}, stickers: [], trophies: [] });
 function load(): Save { const d = fresh(); try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s && Array.isArray(s.lv)) { const m = { ...d, ...s }; while (m.lv.length < ACTS.length) m.lv.push(0); return m; } } catch { /* */ } return d; }
-let save = load(); const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(save)); } catch { /* full */ } };
+let save = load();
+function applyTuning() { const t = tuning(); hintCfg.delay = t.hint; tune.slack = t.slack; }
+applyTuning();
+const SK = 'fs5~settings'; try { Object.assign(settings, JSON.parse(localStorage.getItem(SK) || '{}')); } catch { /* */ }
+const saveSettings = () => { applySettings(); try { localStorage.setItem(SK, JSON.stringify(settings)); } catch { /* */ } };
+function pickChild(i: number) { if (switchTo(i)) { save = load(); applyTuning(); sfx.pop(); } } const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(save)); } catch { /* full */ } };
 const SKILLS: Record<string, string[]> = { soccer: ['Aiming (direction)', 'Counting', 'Left and right'], basket: ['Force (how hard)', 'Counting', 'Colours'], bowl: ['Counting to 10', 'Aiming (direction)', 'Left and right'], tee: ['Timing', 'Counting', 'Left and right'], swim: ['Left and right', 'Taking turns', 'Counting'],
   golf: ['Force (how hard)', 'Angles (bank shots)'], tennis: ['Timing', 'Tracking a moving ball', 'Counting'], race: ['Left and right', 'Counting', 'Colours'], hockey: ['Aiming (direction)', 'Angles (bank shots)', 'Force (how hard)'],
   gym: ['Memory and sequences', 'Shapes', 'Body moves'], paint: ['Colours', 'Matching', 'Fine motor'] };
@@ -129,20 +137,36 @@ function openGate() { const a = 2 + Math.floor(Math.random() * 6), b = 2 + Math.
 let resetHold = 0, resetPress = false;
 function drawParents() {
   c.fillStyle = '#f4f1ff'; c.fillRect(0, 0, W, H); backBtn(() => go('hub'));
-  text('For grown-ups', 195, 62, 26); let y = 120;
-  c.fillStyle = '#fff'; rr(c, 16, y, W - 32, 330, 20); c.fill();
-  text(CLUB_NAME, 195, y + 28, 22, '#7b4fd6'); text(hasClub() ? 'Everything is unlocked. Thank you!' : 'Unlock every level of every sport', 195, y + 56, 14, '#5a4a6e', 'center', 600);
+  text('For grown-ups', 195, 62, 26); const P = profiles(), me = current();
+  // ---- children (up to 3), each with an age band that tunes hints and touch slack ----
+  let y = 96; c.fillStyle = '#fff'; rr(c, 16, y, W - 32, 128, 20); c.fill();
+  P.list.forEach((pr, i) => { const x = 28 + i * 86, on = i === P.cur; c.fillStyle = on ? '#e3d9ff' : '#f6f3ff'; rr(c, x, y + 10, 78, 62, 14); c.fill(); if (on) { c.lineWidth = 3; c.strokeStyle = '#7b4fd6'; rr(c, x, y + 10, 78, 62, 14); c.stroke(); }
+    ball(c, pr.face as BallKind, x + 39, y + 32, 15, 0); text(pr.name, x + 39, y + 60, 11.5, INK, 'center', 800);
+    btn('kid' + i, x, y + 10, 78, 62, () => { sfx.tap(); if (i === P.cur) { setFace(i); } else pickChild(i); }); });
+  if (P.list.length < 3) { const x = 28 + P.list.length * 86; c.fillStyle = '#f6f3ff'; rr(c, x, y + 10, 78, 62, 14); c.fill(); text('+', x + 39, y + 40, 30, '#7b4fd6'); btn('kidAdd', x, y + 10, 78, 62, () => { sfx.tap(); const n = addProfile(); if (n >= 0) pickChild(n); }); }
+  text('Name', 330, y + 40, 13, '#1f7ae0'); btn('kidName', 290, y + 20, 80, 40, () => { const n = window.prompt('Child name', me.name); if (n) rename(P.cur, n); });
+  (['2-3', '4-5', '6+'] as Band[]).forEach((bd, i) => { const x = 28 + i * 112, on = me.band === bd; c.fillStyle = on ? '#7b4fd6' : '#efe9ff'; rr(c, x, y + 82, 104, 36, 12); c.fill(); text(tuning(bd).label, x + 52, y + 100, 13, on ? '#fff' : INK);
+    btn('band' + bd, x, y + 82, 104, 36, () => { sfx.tap(); setBand(P.cur, bd); applyTuning(); }); });
+  // ---- Club ----
+  y = 234; c.fillStyle = '#fff'; rr(c, 16, y, W - 32, 300, 20); c.fill();
+  text(CLUB_NAME, 195, y + 26, 21, '#7b4fd6'); text(hasClub() ? 'Everything is unlocked. Thank you!' : 'Unlock every level of every sport', 195, y + 50, 13.5, '#5a4a6e', 'center', 600);
   const plans: [Plan, string, string][] = [['yearly', `${store.prices.yearly} per year`, store.trial.yearly ? '7-day free trial, then auto-renews yearly' : 'Auto-renews yearly'], ['monthly', `${store.prices.monthly} per month`, store.trial.monthly ? '7-day free trial, then auto-renews monthly' : 'Auto-renews monthly'], ['forever', `${store.prices.forever} once`, 'Own it forever, no subscription']];
-  plans.forEach(([p, price, sub], i) => { const by = y + 80 + i * 72; c.fillStyle = store.ent.plan === p ? '#d9ffd0' : '#efe9ff'; rr(c, 30, by, W - 60, 62, 16); c.fill(); text(price, 46, by + 22, 20, INK, 'left', 900); text(sub, 46, by + 45, 12.5, '#5a4a6e', 'left', 600); btn('buy-' + p, 30, by, W - 60, 62, () => { sfx.tap(); void buy(p); }); });
-  const ly = y + 302; text('Restore', 70, ly, 15, '#1f7ae0'); btn('restore', 20, ly - 16, 100, 32, () => void restore()); text('Manage', 160, ly, 15, '#1f7ae0'); btn('manage', 115, ly - 16, 90, 32, () => void manage());
+  plans.forEach(([p, price, sub], i) => { const by = y + 66 + i * 68; c.fillStyle = store.ent.plan === p ? '#d9ffd0' : '#efe9ff'; rr(c, 30, by, W - 60, 60, 16); c.fill(); text(price, 46, by + 21, 19, INK, 'left', 900); text(sub, 46, by + 43, 12.5, '#5a4a6e', 'left', 600); btn('buy-' + p, 30, by, W - 60, 60, () => { sfx.tap(); void buy(p); }); });
+  const ly = y + 284; text('Restore', 70, ly, 15, '#1f7ae0'); btn('restore', 20, ly - 16, 100, 32, () => void restore()); text('Manage', 160, ly, 15, '#1f7ae0'); btn('manage', 115, ly - 16, 90, 32, () => void manage());
   text('Terms', 240, ly, 15, '#1f7ae0'); btn('terms', 210, ly - 16, 60, 32, () => openLink(TERMS_URL)); text('Privacy', 315, ly, 15, '#1f7ae0'); btn('privacy', 280, ly - 16, 80, 32, () => openLink(PRIVACY_URL));
-  if (store.msg) text(store.msg, 195, y + 345, 13, '#2a8a2a', 'center', 700);
-  y = 480; c.fillStyle = '#fff'; rr(c, 16, y, W - 32, 210, 20); c.fill(); text('What your child practised', 195, y + 24, 17); const sk = Object.entries(save.skills).sort((a, b) => b[1] - a[1]).slice(0, 7);
-  if (!sk.length) text('Nothing yet. Play an activity!', 195, y + 70, 14, '#5a4a6e', 'center', 600);
-  sk.forEach(([n, v], i) => { const yy = y + 54 + i * 21; text(n, 34, yy, 13, INK, 'left', 700); c.fillStyle = '#eee'; rr(c, 190, yy - 6, 160, 12, 6); c.fill(); c.fillStyle = '#3ddc4a'; rr(c, 190, yy - 6, Math.max(12, 160 * Math.min(1, v / 30)), 12, 6); c.fill(); });
-  y = 710; c.fillStyle = '#fff'; rr(c, 16, y, 170, 60, 18); c.fill(); text(muted ? 'Sound: off' : 'Sound: on', 101, y + 30, 15); btn('sound', 16, y, 170, 60, () => { setMuted(!muted); });
-  c.fillStyle = '#fff'; rr(c, 204, y, 170, 60, 18); c.fill(); if (resetHold > 0) { c.fillStyle = '#ffd0d0'; rr(c, 204, y, 170 * Math.min(1, resetHold / 3), 60, 18); c.fill(); } text('Hold to reset', 289, y + 30, 15, '#c0392b');
-  btn('reset', 204, y, 170, 60, () => { resetPress = true; });
+  if (store.msg) text(store.msg, 195, y + 262, 12, '#2a8a2a', 'center', 700);
+  // ---- this child's progress ----
+  y = 544; c.fillStyle = '#fff'; rr(c, 16, y, W - 32, 150, 20); c.fill(); text(`What ${me.name} practised`, 195, y + 22, 16); const sk = Object.entries(save.skills).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  text(`${save.trophies.length} trophies  ·  ${save.stickers.length} stickers`, 195, y + 42, 12, '#7a6a8e', 'center', 700);
+  if (!sk.length) text('Nothing yet. Play an activity!', 195, y + 90, 14, '#5a4a6e', 'center', 600);
+  sk.forEach(([n, v], i) => { const yy = y + 64 + i * 19; text(n, 34, yy, 12.5, INK, 'left', 700); c.fillStyle = '#eee'; rr(c, 190, yy - 6, 160, 12, 6); c.fill(); c.fillStyle = '#3ddc4a'; rr(c, 190, yy - 6, Math.max(12, 160 * Math.min(1, v / 30)), 12, 6); c.fill(); });
+  // ---- settings ----
+  y = 706; const BAR = (n: number) => '▮'.repeat(n) + '▯'.repeat(3 - n);
+  const set = (id: string, x: number, label: string, val: string, fn: () => void) => { c.fillStyle = '#fff'; rr(c, x, y, 82, 66, 16); c.fill(); text(label, x + 41, y + 22, 12.5, '#5a4a6e', 'center', 700); text(val, x + 41, y + 46, 15); btn(id, x, y, 82, 66, () => { fn(); saveSettings(); sfx.tap(); }); };
+  set('music', 16, 'Music', BAR(settings.musicVol), () => cycleVol('musicVol')); set('sfx', 106, 'Sounds', BAR(settings.sfxVol), () => cycleVol('sfxVol'));
+  set('voice', 196, 'Voice', settings.voice ? 'On' : 'Off', () => { settings.voice = !settings.voice; });
+  c.fillStyle = '#fff'; rr(c, 286, y, 88, 66, 16); c.fill(); if (resetHold > 0) { c.fillStyle = '#ffd0d0'; rr(c, 286, y, 88 * Math.min(1, resetHold / 3), 66, 16); c.fill(); } text('Hold to', 330, y + 24, 12.5, '#c0392b'); text('reset', 330, y + 44, 14, '#c0392b');
+  btn('reset', 286, y, 88, 66, () => { resetPress = true; });
   text('No ads. No tracking. No data leaves this device.', 195, 800, 12, '#7a6a8e', 'center', 600);
 }
 function drawModal() {
@@ -198,7 +222,7 @@ function release(e: PointerEvent) { if (e.pointerId !== pointerId) return; point
 cv.addEventListener('pointermove', e => { if (e.pointerId !== pointerId) return; lastPtr = performance.now(); const p = toLogical(e); if (screen === 'play' && act && winT < 0) act.move(p); if (townDrag) { townX = Math.max(0, Math.min(townMax, townDrag.sx - (p.x - townDrag.x))); } });
 cv.addEventListener('pointerup', release); cv.addEventListener('pointercancel', release); cv.addEventListener('lostpointercapture', e => { if (e.pointerId === pointerId) release(e); });
 addEventListener('blur', () => { if (pointerId !== null && act) act.up({ x: 0, y: 0 }); pointerId = null; pointerIsDown = false; });
-document.addEventListener('visibilitychange', () => { if (document.hidden) setMuted(true); else setMuted(false); });
+// backgrounding: audio.ts suspends and resumes the whole audio context
 document.title = GAME_TITLE;
 // offline: the web build registers dist/sw.js (made by scripts/precache.mjs). The iOS app bundles its files, so it needs none.
 if ('serviceWorker' in navigator && location.protocol.startsWith('http') && !(window as any).Capacitor?.isNativePlatform?.()) navigator.serviceWorker.register('./sw.js').catch(() => { /* */ });
@@ -213,7 +237,7 @@ function renderArt(kind: 'icon' | 'splash') {
   return cv2.toDataURL('image/png');
 }
 (window as any).__snap = { renderArt,
-  get screen() { return screen; }, get act() { return actI; }, get level() { return level; }, get winT() { return winT; }, get modal() { return modal ? modal.kind : null; }, levels: ACTS.map(a => a.levels), get freeRemix() { return freeRemix; }, get demo() { return demo ? demo.a : null; },
+  get screen() { return screen; }, get hintDelay() { return hintCfg.delay; }, get slack() { return tune.slack; }, get kid() { return profiles().cur; }, get act() { return actI; }, get level() { return level; }, get winT() { return winT; }, get modal() { return modal ? modal.kind : null; }, levels: ACTS.map(a => a.levels), get freeRemix() { return freeRemix; }, get demo() { return demo ? demo.a : null; },
   buttons: () => btns.map(b => ({ id: b.id, x: b.x, y: b.y, w: b.w, h: b.h })), next: () => act?.next() ?? null, busy: () => !!act?.busy?.(),
   toScreen: (x: number, y: number) => { const r = cv.getBoundingClientRect(); return { x: r.left + (ox + x * scale) / dpr, y: r.top + (oy + y * scale) / dpr }; },
   start: (i: number, l: number) => start(i, l), go, save: () => JSON.parse(JSON.stringify(save)), setSave: (s: Save) => { save = s; persist(); }, closeModal: () => { modal = null; afterWin(); },
