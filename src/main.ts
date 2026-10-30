@@ -70,7 +70,7 @@ function start(i: number, lv = save.lv[i], withIntro = false) {
   if (big) sfx.crowd();
   const key = ACTS[i].id + ':' + Math.min(lv, 1); if (!demoShown.has(key)) { demoShown.add(key); idle = 4.6; } // show the hand demo ~1.4 s in
 }
-let screenAt = 0, fadeT = 1, intro: { t: number } | null = null, tut = -1, onboard = -1, poke: { i: number; t: number } | null = null;
+let busyT = 0, heals = 0, screenAt = 0, fadeT = 1, intro: { t: number } | null = null, tut = -1, onboard = -1, poke: { i: number; t: number } | null = null;
 function go(s: Screen) { modal = null; fadeT = 0; intro = null; tut = -1; if (s === 'hub' && !save.seen) { save.seen = 1; persist(); onboard = 0; } screen = s; musicScene(s === 'play' ? (ACTS[actI]?.id === 'paint' ? 'paint' : 'sports') : 'hub'); resetHint(); screenAt = performance.now(); act = null; demo = null; winT = -1; idle = 0; if (s === 'hub') say(L.hub, false); if (s === 'setup') say(L.who); if (s === 'town') { bookPage = -1; say(save.stickers.length ? L.shelfHi : L.shelfEmpty); townX = 0; }
   if (s === 'play' && freeRemix) say(L.locked, false); }
 // ---- buttons (registered while drawing; hit-tested on the next pointer down) ----
@@ -315,7 +315,7 @@ function frame(now: number) {
   if (lockT > 0) lockT -= dt; if (mascotPoseT > 0) { mascotPoseT -= dt; if (mascotPoseT <= 0) mascotPose = 'stand'; } if (shake > 0) shake = Math.max(0, shake - dt * 30);
   if (screen === 'play' && act) { { const n = Math.ceil(dt / (1 / 120)); for (let k = 0; k < n && act; k++) act.update(dt / n); } // fixed small physics steps: the same shot rolls the same on a slow device
     if (winT >= 0) { const w0 = winT; winT += dt; if (w0 < 1.9 && winT >= 1.9 && newSticker >= 0) { voiceSay(L.sticker); sfx.pop(); } if (w0 < 2.3 && winT >= 2.3 && newSticker >= 0) sfx.stickerIn(); if (winT > 3.2 && !modal) { winT = -1; if (!checkUnlock()) afterWin(); } }
-    else if (!modal) { idle += dt; if (act.busy?.()) idle = 0; const cur = act; stepHint(dt, idle, () => cur.next(), () => { if (cur.intro) { say(cur.intro, false); mascotPose = 'point'; mascotPoseT = 2.5; } });
+    else if (!modal) { idle += dt; if (act.busy?.()) { idle = 0; busyT += dt; if (busyT > 12) { busyT = 0; heals++; const lv = level; start(actI, lv); return; } } else busyT = 0; const cur = act; stepHint(dt, idle, () => cur.next(), () => { if (cur.intro) { say(cur.intro, false); mascotPose = 'point'; mascotPoseT = 2.5; } });
       demo = hint.active && hint.act ? { a: hint.act, t: hint.t } : null; if (idle > 12 && mascotPoseT <= 0) mascotPose = 'think'; } }
   if (resetPress && pointerIsDown) { resetHold += dt; if (resetHold > 3) { resetPress = false; resetHold = 0; save = fresh(); persist(); sfx.crash(); } } else { resetHold = 0; resetPress = false; }
   for (const p of parts) { p.vy += 900 * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= 0.99; p.life -= dt; } for (let i = parts.length - 1; i >= 0; i--) if (parts[i].life <= 0) parts.splice(i, 1);
@@ -360,7 +360,7 @@ function renderArt(kind: 'icon' | 'splash') {
 }
 (window as any).__snap = { renderArt,
   get screen() { return screen; }, get audio() { return { ...audioStats, track: audioStats.track, ctx: audioStats.ctx }; }, get winStars() { return winStars; }, get hintDelay() { return hintCfg.delay; }, get slack() { return tune.slack; }, get kid() { return profiles().cur; }, get act() { return actI; }, get level() { return level; }, get winT() { return winT; }, get modal() { return modal ? modal.kind : null; }, levels: ACTS.map(a => a.levels), get freeRemix() { return freeRemix; }, get demo() { return demo ? demo.a : null; },
-  buttons: () => btns.map(b => ({ id: b.id, x: b.x, y: b.y, w: b.w, h: b.h })), next: () => act?.next() ?? null, busy: () => !!intro || !!poke || !!act?.busy?.(), get intro() { return !!intro; }, get onboard() { return onboard; },
+  buttons: () => btns.map(b => ({ id: b.id, x: b.x, y: b.y, w: b.w, h: b.h })), next: () => act?.next() ?? null, busy: () => !!intro || !!poke || !!act?.busy?.(), get heals() { return heals; }, get intro() { return !!intro; }, get onboard() { return onboard; },
   toScreen: (x: number, y: number) => { const r = cv.getBoundingClientRect(); return { x: r.left + (ox + x * scale) / dpr, y: r.top + (oy + y * scale) / dpr }; },
   start: (i: number, l: number) => start(i, l), go, save: () => JSON.parse(JSON.stringify(save)), setSave: (s: Save) => { save = s; persist(); }, closeModal: () => { modal = null; afterWin(); },
   store: () => ({ club: hasClub(), sim: store.sim, msg: store.msg }), storeTest, products: PRODUCTS, lines: allLines, lineId, missing: () => [...missing], get gate() { return { ...gate }; },

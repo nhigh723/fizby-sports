@@ -54,7 +54,7 @@ export function paint(api: Api, level: number): Activity {
       for (let i = 0; i < need; i++) { c.fillStyle = i < made ? '#ffd60a' : 'rgba(43,33,64,0.15)'; c.beginPath(); c.arc(180 + i * 30, 825, 9, 0, 6.28); c.fill(); }
       if (sel >= 0) { c.fillStyle = PAL[sel]; c.beginPath(); c.arc(W - 40, 130, 16, 0, 6.28); c.fill(); } },
     down(q: Pt) { if (done || cheer >= 0) return; const pi = PAL.findIndex((_, i) => Math.hypot(q.x - pot(i).x, q.y - pot(i).y) < 28); if (pi >= 0) { sel = pi; api.sfx.pick(); return; }
-      if (sel < 0) return; const ps = [...parts].reverse().find(p => hit(p, q)); if (!ps) return;
+      if (sel < 0) return; const byDot = parts.find(p => p.got !== p.want && Math.hypot(spot(p).x - q.x, spot(p).y - q.y) < 16); const ps = byDot || [...parts].reverse().find(p => hit(p, q)); if (!ps) return;
       ps.got = PAL[sel]; api.sfx.splash(); if (ps.got !== ps.want) { api.say(L.paintWrong, false); return; }
       if (parts.every(p => p.got === p.want)) { cheer = 0; api.sfx.cheer(); api.burst(195, 400, 40); } else { const nx = parts.find(p => p.got !== p.want); if (nx && (level === 4 || level >= 5)) api.say(colorLine(nx.want)); } },
     move() { /* */ }, up() { /* */ },
