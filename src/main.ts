@@ -1,7 +1,9 @@
 // Fizby Sports: app shell. Screens, input routing, save, stickers/trophies, hint hand, Trophy Room, grown-ups area + parental gate.
 import { CLUB_NAME, GAME_TITLE } from './brand';
-import { W, H, INK, COLORS, mascot, mascotBust, hand, sky, confettiDraw, rr, shade, type Ctx, type Pose } from './art';
-import { initAudio, sfx, say as voiceSay, isSpeaking, setMuted, muted, missing } from './audio';
+import { mascot, mascotBust, preloadArt, type Mood } from './fizby2d';
+import { stepHint, drawHint, resetHint, hint, hintCfg, setHintCtx } from './hint';
+import { W, H, INK, COLORS, hand, sky, confettiDraw, rr, shade, type Ctx, type Pose } from './art';
+import { initAudio, sfx, say as voiceSay, isSpeaking, setMuted, muted, missing, musicScene, stopVoice } from './audio';
 import { L, allLines } from './lines';
 import type { Activity, Action, Api, Pt } from './kit';
 import { ball, field, sticker, trophy, star, keeper, pin, hoop, goal, type BallKind } from './sports';
@@ -10,7 +12,7 @@ import { golf } from './acts/golf'; import { hockey } from './acts/hockey'; impo
 import { SPORT_NAME } from './lines';
 import { store, hasClub, levelFree, buy, restore, manage, initStore, PRODUCTS, TERMS_URL, PRIVACY_URL, openLink, storeTest, type Plan } from './store';
 import { lineId } from './voice';
-const cv = document.getElementById('c') as HTMLCanvasElement, c = cv.getContext('2d')!;
+const cv = document.getElementById('c') as HTMLCanvasElement, c = cv.getContext('2d')!; setHintCtx(c); void preloadArt([]); musicScene('hub');
 let scale = 1, ox = 0, oy = 0, dpr = 1;
 function resize() { dpr = Math.min(devicePixelRatio || 1, 3); cv.width = Math.round(innerWidth * dpr); cv.height = Math.round(innerHeight * dpr); scale = Math.min(cv.width / W, cv.height / H); ox = (cv.width - W * scale) / 2; oy = (cv.height - H * scale) / 2; }
 addEventListener('resize', resize); resize();
@@ -34,12 +36,14 @@ const SKILLS: Record<string, string[]> = { soccer: ['Aiming (direction)', 'Count
 type Screen = 'title' | 'hub' | 'play' | 'town' | 'parents';
 let newSticker = -1, freeRemix = false;
 let screen: Screen = 'title', T = 0, actI = 0, level = 0, act: Activity | null = null, winT = -1, winLine = '', idle = 0, demo: { a: Action; t: number } | null = null, demoShown = new Set<string>();
-let modal: null | { kind: 'gate' } | { kind: 'unlock'; sport: number; t: number } = null, shake = 0, mascotPose: Pose = 'stand', mascotPoseT = 0, lockWiggle = -1, lockT = 0, townX = 0, townDrag: { x: number; sx: number; moved: boolean } | null = null;
+let modal: null | { kind: 'gate' } | { kind: 'unlock'; sport: number; t: number } = null, shake = 0, mascotPose: Mood = 'stand', mascotPoseT = 0, lockWiggle = -1, lockT = 0, townX = 0, townDrag: { x: number; sx: number; moved: boolean } | null = null;
 const parts: { x: number; y: number; vx: number; vy: number; r: number; col: string; life: number }[] = [];
 function burst(x: number, y: number, n = 20, cols: string[] = COLORS) { for (let i = 0; i < n && parts.length < 400; i++) { const a = Math.random() * 6.28, s = 120 + Math.random() * 380; parts.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 200, r: 4 + Math.random() * 5, col: cols[i % cols.length], life: 1.2 + Math.random() * 0.6 }); } }
-function say(text: string, force = true) { void voiceSay(text, force); }
+/** force: a fresh line drops whatever is queued (the current sentence still finishes); otherwise it is skipped while Fizby talks */
+function say(text: string, force = true) { if (!text) return; if (!force && isSpeaking()) return; if (force) stopVoice(false); voiceSay(text); }
+const sfxApi = { ...sfx, wrong: () => { sfx.wrong(); mascotPose = 'oops'; mascotPoseT = 1.4; } };
 const api: Api = {
-  say, sfx, burst, t: () => T, shake: (a) => { shake = Math.max(shake, a); },
+  say, sfx: sfxApi, burst, t: () => T, shake: (a) => { shake = Math.max(shake, a); },
   win(line: string) { if (winT >= 0 || !act) return; winT = 0; winLine = line; sfx.cheer(); burst(195, 300, 60); say(line); mascotPose = 'cheer'; mascotPoseT = 3; credit(); },
 };
 function credit() { save.wins++; for (const s of SKILLS[ACTS[actI].id]) save.skills[s] = (save.skills[s] || 0) + 1; if (!freeRemix && level >= save.lv[actI]) save.lv[actI] = level + 1;
@@ -48,12 +52,12 @@ let pendingTrophy = -1;
 function checkUnlock() { if (pendingTrophy >= 0) { modal = { kind: 'unlock', sport: pendingTrophy, t: 0 }; pendingTrophy = -1; sfx.unlock(); say(L.trophy); return true; } return false; }
 const clubLocked = (l: number) => !hasClub() && !levelFree(l);
 function start(i: number, lv = save.lv[i]) {
-  actI = i; level = lv; freeRemix = clubLocked(lv); act = ACTS[i].make(api, freeRemix ? lv % 2 : lv); newSticker = -1; screen = 'play'; winT = -1; idle = 0; demo = null; mascotPose = 'point'; mascotPoseT = 2;
+  actI = i; level = lv; freeRemix = clubLocked(lv); act = ACTS[i].make(api, freeRemix ? lv % 2 : lv); newSticker = -1; screen = 'play'; musicScene(ACTS[i].id === 'paint' ? 'paint' : 'sports'); resetHint(); winT = -1; idle = 0; demo = null; mascotPose = 'point'; mascotPoseT = 2;
   if (act.intro) say(act.intro);
   const key = ACTS[i].id + ':' + Math.min(lv, 1); if (!demoShown.has(key)) { demoShown.add(key); idle = 4.6; } // show the hand demo ~1.4 s in
 }
 let screenAt = 0;
-function go(s: Screen) { screen = s; screenAt = performance.now(); act = null; demo = null; winT = -1; idle = 0; if (s === 'hub') say(L.hub, false); if (s === 'town') { say(save.stickers.length ? L.shelfHi : L.shelfEmpty); townX = 0; }
+function go(s: Screen) { screen = s; musicScene(s === 'play' ? (ACTS[actI]?.id === 'paint' ? 'paint' : 'sports') : 'hub'); resetHint(); screenAt = performance.now(); act = null; demo = null; winT = -1; idle = 0; if (s === 'hub') say(L.hub, false); if (s === 'town') { say(save.stickers.length ? L.shelfHi : L.shelfEmpty); townX = 0; }
   if (s === 'play' && freeRemix) say(L.locked, false); }
 // ---- buttons (registered while drawing; hit-tested on the next pointer down) ----
 type Btn = { id: string; x: number; y: number; w: number; h: number; fn: () => void };
@@ -85,7 +89,7 @@ function drawTitle() {
 }
 function drawHub() {
   sky(c, '#22d3ee', '#c8f7ff', T, 790, '#7fe3f5', '#5fd6ee', false);
-  backBtn(() => go('title')); mascotBust(c, 195, 66, 46, T, isSpeaking()); btn('hubMascot', 150, 20, 90, 90, () => { sfx.tap(); say(L.hub); });
+  backBtn(() => go('title')); mascotBust(c, 195, 66, 46, T, isSpeaking(), 'point'); btn('hubMascot', 150, 20, 90, 90, () => { sfx.tap(); say(L.hub); });
   roundBtn('gear', W - 44, 50, 22, 'rgba(255,255,255,0.5)', (c) => { c.fillStyle = '#7a5a8a'; for (let i = 0; i < 8; i++) { c.save(); c.rotate(i * 0.785); c.fillRect(-3, -14, 6, 8); c.restore(); } c.beginPath(); c.arc(0, 0, 9, 0, 6.28); c.fill(); c.fillStyle = '#fff'; c.beginPath(); c.arc(0, 0, 4, 0, 6.28); c.fill(); }, () => { initAudio(); sfx.tap(); openGate(); });
   for (let i = 0; i < ACTS.length; i++) {
     const col = i % 3, row = Math.floor(i / 3), w = 112, h = 112, x = 13 + col * (w + 13), y = 128 + row * (h + 10), lk = false, wig = lockWiggle === i && lockT > 0 ? Math.sin(lockT * 40) * 5 : 0;
@@ -105,12 +109,12 @@ function drawPlay() {
   const A = ACTS[actI]; sky(c, A.bg[0], A.bg[1], T, 900, shade(A.bg[1], -0.05), shade(A.bg[1], -0.1), false);
   act!.draw(c);
   backBtn(() => go('hub'));
-  mascotBust(c, 195, 64, 40, T, isSpeaking()); btn('mascot', 150, 20, 90, 90, () => { sfx.tap(); if (act?.intro) say(act.intro); idle = 99; });
+  mascotBust(c, 195, 64, 40, T, isSpeaking(), mascotPose); btn('mascot', 150, 20, 90, 90, () => { sfx.tap(); if (act?.intro) say(act.intro); idle = 99; });
   if (A.levels) for (let k = 0; k < A.levels; k++) { c.fillStyle = Math.min(level, A.levels) > k ? '#ffd60a' : 'rgba(255,255,255,0.7)'; c.beginPath(); c.arc(W - 30 - (A.levels - 1 - k) * 18, 62, 7, 0, 6.28); c.fill(); }
   if (winT >= 0) { const k = Math.min(1, winT * 3); c.fillStyle = `rgba(255,255,255,${0.25 * k})`; c.fillRect(0, 0, W, H); mascot(c, 300, 844 - 40 + (1 - k) * 300, 270, 'cheer', T, isSpeaking()); if (newSticker >= 0) { const s = Math.min(1, winT * 2); sticker(c, 160, 420, 30 + 50 * s, Math.floor(newSticker / 10), newSticker % 10, T); } }
 }
 function drawTown() {
-  c.fillStyle = '#7c5cff'; c.fillRect(0, 0, W, H); backBtn(() => go('hub')); mascotBust(c, 195, 66, 42, T, isSpeaking());
+  c.fillStyle = '#7c5cff'; c.fillRect(0, 0, W, H); backBtn(() => go('hub')); mascotBust(c, 195, 66, 42, T, isSpeaking(), 'cheer');
   c.fillStyle = '#b07a3a'; rr(c, 16, 205, W - 32, 14, 6); c.fill(); rr(c, 16, 305, W - 32, 14, 6); c.fill(); for (let k = 0; k < ACTS.length; k++) { const x = 40 + (k % 6) * 62 + (k >= 6 ? 31 : 0), ty2 = k < 6 ? 170 : 270; trophy(c, x, ty2, 0.72, k, save.trophies.includes(k), T); btn('trophy' + k, x - 28, ty2 - 40, 56, 76, () => { sfx.bell(); say(SPORT_NAME[k]); }); }
   c.fillStyle = '#fff'; rr(c, 16, 335, W - 32, 495, 24); c.fill();
   for (let i = 0; i < 24; i++) { const x = 60 + (i % 4) * 90, y = 378 + Math.floor(i / 4) * 78, s = save.stickers[save.stickers.length - 24 + i] ?? save.stickers[i];
@@ -158,31 +162,22 @@ function drawModal() {
   text('Close', 195, 595, 16, '#1f7ae0'); btn('gateX', 135, 575, 120, 40, () => { sfx.tap(); modal = null; });
 }
 function afterWin() { if (screen !== 'play') return; const A = ACTS[actI]; if (A.levels) start(actI); }
-// ---- hint hand ----
-function drawDemo() {
-  if (!demo || !act || winT >= 0) return; const a = demo.a, t = demo.t;
-  if (a.type === 'tap') { const k = (t % 1.4) / 1.4, pr = k > 0.45 && k < 0.65 ? Math.sin((k - 0.45) / 0.2 * Math.PI) : 0, lift = k < 0.45 ? (0.45 - k) * 60 : 0; hand(c, a.x, a.y - lift + 0, pr, Math.min(1, t * 4)); }
-  if (a.type === 'drag') { const cyc = 2.2, k = (t % cyc) / cyc, P = a.path; let x = P[0][0], y = P[0][1], pr = 0;
-    if (k < 0.15) { pr = k / 0.15; } else if (k < 0.8) { const u = (k - 0.15) / 0.65, seg = u * (P.length - 1), i = Math.min(P.length - 2, Math.floor(seg)), f = seg - i, e = f * f * (3 - 2 * f); x = P[i][0] + (P[i + 1][0] - P[i][0]) * e; y = P[i][1] + (P[i + 1][1] - P[i][1]) * e; pr = 0.6;
-      c.save(); c.strokeStyle = 'rgba(255,255,255,0.7)'; c.lineWidth = 6; c.setLineDash([2, 12]); c.lineCap = 'round'; c.beginPath(); c.moveTo(P[0][0], P[0][1]); for (const q of P.slice(1)) c.lineTo(q[0], q[1]); c.stroke(); c.restore(); }
-    else { x = P[P.length - 1][0]; y = P[P.length - 1][1]; pr = 0; }
-    hand(c, x, y, pr, k > 0.9 ? (1 - k) * 10 : Math.min(1, t * 4)); }
-}
 // ---- loop ----
 let last = performance.now();
 function frame(now: number) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now; T += dt; requestAnimationFrame(frame);
-  if (lockT > 0) lockT -= dt; if (mascotPoseT > 0) mascotPoseT -= dt; else mascotPose = 'stand'; if (shake > 0) shake = Math.max(0, shake - dt * 30);
+  if (lockT > 0) lockT -= dt; if (mascotPoseT > 0) { mascotPoseT -= dt; if (mascotPoseT <= 0) mascotPose = 'stand'; } if (shake > 0) shake = Math.max(0, shake - dt * 30);
   if (screen === 'play' && act) { act.update(dt);
     if (winT >= 0) { const w0 = winT; winT += dt; if (w0 < 1.9 && winT >= 1.9 && newSticker >= 0) { say(L.sticker); sfx.pop(); } if (winT > 3.2 && !modal) { winT = -1; if (!checkUnlock()) afterWin(); } }
-    else if (!modal) { idle += dt; if (act.busy?.()) idle = 0; if (idle > 6) { const a = act.next(); if (a && a.type !== 'wait') { if (!demo || JSON.stringify(demo.a) !== JSON.stringify(a)) demo = { a, t: 0 }; } else demo = null; } if (demo) demo.t += dt; } }
+    else if (!modal) { idle += dt; if (act.busy?.()) idle = 0; const cur = act; stepHint(dt, idle, () => cur.next(), () => { if (cur.intro) { say(cur.intro, false); mascotPose = 'point'; mascotPoseT = 2.5; } });
+      demo = hint.active && hint.act ? { a: hint.act, t: hint.t } : null; if (idle > 12 && mascotPoseT <= 0) mascotPose = 'think'; } }
   if (resetPress && pointerIsDown) { resetHold += dt; if (resetHold > 3) { resetPress = false; resetHold = 0; save = fresh(); persist(); sfx.crash(); } } else { resetHold = 0; resetPress = false; }
   for (const p of parts) { p.vy += 900 * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= 0.99; p.life -= dt; } for (let i = parts.length - 1; i >= 0; i--) if (parts[i].life <= 0) parts.splice(i, 1);
   c.setTransform(1, 0, 0, 1, 0, 0); c.fillStyle = '#ffe14d'; c.fillRect(0, 0, cv.width, cv.height);
   const sx = shake ? (Math.random() - 0.5) * shake : 0, sy = shake ? (Math.random() - 0.5) * shake : 0; c.setTransform(scale, 0, 0, scale, ox + sx * scale, oy + sy * scale);
   frameBtns = [];
   if (screen === 'title') drawTitle(); else if (screen === 'hub') drawHub(); else if (screen === 'play' && act) drawPlay(); else if (screen === 'town') townMax = drawTown(); else if (screen === 'parents') drawParents();
-  confettiDraw(c, parts); drawDemo(); if (modal) { frameBtns = frameBtns.filter(() => false); drawModal(); }
+  confettiDraw(c, parts); if (screen === 'play' && act && winT < 0 && !modal) drawHint(T, idle); if (modal) { frameBtns = frameBtns.filter(() => false); drawModal(); }
   btns = frameBtns;
 }
 // ---- input: one finger at a time; leaving the screen or a cancelled touch counts as letting go ----
@@ -192,7 +187,7 @@ cv.addEventListener('pointerdown', e => {
   if (pointerId !== null) { // a second finger: ignore it, unless the first one went quiet (a lost touch end must never freeze input)
     if (performance.now() - lastPtr < 600) return; const old = pointerId; release({ pointerId: old, clientX: e.clientX, clientY: e.clientY } as PointerEvent); }
   pointerId = e.pointerId; lastPtr = performance.now(); pointerIsDown = true; try { cv.setPointerCapture(e.pointerId); } catch { /* */ } initAudio();
-  const p = toLogical(e); idle = 0; demo = null; if (performance.now() - screenAt < 180) return; // a tap that lands as the screen changes must not hit the new screen's buttons
+  const p = toLogical(e); idle = 0; demo = null; resetHint(); if (mascotPose === 'think') mascotPose = 'stand'; if (performance.now() - screenAt < 180) return; // a tap that lands as the screen changes must not hit the new screen's buttons
   const b = [...btns].reverse().find(b => p.x >= b.x && p.x <= b.x + b.w && p.y >= b.y && p.y <= b.y + b.h);
   if (b && !(screen === 'play' && b.id !== 'back' && b.id !== 'mascot' && !modal && act && hitAct(p))) { b.fn(); if (screen === 'town') townDrag = null; return; }
   if (screen === 'play' && act && winT < 0 && !modal) act.down(p);
