@@ -37,7 +37,9 @@ export function gym(api: Api, level: number): Activity {
     draw(c: Ctx) { const t = api.t(); setKitCtx(c);
       const g = c.createLinearGradient(0, 0, 0, 470); g.addColorStop(0, '#ffb3e6'); g.addColorStop(1, '#ff7ccf'); c.fillStyle = g; band(c, 0, 470);
       for (let i = -2; i < 9; i++) { c.fillStyle = i % 2 ? 'rgba(255,255,255,0.13)' : 'rgba(155,92,255,0.12)'; c.fillRect(i * 60, 0, 30, 470); }
-      for (let i = 0; i < 8; i++) { const px = 10 + i * 54; c.fillStyle = ['#ffd60a', '#1fb6ff', '#3ddc4a', '#ff3b6b'][i % 4]; c.beginPath(); c.moveTo(px, 40); c.lineTo(px + 44, 40); c.lineTo(px + 22, 70); c.fill(); } c.strokeStyle = '#fff'; c.lineWidth = 3; c.beginPath(); c.moveTo(-200, 40); c.lineTo(600, 40); c.stroke();
+      // bunting: two side swags below the HUD buttons, beside the beam frame (never behind the top buttons)
+      for (const [x0, x1] of [[-20, 96], [294, 410]]) { const y0 = 200, sag = 22, n = 4; c.strokeStyle = '#fff'; c.lineWidth = 3; c.beginPath(); c.moveTo(x0, y0); c.quadraticCurveTo((x0 + x1) / 2, y0 + sag * 2, x1, y0); c.stroke();
+        for (let i = 0; i < n; i++) { const u = (i + 0.5) / n, px = x0 + (x1 - x0) * u, py = y0 + sag * 4 * u * (1 - u); c.fillStyle = ['#ffd60a', '#1fb6ff', '#3ddc4a', '#ff3b6b'][(i + (x0 > 0 ? 2 : 0)) % 4]; c.beginPath(); c.moveTo(px - 12, py); c.lineTo(px + 12, py); c.lineTo(px, py + 24); c.fill(); } }
       c.fillStyle = '#ffd6f4'; band(c, 470, 374); c.fillStyle = '#f7b8e6'; for (let i = -2; i < 10; i++) c.fillRect(i * 50, 470, 2, 374);
       box(30, 618, W - 60, 22, 10, '#1fb6ff'); box(18, 640, W - 36, 14, 6, '#0e8fd0');
       box(70, 360, 250, 14, 7, '#c98a4b'); box(100, 374, 12, 40, 4, '#8a93bb'); box(278, 374, 12, 40, 4, '#8a93bb');
