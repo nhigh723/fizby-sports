@@ -12,7 +12,7 @@ Commits push after each chunk. Newest first.
   - offline-check: OK (`/workspace/fs-logs/final/offline-check.log`)
   - parity screenshots: 26 pairs in `screenshots/parity/`
 - Still to do (as of 00:50 EDT):
-  1. Green full play-all. Running under nohup; log at fs-logs/final/play-all.log.
+  1. DONE: green full play-all (EXIT 0)
   2. Rerun monkey. It passed at 23:15 but needs a rerun after the bowling, tennis and racing fixes.
   3. Rerun audio-check and offline-check.
   4. Re-shoot the parity screenshots.
