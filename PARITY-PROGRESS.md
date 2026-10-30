@@ -31,3 +31,7 @@ Source: /workspace/fs-qa-independent/REPORT.md. Newest first.
 - Frame loop bug from 81f4685 (inline comment swallowed `T += dt`) found by an fps probe and fixed in 77b3bc7; nothing deployed in between.
 - B1 diagnostics in __snap.perf: longest JS frame (<=90 ms), longest long task, gaps between frames, slowest audio/voice call (<=2 ms). The stalls line up with 8-16 s gaps where no rAF and no timer ran, while no JS task was long. So the page is being starved, not looping. Running an A/B now: headless GPU (SwiftShader) vs --disable-gpu.
 - Watchdog restarts now count as test failures in play-all.
+
+## QA round 2: update (Oct 30, 2026 ~10:30 EDT)
+- B1 root cause: the box itself freezes. The host-stall monitor (/workspace/fs-logs/lagmon.mjs, a plain Node 100 ms timer) logged gaps of 80 s, 332 s, 86 s, 99 s and 67 s (lagmon.log). Over the same windows the page shows frame gaps with no long JS task (__snap.perf). Bowl, paint and tee "stalls" happen only inside these windows. Once the box is frozen past the timeout, the game's own real-time watchdog restarted turns, which made more noise. That watchdog is removed. What remains is a game-time detector (logs only), and play-all fails if it ever triggers.
+- play-all now budgets each level in game time. Full run: 110 ok / 0 FAIL, 0 detector hits (fs-logs/qa-final2/full-1.log).
