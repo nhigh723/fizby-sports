@@ -1,6 +1,6 @@
 // Bowling: swipe the ball up the lane. Fizby counts every pin that falls. Teaches counting (to 10), aim, left/right.
 // L0 3 pins - L1 6 pins - L2 10 pins - L3 10 pins, narrow lane - L4 pins sit left or right - L5 (hard) 10 pins left/right, narrow lane,
-// pins only knock the pin right behind them, so most racks take 2-3 rolls. Each level: 2 racks (L5: 3). 6+: remixes.
+// pins only knock the pin right behind them, so most racks take 2-3 rolls. Each level: 2 racks. 6+: remixes.
 import { type Ctx, W } from '../art';
 import { ball, pin } from '../sports';
 import { L, NUM } from '../lines';
@@ -11,7 +11,7 @@ type Pin = { x: number; y: number; down: boolean; rot: number; vx: number; vy: n
 function rack(n: number, cx: number): Pin[] { const ps: Pin[] = []; let row = 0; while (ps.length < n) { for (let k = 0; k <= row && ps.length < n; k++) ps.push({ x: cx + (k - row / 2) * 36, y: 280 - row * 34, down: false, rot: 0, vx: 0, vy: 0, counted: false }); row++; } return ps; }
 export function bowl(api: Api, level: number): Activity {
   const remix = level >= 6, rnd = Math.random, hard = level === 5, sides = level === 4 || hard || (remix && rnd() < 0.5);
-  const N = remix ? [3, 6, 10][Math.floor(rnd() * 3)] : [3, 6, 10, 10, 6, 10][level], LW = level === 3 || hard ? 170 : 200, racks = hard ? 3 : 2;
+  const N = remix ? [3, 6, 10][Math.floor(rnd() * 3)] : [3, 6, 10, 10, 6, 10][level], LW = level === 3 || hard ? 170 : 200, racks = 2;
   let side = 0, pins: Pin[] = [];
   const newRack = () => { side = rnd() < 0.5 ? -1 : 1; pins = rack(N, sides ? 195 + side * 45 : 195); if (sides) api.say(side < 0 ? L.bowlLeft : L.bowlRight); };
   let bx = B.x, by = B.y, vx = 0, vy = 0, roll = false, start: Pt | null = null, countQ: number[] = [], countT = 0, after = -1, cleared = 0, done = false, spin = 0, gutter = false;
