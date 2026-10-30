@@ -34,7 +34,7 @@ async function beat(i, l) {
   return -1;
 }
 const ONLY = process.env.ONLY ? process.env.ONLY.split(',').map(Number) : null;
-for (let i = 0; i < NA; i++) if (!ONLY || ONLY.includes(i)) for (let l = 0; l < LV[i] + 2; l++) { const n = await beat(i, l); ok(n >= 0, `activity ${i} level ${l}${l >= LV[i] ? ' (remix)' : ''}: won in ${n} inputs`); }
+for (let i = 0; i < NA; i++) if (!ONLY || ONLY.includes(i)) for (let l = 0; l < LV[i] + 2; l++) if (!process.env.LVL || process.env.LVL.split(",").map(Number).includes(l)) { const n = await beat(i, l); ok(n >= 0, `activity ${i} level ${l}${l >= LV[i] ? ' (remix)' : ''}: won in ${n} inputs`); }
 // mistakes are recoverable: a kick that misses wide bounces back (no fail), then the round is still winnable
 await S(() => window.__snap.start(0, 0)); await wait(800);
 await run({ type: 'drag', path: [[195, 700], [120, 650], [20, 600]] }); await wait(300); ok((await S(() => window.__snap.winT)) < 0, 'soccer: a wide kick is a miss, no win, no fail');

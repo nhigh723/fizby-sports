@@ -12,12 +12,12 @@ function rack(n: number, cx: number): Pin[] { const ps: Pin[] = []; let row = 0;
 export function bowl(api: Api, level: number): Activity {
   const remix = level >= 6, rnd = Math.random, hard = level === 5, sides = level === 4 || hard || (remix && rnd() < 0.5);
   const N = remix ? [3, 6, 10][Math.floor(rnd() * 3)] : [3, 6, 10, 10, 6, 10][level], LW = level === 3 || hard ? 170 : 200, racks = 2;
+  const lx0 = 195 - LW / 2, lx1 = 195 + LW / 2, rows = Math.ceil((Math.sqrt(8 * N + 1) - 1) / 2), OFF = Math.max(0, Math.min(45, LW / 2 - (rows - 1) * 18 - 8)); // the whole rack stays reachable inside the lane
   let side = 0, pins: Pin[] = [];
-  const newRack = () => { side = rnd() < 0.5 ? -1 : 1; pins = rack(N, sides ? 195 + side * 45 : 195); if (sides) api.say(side < 0 ? L.bowlLeft : L.bowlRight); };
+  const newRack = () => { side = rnd() < 0.5 ? -1 : 1; pins = rack(N, sides ? 195 + side * OFF : 195); if (sides) api.say(side < 0 ? L.bowlLeft : L.bowlRight); };
   let bx = B.x, by = B.y, vx = 0, vy = 0, roll = false, start: Pt | null = null, countQ: number[] = [], countT = 0, after = -1, cleared = 0, done = false, spin = 0, gutter = false;
-  side = rnd() < 0.5 ? -1 : 1; pins = rack(N, sides ? 195 + side * 45 : 195); if (sides) setTimeout(() => api.say(side < 0 ? L.bowlLeft : L.bowlRight), 2600);
-  const lx0 = 195 - LW / 2, lx1 = 195 + LW / 2;
-  const reset = () => { bx = B.x; by = B.y; vx = vy = 0; roll = false; gutter = false; };
+  side = rnd() < 0.5 ? -1 : 1; pins = rack(N, sides ? 195 + side * OFF : 195); if (sides) setTimeout(() => api.say(side < 0 ? L.bowlLeft : L.bowlRight), 2600);
+    const reset = () => { bx = B.x; by = B.y; vx = vy = 0; roll = false; gutter = false; };
   return {
     intro: L.bowlGo,
     update(dt) { spin += dt * (roll ? 10 : 0);
@@ -41,7 +41,7 @@ export function bowl(api: Api, level: number): Activity {
     move() { /* */ },
     up(p: Pt) { if (!start) return; const dx = p.x - start.x, dy = p.y - start.y, d = Math.hypot(dx, dy); start = null; if (d < 25 || dy > -10) return; vx = dx / d * SPEED; vy = dy / d * SPEED; roll = true; api.sfx.roll(); },
     next() { if (roll || after >= 0 || done) return null; const up = pins.filter(p => !p.down); if (!up.length) return null; const t = up.sort((a, b) => b.y - a.y)[0];
-      const dx = t.x - B.x, dy = t.y - B.y, d = Math.hypot(dx, dy), k = 130 / d; return { type: 'drag', path: [[B.x, B.y], [B.x + dx * k * 0.5, B.y + dy * k * 0.5], [B.x + dx * k, B.y + dy * k]] }; },
+      const ax = Math.max(lx0 + 10, Math.min(lx1 - 10, t.x)), dx = ax - B.x, dy = t.y - B.y, d = Math.hypot(dx, dy), k = 130 / d; return { type: 'drag', path: [[B.x, B.y], [B.x + dx * k * 0.5, B.y + dy * k * 0.5], [B.x + dx * k, B.y + dy * k]] }; },
     busy: () => roll || after >= 0 || done,
   };
 }
