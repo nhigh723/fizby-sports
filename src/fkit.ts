@@ -95,3 +95,62 @@ export function ear(x: number, y: number, s = 1) { c.save(); c.translate(x, y); 
   c.beginPath(); c.arc(0, -3, 6, Math.PI * 0.9, Math.PI * 2.2); c.lineWidth = 2.5; c.strokeStyle = INK; c.stroke(); c.restore(); }
 export function check(x: number, y: number, s = 1, col = '#ffffff') { c.save(); c.translate(x, y); c.scale(s, s); c.beginPath(); c.moveTo(-12, 0); c.lineTo(-3, 9); c.lineTo(13, -9); c.lineCap = 'round'; c.lineJoin = 'round'; c.lineWidth = 9; c.strokeStyle = INK; c.stroke(); c.lineWidth = 5; c.strokeStyle = col; c.stroke(); c.restore(); }
 export function padlock(x: number, y: number, s = 1) { c.save(); c.translate(x, y); c.scale(s, s); ball(0, 0, 17, '#ffffff'); c.beginPath(); c.arc(0, -4, 6, Math.PI, 0); c.lineWidth = 3.5; c.strokeStyle = INK; c.stroke(); box(-8, -4, 16, 13, 3, '#ffb703'); c.restore(); }
+
+/** Head + hair + face of the kid() cartoon at (0,-106) in kid space, split out so posed figures share it. */
+export function kidHead(look: KidLook = KID_DEFAULT) {
+  if (look.style === 'puffs') { ball(-17, -122, 9, look.hair); ball(17, -122, 9, look.hair); }
+  if (look.style === 'curly') for (let i = 0; i < 7; i++) ball(Math.cos(Math.PI + i * Math.PI / 6) * 16, -110 + Math.sin(Math.PI + i * Math.PI / 6) * 16, 7, look.hair);
+  ball(0, -106, 17, look.skin); c.beginPath(); c.arc(0, -110, 17, Math.PI * 1.05, Math.PI * 1.95); c.fillStyle = look.hair; c.fill(); stroke(3);
+  if (look.style === 'spiky') shape([-15, -116, -12, -133, -5, -122, 0, -138, 5, -122, 12, -133, 15, -116], look.hair);
+  if (look.band) { c.fillStyle = look.band; c.fillRect(-17, -117, 34, 6); c.lineWidth = 2; c.strokeStyle = INK; c.strokeRect(-17, -117, 34, 6); }
+  ball(-11, -99, 3.5, '#ff9bb0', false); ball(11, -99, 3.5, '#ff9bb0', false);
+  c.fillStyle = INK; c.beginPath(); c.arc(-6, -104, 2.4, 0, 6.283); c.arc(6, -104, 2.4, 0, 6.283); c.fill(); c.beginPath(); c.arc(0, -99, 5, 0.2, Math.PI - 0.2); c.lineWidth = 2; c.stroke();
+}
+function limb(x: number, y: number, a: number, len: number, skin: string, w: number, end?: string) {
+  const ex = x + Math.sin(a) * len, ey = y + Math.cos(a) * len;
+  c.lineCap = 'round'; c.beginPath(); c.moveTo(x, y); c.lineTo(ex, ey); c.strokeStyle = INK; c.lineWidth = w + 4; c.stroke(); c.strokeStyle = skin; c.lineWidth = w; c.stroke();
+  if (end) { c.save(); c.translate(ex, ey); c.rotate(-a); box(-7, -3, 14, 7, 3, end); c.restore(); } else ball(ex, ey, w * 0.62, skin, true);
+}
+/** Posed cartoon kid (same look as kid()): limb angles in radians from straight down (0 = down, PI = up), whole-body spin `rot`
+ * around the tummy. Used for gymnasts (star jumps, tucks, splits, handstands) and other action poses. */
+export type Pose = { la: number; ra: number; ll: number; rl: number; rot?: number; tuck?: number };
+export function figure(x: number, y: number, s: number, jersey: string, p: Pose, look: KidLook = KID_DEFAULT, extra?: () => void) {
+  c.save(); c.translate(x, y); c.scale(s, s); if (!p.rot) shadow(0, 0, 26, 6);
+  c.translate(0, -66); c.rotate(p.rot || 0); c.translate(0, 66);
+  const legL = 40 - (p.tuck || 0) * 18;
+  limb(-8, -44, -p.ll, legL, look.skin, 7, look.shoes); limb(8, -44, p.rl, legL, look.skin, 7, look.shoes);
+  box(-17, -50, 34, 14, 5, look.shorts || dark(jersey, 0.25));
+  limb(-18, -80, -p.la, 34, look.skin, 6.5); limb(18, -80, p.ra, 34, look.skin, 6.5);
+  box(-20, -90, 40, 46, 12, jersey); c.fillStyle = light(jersey, 0.5); c.beginPath(); c.arc(0, -66, 6, 0, 6.283); c.fill();
+  kidHead(look); if (extra) extra(); c.restore();
+}
+/** Illustrated go-kart seen from the side: shaded body with number disc, spoiler, steering wheel, driver in a helmet. */
+export function kart(x: number, y: number, s: number, col: string, t = 0, num = '1', helmet = '#ffffff', look: KidLook = KID_DEFAULT) {
+  c.save(); c.translate(x, y); c.scale(s, s); shadow(0, 2, 62, 7);
+  box(-58, -30, 18, 10, 3, '#3d4a7a'); box(-62, -44, 8, 22, 3, dark(col, 0.2)); box(-70, -48, 26, 8, 3, col);
+  shape([-54, -10, -48, -34, 18, -36, 48, -26, 60, -14, 56, -4, -50, -4], col);
+  c.save(); c.globalAlpha *= 0.5; c.fillStyle = '#fff'; c.beginPath(); c.ellipse(-6, -30, 30, 3, 0, 0, 6.283); c.fill(); c.restore();
+  ball(10, -20, 11, '#ffffff'); label(num, 10, -19, 13, INK);
+  box(40, -10, 24, 8, 4, '#3d4a7a');
+  c.lineWidth = 6; c.strokeStyle = INK; c.beginPath(); c.moveTo(-6, -36); c.lineTo(10, -56); c.stroke();
+  c.save(); c.scale(0.55, 0.55); c.translate(-30, 20); kidHead(look); c.restore();
+  c.beginPath(); c.arc(-16.5, -40, 11.5, Math.PI * 1.02, Math.PI * 2.05); c.fillStyle = shade(helmet, -52, -40) as any; c.fill(); stroke(3);
+  c.fillStyle = col; c.fillRect(-27, -45, 21, 3);
+  ball(14, -58, 6, '#3d4a7a'); c.lineWidth = 4; c.strokeStyle = INK; c.beginPath(); c.moveTo(-8, -42); c.lineTo(12, -56); c.stroke();
+  wheel(-40, -4, 15, t * 12); wheel(42, -4, 15, t * 12);
+  c.restore();
+}
+/** Hockey puck: flat black disc with a top face, side band and shine. */
+export function puck(x: number, y: number, r: number) {
+  c.fillStyle = '#0d0b18'; c.beginPath(); c.ellipse(x, y + r * 0.22, r, r * 0.42, 0, 0, 6.283); c.fill(); c.fillRect(x - r, y - r * 0.05, r * 2, r * 0.27);
+  c.beginPath(); c.ellipse(x, y, r, r * 0.42, 0, 0, 6.283); c.fillStyle = '#2b2740'; c.fill(); c.lineWidth = 2; c.strokeStyle = '#000'; c.stroke();
+  c.save(); c.globalAlpha *= 0.5; c.strokeStyle = '#fff'; c.lineWidth = Math.max(1.5, r * 0.12); c.beginPath(); c.ellipse(x - r * 0.15, y - r * 0.05, r * 0.55, r * 0.2, 0, 3.6, 4.9); c.stroke(); c.restore();
+}
+/** Hockey kid: helmet, jersey, gloves and a stick whose blade swings by `swing` (0 rest .. 1 follow-through). */
+export function hockeyKid(x: number, y: number, s: number, jersey: string, swing = 0, look: KidLook = KID_DEFAULT) {
+  const a = -0.5 + swing * 1.3;
+  figure(x, y, s, jersey, { la: 0.7 + swing * 0.6, ra: -0.2 + swing * 0.6, ll: 0.25, rl: 0.25 }, look, () => {
+    c.beginPath(); c.arc(0, -110, 19, Math.PI * 1.0, Math.PI * 2.0); c.fillStyle = shade('#1fb6ff', -130, -110) as any; c.fill(); stroke(3); c.fillStyle = '#fff'; c.fillRect(-19, -112, 38, 4);
+    c.save(); c.translate(20, -60); c.rotate(a); box(-3, 0, 7, 64, 3, '#c98a4b'); box(-3, 58, 26, 9, 4, '#1d1427'); box(-6, -4, 14, 14, 5, jersey); c.restore();
+  });
+}

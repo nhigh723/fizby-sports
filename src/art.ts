@@ -132,7 +132,7 @@ const cloud = (c: Ctx, x: number, y: number, r: number) => { c.beginPath(); c.ar
 export function sky(c: Ctx, top: string, bot: string, t: number, groundY: number, g1 = '#5fd83a', g2 = '#3fbf2c', sun = true) {
   const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, top); g.addColorStop(1, bot); c.fillStyle = g; band(c, 0, H);
   if (sun) { c.fillStyle = '#fff59a'; c.beginPath(); c.arc(320, 120, 46, 0, 6.28); c.fill(); c.fillStyle = '#ffd60a'; c.beginPath(); c.arc(320, 120, 34, 0, 6.28); c.fill(); }
-  c.fillStyle = 'rgba(255,255,255,0.95)'; for (let i = 0; i < 3 + Math.ceil(bleed.x / 120); i++) cloud(c, ((i * 160 + t * 8) % (W + 160 + 2 * bleed.x)) - 60 - bleed.x, 90 + (i % 3) * 55, 22 + (i % 3) * 4);
+  if (sun) for (let i = 0; i < 3 + Math.ceil(bleed.x / 120); i++) { c.fillStyle = 'rgba(255,255,255,0.95)'; cloud(c, ((i * 160 + t * 8) % (W + 160 + 2 * bleed.x)) - 60 - bleed.x, 90 + (i % 3) * 55, 22 + (i % 3) * 4); }
   c.fillStyle = g1; c.beginPath(); c.ellipse(80, groundY + 10, 260 + bleed.x, 50, 0, 0, 6.28); c.fill(); c.fillStyle = g2; band(c, groundY, H - groundY);
   c.fillStyle = 'rgba(255,255,255,0.18)'; for (let i = 0; i < 12; i++) c.fillRect((i * 67) % W, groundY + 20 + (i % 4) * 30, 18, 6);
 }

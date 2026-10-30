@@ -18,7 +18,8 @@ async function run(a) {
 }
 let fails = 0; const ok = (c, m) => { if (c) console.log('ok   ' + m); else { fails++; console.log('FAIL ' + m); } };
 // UI: title -> hub (Play), each card opens, Back is a single tap
-await tapBtn('play'); ok(await S(() => window.__snap.screen) === 'hub', 'Play opens the hub');
+await tapBtn('play'); ok(await S(() => window.__snap.screen) === 'setup', 'first launch: Play opens the profile setup');
+await tapBtn('setupKid1'); await tapBtn('setupAge2'); await tapBtn('setupGo'); ok(await S(() => window.__snap.screen) === 'hub' && (await S(() => window.__snap.slack)) === 0, 'setup saves the ball and age (5-6 tuning), then the hub');
 const LV = await S(() => window.__snap.levels), NA = LV.length;
 for (let i = 0; i < NA; i++) { await tapBtn('act' + i); await wait(300); const intro = await S(() => window.__snap.intro); const s = await S(() => window.__snap.screen); await tapBtn('back'); const s2 = await S(() => window.__snap.screen); ok(s === 'play' && intro && s2 === 'hub', `card ${i} pokes, opens with its sport intro, one tap on Back returns`); }
 await tapBtn('town'); ok(await S(() => window.__snap.screen) === 'town', 'Trophy Room opens'); await tapBtn('back');

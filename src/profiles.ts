@@ -4,6 +4,9 @@ export type Band = '2-3' | '4-5' | '6+';
 export type Profile = { name: string; face: string; band: Band };
 type Store = { cur: number; list: Profile[] };
 const PK = 'fs5~profiles', FACES = ['soccer', 'basket', 'tennis'];
+/** true once a child has been set up (first-launch setup or the grown-ups area) */
+export const hasProfiles = () => { try { return !!localStorage.getItem(PK); } catch { return true; } };
+export function saveFirst(face: number, band: Band) { put({ cur: 0, list: [{ name: 'Player 1', face: FACES[face % 3], band }] }); }
 export function profiles(): Store { try { const s = JSON.parse(localStorage.getItem(PK) || ''); if (s && Array.isArray(s.list) && s.list.length) return s; } catch { } return { cur: 0, list: [{ name: 'Player 1', face: FACES[0], band: '4-5' }] }; }
 function put(s: Store) { try { localStorage.setItem(PK, JSON.stringify(s)); } catch { } }
 export const current = () => { const s = profiles(); return s.list[s.cur] || s.list[0]; };
@@ -20,4 +23,4 @@ export function switchTo(i: number): boolean { const s = profiles(); if (i === s
   for (const k of back) { localStorage.setItem(k.slice(pre.length), localStorage.getItem(k)!); localStorage.removeItem(k); }
   s.cur = i; put(s); return true; }
 /** Age band tuning: hint delay, extra touch slack. */
-export function tuning(b: Band = current().band) { return b === '2-3' ? { hint: 4, slack: 16, label: 'Ages 2-3' } : b === '6+' ? { hint: 7, slack: 0, label: 'Ages 6+' } : { hint: 5, slack: 8, label: 'Ages 4-5' }; }
+export function tuning(b: Band = current().band) { return b === '2-3' ? { hint: 4, slack: 16, label: 'Age 3' } : b === '6+' ? { hint: 7, slack: 0, label: 'Ages 5-6' } : { hint: 5, slack: 8, label: 'Age 4' }; }
