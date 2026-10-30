@@ -63,5 +63,6 @@ export function paint(api: Api, level: number): Activity {
     move() { /* */ }, up() { /* */ },
     next() { if (done || cheer >= 0) return null; if (stamps.length) return { type: 'tap', x: stamps[0].x, y: stamps[0].y }; const p = parts.find(p => p.got !== p.want); if (!p) return null; const i = PAL.indexOf(p.want); if (sel !== i) { const b = pot(i); return { type: 'tap', x: b.x, y: b.y }; } const q = spot(p); return { type: 'tap', x: q.x, y: q.y }; },
     busy: () => done || cheer >= 0,
+    dbg: () => ({ pic, sel, made, cheer: +cheer.toFixed(2), done, stamps: stamps.length, stamped, parts: parts.map(p => [p.want, p.got]) }),
   };
 }

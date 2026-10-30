@@ -43,5 +43,6 @@ export function bowl(api: Api, level: number): Activity {
     next() { if (roll || after >= 0 || done) return null; const up = pins.filter(p => !p.down); if (!up.length) return null; const t = up.sort((a, b) => b.y - a.y)[0];
       const ax = Math.max(lx0 + 10, Math.min(lx1 - 10, t.x)), dx = ax - B.x, dy = t.y - B.y, d = Math.hypot(dx, dy), k = 130 / d; return { type: 'drag', path: [[B.x, B.y], [B.x + dx * k * 0.5, B.y + dy * k * 0.5], [B.x + dx * k, B.y + dy * k]] }; },
     busy: () => roll || after >= 0 || done,
+    dbg: () => ({ bx: Math.round(bx), by: Math.round(by), vx: Math.round(vx), vy: Math.round(vy), roll, gutter, after: +after.toFixed(2), countT: +countT.toFixed(2), q: countQ.length, cleared, done, pins: pins.map(p => [Math.round(p.x), Math.round(p.y), p.down ? 1 : 0, p.counted ? 1 : 0]) }),
   };
 }

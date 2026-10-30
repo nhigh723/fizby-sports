@@ -311,7 +311,10 @@ let last = performance.now();
 let raf = 0, lastTick = performance.now(), stalls = 0;
 /** rAF can stall (busy device, webview hiccup); a slow interval keeps the game ticking so nothing freezes mid-turn. */
 setInterval(() => { if (!document.hidden && performance.now() - lastTick > 400) { stalls++; if (raf) cancelAnimationFrame(raf); raf = 0; frame(performance.now()); } }, 250);
-function frame(now: number) {
+let maxFrame = 0, maxFrameAt = '', maxTask = 0;
+try { new PerformanceObserver(l => { for (const e of l.getEntries()) maxTask = Math.max(maxTask, e.duration); }).observe({ entryTypes: ['longtask'] }); } catch { /* not supported */ }
+function frame(now: number) { const f0 = performance.now(); try { frameBody(now); } finally { const d = performance.now() - f0; if (d > maxFrame) { maxFrame = d; maxFrameAt = screen + ':' + actI + ':' + level; } } }
+function frameBody(now: number) {
   raf = 0; lastTick = performance.now(); if (now < last) now = last;
   const dt = Math.min(0.25, (now - last) / 1000); last = now; /* slow/starved frames still advance real time (physics runs in 1/120 s substeps) */ T += dt; if (!raf) raf = requestAnimationFrame(frame);
   fadeT += dt; for (let i = pops.length - 1; i >= 0; i--) { pops[i].t += dt; if (pops[i].t > 0.9) pops.splice(i, 1); } if (intro) { intro.t += dt; idle = 0; if (intro.t > 2.4) intro = null; } if (tut >= 0) { tut += dt; if (tut > 4.5) tut = -1; } if (onboard >= 0) onboard += dt;
@@ -365,7 +368,7 @@ function renderArt(kind: 'icon' | 'splash') {
 }
 (window as any).__snap = { renderArt,
   get screen() { return screen; }, get audio() { return { ...audioStats, track: audioStats.track, ctx: audioStats.ctx }; }, get winStars() { return winStars; }, get hintDelay() { return hintCfg.delay; }, get slack() { return tune.slack; }, get kid() { return profiles().cur; }, get act() { return actI; }, get level() { return level; }, get winT() { return winT; }, get modal() { return modal ? modal.kind : null; }, levels: ACTS.map(a => a.levels), get freeRemix() { return freeRemix; }, get demo() { return demo ? demo.a : null; },
-  buttons: () => btns.map(b => ({ id: b.id, x: b.x, y: b.y, w: b.w, h: b.h })), next: () => act?.next() ?? null, busy: () => !!intro || !!poke || !!act?.busy?.(), get heals() { return heals; }, get busyT() { return busyT ? performance.now() - busyT : 0; }, get dbg() { return { screen, act: !!act, winT, modal: !!modal, poke: !!poke, intro: !!intro, ab: !!act?.busy?.() }; }, get stalls() { return stalls; }, get T() { return T; }, get intro() { return !!intro; }, get onboard() { return onboard; },
+  buttons: () => btns.map(b => ({ id: b.id, x: b.x, y: b.y, w: b.w, h: b.h })), next: () => act?.next() ?? null, busy: () => !!intro || !!poke || !!act?.busy?.(), get heals() { return heals; }, get actDbg() { return act?.dbg?.() ?? null; }, get perf() { return { maxFrame: Math.round(maxFrame), maxFrameAt, maxTask: Math.round(maxTask) }; }, get busyT() { return busyT ? performance.now() - busyT : 0; }, get dbg() { return { screen, act: !!act, winT, modal: !!modal, poke: !!poke, intro: !!intro, ab: !!act?.busy?.() }; }, get stalls() { return stalls; }, get T() { return T; }, get intro() { return !!intro; }, get onboard() { return onboard; },
   toScreen: (x: number, y: number) => { const r = cv.getBoundingClientRect(); return { x: r.left + (ox + x * scale) / dpr, y: r.top + (oy + y * scale) / dpr }; },
   start: (i: number, l: number) => start(i, l), go, save: () => JSON.parse(JSON.stringify(save)), setSave: (s: Save) => { save = s; persist(); }, closeModal: () => { modal = null; afterWin(); },
   store: () => ({ club: hasClub(), sim: store.sim, msg: store.msg }), storeTest, products: PRODUCTS, lines: allLines, lineId, missing: () => [...missing], get gate() { return { ...gate }; },

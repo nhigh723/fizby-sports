@@ -9,7 +9,7 @@ export interface Api {
 export interface Activity {
   update(dt: number): void; draw(c: Ctx): void; down(p: Pt): void; move(p: Pt): void; up(p: Pt): void;
   /** the next input a player would make right now (drives the hint hand and the automated tests) */
-  next(): Action | null; busy?(): boolean; intro?: string;
+  next(): Action | null; busy?(): boolean; dbg?(): unknown; intro?: string;
 }
 export type Blk = { id: number; sh: Shape; x: number; y: number; w: number; h: number; col: string };
 let nid = 1; export const newId = () => nid++;
