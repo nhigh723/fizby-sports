@@ -1,4 +1,5 @@
 // Fizby Sports art, all drawn in code (original designs): balls, goal, hoop, pins, the keeper pal, trophies, stickers, fields.
+import { kid, setKitCtx, type KidLook } from './fkit';
 import { type Ctx, rr, shade, W } from './art';
 export type BallKind = 'soccer' | 'basket' | 'bowl' | 'tee' | 'swim' | 'golf' | 'tennis' | 'race' | 'hockey' | 'gym' | 'paint';
 /** hub order: the icon for each sport (stickers and trophies use it too) */
@@ -31,13 +32,12 @@ export function goal(c: Ctx, x: number, y: number, w: number, h = 110, col = '#f
   c.strokeStyle = col; c.lineWidth = 12; c.lineCap = 'round'; c.lineJoin = 'round'; c.beginPath(); c.moveTo(x - w / 2, y); c.lineTo(x - w / 2, y - h); c.lineTo(x + w / 2, y - h); c.lineTo(x + w / 2, y); c.stroke(); c.restore();
 }
 /** the keeper pal: a round fluffy original critter with big gloves */
-export function keeper(c: Ctx, x: number, y: number, t: number, col = '#ff5fd2') {
-  c.save(); c.translate(x, y + Math.sin(t * 6) * 3); c.fillStyle = 'rgba(0,0,0,0.15)'; c.beginPath(); c.ellipse(0, 34, 30, 7, 0, 0, 6.28); c.fill();
-  c.fillStyle = col; c.beginPath(); c.arc(0, 0, 32, 0, 6.28); c.fill(); c.fillStyle = shade(col, 0.5); c.beginPath(); c.ellipse(0, 10, 20, 16, 0, 0, 6.28); c.fill();
-  c.fillStyle = col; c.beginPath(); c.arc(-22, -26, 9, 0, 6.28); c.arc(22, -26, 9, 0, 6.28); c.fill();
-  for (const ex of [-11, 11]) { c.fillStyle = '#fff'; c.beginPath(); c.arc(ex, -6, 8, 0, 6.28); c.fill(); c.fillStyle = '#2b2140'; c.beginPath(); c.arc(ex + 1, -5, 4, 0, 6.28); c.fill(); }
-  c.fillStyle = '#ffd60a'; const up = Math.sin(t * 6) * 6; c.beginPath(); c.arc(-40, -10 - up, 13, 0, 6.28); c.arc(40, -10 + up, 13, 0, 6.28); c.fill(); c.strokeStyle = '#fff'; c.lineWidth = 3; c.stroke();
-  c.strokeStyle = '#2b2140'; c.lineWidth = 3; c.beginPath(); c.arc(0, 4, 7, 0.3, 2.8); c.stroke(); c.restore();
+const LOOKS: KidLook[] = [{ skin: '#f2c29b', hair: '#7a4a2a', style: 'spiky', shoes: '#ffffff', band: '#ffd60a' }, { skin: '#8d5a3b', hair: '#2b1a12', style: 'puffs', shoes: '#ff3b6b', band: '' },
+  { skin: '#e0ac69', hair: '#1d1427', style: 'curly', shoes: '#1fb6ff', band: '' }, { skin: '#ffdbb5', hair: '#e8a33d', style: 'short', shoes: '#3ddc4a', band: '#ff5fd2' }];
+/** A team pal: the shared kid() cartoon child (F&L kit), jersey in the team colour, gloves up and bouncing. Centre at x,y like the old keeper. */
+export function keeper(c: Ctx, x: number, y: number, t: number, col = '#ff5fd2', look = -1) {
+  setKitCtx(c); const L = LOOKS[look >= 0 ? look % 4 : Math.abs(Math.round(x * 7 + col.charCodeAt(2))) % 4], b = Math.abs(Math.sin(t * 6)) * 4;
+  kid(x, y + 40 - b, 0.58, col, 0.6 + Math.sin(t * 6) * 0.4, t, 0, '', L);
 }
 export function hoop(c: Ctx, x: number, y: number, col = '#ff3b6b', t = 0, swish = 0) {
   c.save(); c.fillStyle = '#fff'; rr(c, x - 52, y - 82, 104, 72, 10); c.fill(); c.strokeStyle = col; c.lineWidth = 6; c.stroke(); c.strokeStyle = col; c.lineWidth = 4; c.strokeRect(x - 20, y - 50, 40, 32);

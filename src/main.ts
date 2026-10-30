@@ -9,7 +9,7 @@ import type { Activity, Action, Api, Pt } from './kit';
 import { ball, field, sticker, trophy, star, keeper, pin, hoop, goal, type BallKind } from './sports';
 import { soccer } from './acts/soccer'; import { basket } from './acts/basket'; import { bowl } from './acts/bowl'; import { tee } from './acts/tee'; import { swim } from './acts/swim';
 import { golf } from './acts/golf'; import { hockey } from './acts/hockey'; import { tennis } from './acts/tennis'; import { race } from './acts/race'; import { gym } from './acts/gym'; import { paint } from './acts/paint';
-import { SPORT_NAME } from './lines';
+import { SPORT_NAME, FACT } from './lines';
 import { store, hasClub, levelFree, buy, restore, manage, initStore, PRODUCTS, TERMS_URL, PRIVACY_URL, openLink, storeTest, type Plan } from './store';
 import { lineId } from './voice';
 import { profiles, current, addProfile, setBand, setFace, rename, switchTo, tuning, type Band } from './profiles';
@@ -52,20 +52,24 @@ function say(text: string, force = true) { if (!text) return; if (!force && isSp
 const sfxApi = { ...sfx, wrong: () => { sfx.wrong(); mascotPose = 'oops'; mascotPoseT = 1.4; } };
 const api: Api = {
   say, sfx: sfxApi, burst, t: () => T, shake: (a) => { shake = Math.max(shake, a); },
-  win(line: string) { if (winT >= 0 || !act) return; winT = 0; winLine = line; sfx.cheer(); burst(195, 300, 60); say(line); mascotPose = 'cheer'; mascotPoseT = 3; credit(); },
+  win(line: string) { if (winT >= 0 || !act) return; winT = 0; winLine = line; sfx.cheer(); burst(195, 300, 60); say(line); voiceSay(FACT[actI]); if (isBig()) { sfx.crowd(); burst(100, 200, 40, ['#ffd60a', '#fff']); burst(290, 200, 40, ['#ffd60a', '#fff']); } mascotPose = 'cheer'; mascotPoseT = 3; credit(); },
 };
 function credit() { save.wins++; for (const s of SKILLS[ACTS[actI].id]) save.skills[s] = (save.skills[s] || 0) + 1; if (!freeRemix && level >= save.lv[actI]) save.lv[actI] = level + 1;
   newSticker = actI * 10 + (save.stickers.filter(x => Math.floor(x / 10) === actI).length % 10); save.stickers.push(newSticker); if (save.lv[actI] >= ACTS[actI].levels && !save.trophies.includes(actI)) { save.trophies.push(actI); pendingTrophy = actI; } persist(); }
 let pendingTrophy = -1;
 function checkUnlock() { if (pendingTrophy >= 0) { modal = { kind: 'unlock', sport: pendingTrophy, t: 0 }; pendingTrophy = -1; sfx.unlock(); say(L.trophy); return true; } return false; }
+const isBig = () => ACTS[actI].levels > 0 && level === ACTS[actI].levels - 1 && !freeRemix;
 const clubLocked = (l: number) => !hasClub() && !levelFree(l);
-function start(i: number, lv = save.lv[i]) {
+function start(i: number, lv = save.lv[i], withIntro = false) {
+  modal = null; fadeT = 0; tut = -1; intro = withIntro ? { t: 0 } : null; onboard = -1;
   actI = i; level = lv; freeRemix = clubLocked(lv); act = ACTS[i].make(api, freeRemix ? lv % 2 : lv); newSticker = -1; screen = 'play'; musicScene(ACTS[i].id === 'paint' ? 'paint' : 'sports'); resetHint(); winT = -1; idle = 0; demo = null; mascotPose = 'point'; mascotPoseT = 2;
-  if (act.intro) say(act.intro);
+  const big = ACTS[i].levels > 0 && lv === ACTS[i].levels - 1 && !freeRemix;
+  if (intro) { say(SPORT_NAME[i]); if (big) voiceSay(L.bigGame); if (act.intro) voiceSay(act.intro); } else if (big) { say(L.bigGame); if (act.intro) voiceSay(act.intro); } else if (act.intro) say(act.intro);
+  if (big) sfx.crowd();
   const key = ACTS[i].id + ':' + Math.min(lv, 1); if (!demoShown.has(key)) { demoShown.add(key); idle = 4.6; } // show the hand demo ~1.4 s in
 }
-let screenAt = 0;
-function go(s: Screen) { screen = s; musicScene(s === 'play' ? (ACTS[actI]?.id === 'paint' ? 'paint' : 'sports') : 'hub'); resetHint(); screenAt = performance.now(); act = null; demo = null; winT = -1; idle = 0; if (s === 'hub') say(L.hub, false); if (s === 'town') { say(save.stickers.length ? L.shelfHi : L.shelfEmpty); townX = 0; }
+let screenAt = 0, fadeT = 1, intro: { t: number } | null = null, tut = -1, onboard = -1, poke: { i: number; t: number } | null = null;
+function go(s: Screen) { modal = null; fadeT = 0; intro = null; tut = -1; if (s === 'hub' && !save.seen) { save.seen = 1; persist(); onboard = 0; } screen = s; musicScene(s === 'play' ? (ACTS[actI]?.id === 'paint' ? 'paint' : 'sports') : 'hub'); resetHint(); screenAt = performance.now(); act = null; demo = null; winT = -1; idle = 0; if (s === 'hub') say(L.hub, false); if (s === 'town') { bookPage = -1; say(save.stickers.length ? L.shelfHi : L.shelfEmpty); townX = 0; }
   if (s === 'play' && freeRemix) say(L.locked, false); }
 // ---- buttons (registered while drawing; hit-tested on the next pointer down) ----
 type Btn = { id: string; x: number; y: number; w: number; h: number; fn: () => void };
@@ -84,29 +88,59 @@ function cardArt(i: number, x: number, y: number, w: number, h: number) { const 
   if (i < 3) ball(c, ACTS[i].ball, i === 2 ? cx - 30 : cx - 22, cy + 22 - b, 22, T * (i + 1)); else { if (i === 3) { c.fillStyle = '#ff9f1c'; c.fillRect(cx - 4, cy + 4, 8, 34); } if (i === 7) { c.fillStyle = '#6a6080'; c.fillRect(cx - 30, cy - 30, 60, 76); } if (i === 5) { c.fillStyle = '#2b2140'; c.beginPath(); c.arc(cx + 24, cy + 30, 10, 0, 6.28); c.fill(); }
     ball(c, ACTS[i].ball, cx, cy + (i === 3 ? -6 : 6) - (i === 4 || i === 10 ? 0 : b), i === 8 ? 26 : 28, i === 9 ? T : 0); } c.restore(); }
 // ---- drawing per screen ----
+/** Title logo: "Fizby" on a ribbon over a bouncy "SPORTS!" in bubble letters (brand only; nothing to read for play). */
+function logo(x: number, y: number) { const COL = ['#ff3b6b', '#ff9f1c', '#ffd60a', '#3ddc4a', '#1fb6ff', '#9b5cff', '#ff5fd2'];
+  c.save(); c.translate(x, y); c.fillStyle = '#1fb6ff'; rr(c, -70, -80, 140, 40, 20); c.fill(); c.lineWidth = 4; c.strokeStyle = '#fff'; c.stroke(); text('Fizby’s', 0, -59, 26, '#fff', 'center', 900);
+  const word = 'SPORTS!'; c.font = '900 64px ui-rounded, "SF Pro Rounded", system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.lineJoin = 'round';
+  for (let i = 0; i < word.length; i++) { const lx = (i - 3) * 44, ly = Math.sin(T * 4 + i * 0.7) * 6, r = Math.sin(T * 2 + i) * 0.08; c.save(); c.translate(lx, 10 + ly); c.rotate(r);
+    c.lineWidth = 14; c.strokeStyle = '#2b2140'; c.strokeText(word[i], 0, 0); c.lineWidth = 8; c.strokeStyle = '#fff'; c.strokeText(word[i], 0, 0); c.fillStyle = COL[i]; c.fillText(word[i], 0, 0); c.restore(); }
+  c.restore(); }
 function drawTitle() {
   sky(c, '#22d3ee', '#c8f7ff', T, 520, '#3ddc4a', '#2fc23c'); field(c, 520, '#3ddc4a');
   for (let i = 0; i < 6; i++) { const x = 30 + i * 66; c.fillStyle = ['#ff3b6b', '#ffd60a', '#1fb6ff', '#ff9f1c', '#9b5cff', '#ff5fd2'][i]; c.beginPath(); c.moveTo(x, 120); c.lineTo(x + 66, 120); c.lineTo(x + 33, 170); c.fill(); }
   c.strokeStyle = '#fff'; c.lineWidth = 3; c.beginPath(); c.moveTo(0, 120); c.lineTo(W, 120); c.stroke();
   ball(c, 'soccer', 300, 600 - Math.abs(Math.sin(T * 3)) * 90, 30, T * 3); ball(c, 'basket', 70, 640 - Math.abs(Math.sin(T * 3 + 1.5)) * 70, 28, T * 2); keeper(c, 320, 500, T, '#1fb6ff');
-  for (let i = 0; i < 3; i++) star(c, 90 + i * 105, 240 + Math.sin(T * 2 + i) * 8, 22);
+  logo(195, 225);
   mascot(c, 170, 600, 300, 'wave', T, isSpeaking());
   const p = 1 + Math.sin(T * 4) * 0.06; c.save(); c.translate(195, 760); c.scale(p, p); c.fillStyle = 'rgba(0,0,0,0.18)'; c.beginPath(); c.arc(0, 6, 58, 0, 6.28); c.fill(); c.fillStyle = '#ff2d55'; c.beginPath(); c.arc(0, 0, 58, 0, 6.28); c.fill(); c.lineWidth = 7; c.strokeStyle = '#fff'; c.stroke();
   c.fillStyle = '#fff'; c.beginPath(); c.moveTo(-18, -28); c.lineTo(30, 0); c.lineTo(-18, 28); c.closePath(); c.fill(); c.restore();
   btn('play', 195 - 66, 694, 132, 132, () => { initAudio(); sfx.snap(); go('hub'); });
 }
+function bookIcon(x: number, y: number, k = 1) { c.save(); c.translate(x, y); c.scale(k, k); c.fillStyle = 'rgba(0,0,0,0.18)'; rr(c, -26, -20, 56, 46, 8); c.fill(); c.fillStyle = '#9b5cff'; rr(c, -28, -24, 56, 46, 8); c.fill(); c.fillStyle = '#fff'; rr(c, -20, -18, 40, 34, 5); c.fill(); sticker(c, 0, -1, 12, 0, 1, 0); c.restore(); }
+/** Big game (the last level of a sport): a cheering crowd along the top. */
+function crowdStrip() { const CR = ['#ff3b6b', '#ffd60a', '#1fb6ff', '#ff9f1c', '#3ddc4a', '#ff5fd2'];
+  c.fillStyle = 'rgba(91,75,214,0.85)'; c.fillRect(0, 100, W, 46); for (let q = 0; q < 16; q++) { const x = 12 + q * 25, w = Math.max(0, Math.sin(q * 0.6 - T * 4)), y = 124 - w * 8; c.fillStyle = CR[q % 6]; rr(c, x - 8, y + 4, 16, 16, 6); c.fill(); c.fillStyle = '#f6c6a0'; c.beginPath(); c.arc(x, y, 7, 0, 6.28); c.fill(); } }
+/** Sport intro card (like F&L introAnim): the sport's picture zooms in on a sunburst, Fizby explains, tap to skip. */
+function drawIntro() { const t = intro!.t, A = ACTS[actI], k = Math.min(1, t * 3), out = t > 2.1 ? Math.min(1, (t - 2.1) * 4) : 0;
+  c.save(); c.globalAlpha = 1 - out; const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, A.bg[0]); g.addColorStop(1, A.bg[1]); c.fillStyle = g; c.fillRect(0, 0, W, H);
+  c.save(); c.translate(195, 330); c.rotate(t * 0.4); c.fillStyle = 'rgba(255,255,255,0.25)'; for (let q = 0; q < 12; q++) { c.rotate(0.5236); c.beginPath(); c.moveTo(0, 0); c.lineTo(-40, -520); c.lineTo(40, -520); c.fill(); } c.restore();
+  const s = (0.4 + 0.6 * k) * (1 + Math.sin(t * 5) * 0.03) * 2.3; c.save(); c.translate(195, 330); c.scale(s, s); c.fillStyle = '#fff'; rr(c, -56, -56, 112, 112, 28); c.fill(); cardArt(actI, -56, -56, 112, 112); c.restore();
+  mascot(c, 120 + (1 - k) * -200, 830, 330, 'stand', T, isSpeaking()); c.restore(); }
+function drawOnboard() { const t = onboard, k = Math.min(1, t * 2.5); mascot(c, 300, 844 + (1 - k) * 340, 300, 'point', T, isSpeaking(), true);
+  const ph = (t % 1.6) / 1.6; if (t > 0.8) hand(c, 70, 190 + (ph < 0.4 ? (0.4 - ph) * 60 : 0), ph > 0.4 && ph < 0.6 ? 1 : 0, 1); }
+/** Living stadium behind the hub cards: a crowd doing the wave, flags, bunting, a ball rolling across the grass. */
+function stadium() {
+  sky(c, '#22d3ee', '#c8f7ff', T, 790, '#3ddc4a', '#2fc23c', false);
+  c.fillStyle = '#5b4bd6'; rr(c, -20, 110, W + 40, 520, 40); c.fill(); c.fillStyle = '#7a6af0'; for (let r = 0; r < 9; r++) c.fillRect(0, 140 + r * 54, W, 6);
+  const CROWD = ['#ff3b6b', '#ffd60a', '#1fb6ff', '#ff9f1c', '#3ddc4a', '#ff5fd2', '#ffffff'];
+  for (let r = 0; r < 9; r++) for (let q = 0; q < 14; q++) { const x = 14 + q * 28 + (r % 2) * 14, wave = Math.max(0, Math.sin(q * 0.5 - T * 3.2 + r * 0.25)), y = 136 + r * 54 - wave * 14;
+    c.fillStyle = CROWD[(q * 3 + r * 5) % 7]; rr(c, x - 9, y + 4, 18, 18, 7); c.fill(); c.fillStyle = '#f6c6a0'; c.beginPath(); c.arc(x, y, 8, 0, 6.28); c.fill(); if (wave > 0.6) { c.strokeStyle = '#f6c6a0'; c.lineWidth = 4; c.beginPath(); c.moveTo(x - 9, y + 8); c.lineTo(x - 14, y - 10); c.moveTo(x + 9, y + 8); c.lineTo(x + 14, y - 10); c.stroke(); } }
+  for (let i = 0; i < 5; i++) { const x = 20 + i * 87; c.fillStyle = '#fff'; c.fillRect(x, 96, 3, 30); c.fillStyle = CROWD[i]; c.beginPath(); c.moveTo(x + 3, 96); c.quadraticCurveTo(x + 18, 96 + Math.sin(T * 6 + i) * 5, x + 30, 104); c.lineTo(x + 3, 112); c.fill(); }
+  const bx = ((T * 70) % (W + 120)) - 60; ball(c, 'soccer', bx, 640 - Math.abs(Math.sin(T * 5)) * 16, 14, T * 5);
+}
 function drawHub() {
-  sky(c, '#22d3ee', '#c8f7ff', T, 790, '#7fe3f5', '#5fd6ee', false);
+  stadium();
   backBtn(() => go('title')); mascotBust(c, 195, 66, 46, T, isSpeaking(), 'point'); btn('hubMascot', 150, 20, 90, 90, () => { sfx.tap(); say(L.hub); });
   roundBtn('gear', W - 44, 50, 22, 'rgba(255,255,255,0.5)', (c) => { c.fillStyle = '#7a5a8a'; for (let i = 0; i < 8; i++) { c.save(); c.rotate(i * 0.785); c.fillRect(-3, -14, 6, 8); c.restore(); } c.beginPath(); c.arc(0, 0, 9, 0, 6.28); c.fill(); c.fillStyle = '#fff'; c.beginPath(); c.arc(0, 0, 4, 0, 6.28); c.fill(); }, () => { initAudio(); sfx.tap(); openGate(); });
   for (let i = 0; i < ACTS.length; i++) {
     const col = i % 3, row = Math.floor(i / 3), w = 112, h = 112, x = 13 + col * (w + 13), y = 128 + row * (h + 10), lk = false, wig = lockWiggle === i && lockT > 0 ? Math.sin(lockT * 40) * 5 : 0;
-    c.save(); c.translate(wig, 0); const g = c.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, ACTS[i].bg[0]); g.addColorStop(1, ACTS[i].bg[1]); c.fillStyle = 'rgba(0,0,0,0.12)'; rr(c, x, y + 5, w, h, 28); c.fill(); c.fillStyle = g; rr(c, x, y, w, h, 28); c.fill(); c.lineWidth = 6; c.strokeStyle = '#fff'; c.stroke();
+    const pk = poke && poke.i === i ? 1 + Math.sin(Math.min(1, poke.t / 0.28) * Math.PI) * 0.12 : 1;
+    c.save(); c.translate(wig + x + w / 2, y + h / 2); c.scale(pk, pk); c.translate(-x - w / 2, -y - h / 2); const g = c.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, ACTS[i].bg[0]); g.addColorStop(1, ACTS[i].bg[1]); c.fillStyle = 'rgba(0,0,0,0.12)'; rr(c, x, y + 5, w, h, 28); c.fill(); c.fillStyle = g; rr(c, x, y, w, h, 28); c.fill(); c.lineWidth = 6; c.strokeStyle = '#fff'; c.stroke();
     cardArt(i, x, y, w, h);
     if (ACTS[i].levels) for (let k = 0; k < ACTS[i].levels; k++) { const on = save.lv[i] > k; c.fillStyle = on ? '#ffd60a' : 'rgba(255,255,255,0.6)'; c.beginPath(); const sx = x + w / 2 + (k - (ACTS[i].levels - 1) / 2) * 17, sy = y + h - 13; if (clubLocked(k) && !on) { c.fillStyle = 'rgba(60,40,90,0.35)'; } for (let q = 0; q < 10; q++) { const rr2 = q % 2 ? 3 : 7.5; c.lineTo(sx + Math.cos(-1.571 + q * 0.628) * rr2, sy + Math.sin(-1.571 + q * 0.628) * rr2); } c.fill(); }
     if (lk) { c.fillStyle = 'rgba(60,40,90,0.35)'; rr(c, x, y, w, h, 28); c.fill(); lock(x + w / 2, y + h / 2 - 6, 1.4); }
     c.restore();
-    btn('act' + i, x, y, w, h, () => { initAudio(); sfx.snap(); start(i); });
+    btn('act' + i, x, y, w, h, () => { if (poke) return; initAudio(); sfx.snap(); sfx.crowd(); poke = { i, t: 0 }; });
   }
   // Trophy Room button
   const ty = 690, p = 1 + Math.sin(T * 3) * 0.03; c.save(); c.translate(195, ty + 50); c.scale(p, p); c.fillStyle = 'rgba(0,0,0,0.12)'; rr(c, -172, -44, 344, 96, 30); c.fill(); c.fillStyle = '#7c5cff'; rr(c, -172, -48, 344, 96, 30); c.fill(); c.lineWidth = 6; c.strokeStyle = '#fff'; c.stroke();
@@ -115,19 +149,33 @@ function drawHub() {
 }
 function drawPlay() {
   const A = ACTS[actI]; sky(c, A.bg[0], A.bg[1], T, 900, shade(A.bg[1], -0.05), shade(A.bg[1], -0.1), false);
+  if (intro) btn('introSkip', 0, 0, W, H, () => { intro = null; });
   act!.draw(c);
   backBtn(() => go('hub'));
+  if (!intro && winT < 0 && ACTS[actI].id !== 'paint') roundBtn('help', W - 40, 122, 24, '#9b5cff', (c) => { c.fillStyle = '#fff'; c.font = '900 30px ui-rounded, system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('?', 0, 2); }, () => { sfx.tap(); tut = 0; idle = 99; resetHint(); if (act?.intro) say(act.intro); mascotPose = 'point'; mascotPoseT = 3; });
   mascotBust(c, 195, 64, 40, T, isSpeaking(), mascotPose); btn('mascot', 150, 20, 90, 90, () => { sfx.tap(); if (act?.intro) say(act.intro); idle = 99; });
   if (A.levels) for (let k = 0; k < A.levels; k++) { c.fillStyle = Math.min(level, A.levels) > k ? '#ffd60a' : 'rgba(255,255,255,0.7)'; c.beginPath(); c.arc(W - 30 - (A.levels - 1 - k) * 18, 62, 7, 0, 6.28); c.fill(); }
-  if (winT >= 0) { const k = Math.min(1, winT * 3); c.fillStyle = `rgba(255,255,255,${0.25 * k})`; c.fillRect(0, 0, W, H); mascot(c, 300, 844 - 40 + (1 - k) * 300, 270, 'cheer', T, isSpeaking()); if (newSticker >= 0) { const s = Math.min(1, winT * 2); sticker(c, 160, 420, 30 + 50 * s, Math.floor(newSticker / 10), newSticker % 10, T); } }
+  if (!intro && winT < 0) roundBtn('restart', W - 96, 122, 24, '#ff9f1c', (c) => { c.strokeStyle = '#fff'; c.lineWidth = 5; c.lineCap = 'round'; c.beginPath(); c.arc(0, 0, 10, -0.3, 4.6); c.stroke(); c.fillStyle = '#fff'; c.beginPath(); c.moveTo(8, -14); c.lineTo(14, -2); c.lineTo(2, -4); c.fill(); }, () => { sfx.whoosh(); start(actI, level); });
+  if (tut >= 0) { c.fillStyle = `rgba(40,20,80,${0.35 * Math.min(1, tut * 4, (4.5 - tut) * 2)})`; c.fillRect(0, 140, W, H - 140); }
+  if (intro) drawIntro();
+  if (winT >= 0) { const k = Math.min(1, winT * 3); c.fillStyle = `rgba(255,255,255,${0.25 * k})`; c.fillRect(0, 0, W, H); mascot(c, 300, 844 - 40 + (1 - k) * 300, 270, 'cheer', T, isSpeaking()); if (newSticker >= 0) { bookIcon(48, 792, 1 + (winT > 2.3 && winT < 2.6 ? Math.sin((winT - 2.3) / 0.3 * Math.PI) * 0.25 : 0)); const s = Math.min(1, winT * 2), f = Math.max(0, Math.min(1, (winT - 1.7) / 0.6)), e = f * f * (3 - 2 * f);
+    if (f < 1) sticker(c, 160 + (48 - 160) * e, 420 + (792 - 420) * e - Math.sin(e * Math.PI) * 120, (30 + 50 * s) * (1 - e * 0.7), Math.floor(newSticker / 10), newSticker % 10, T); } }
+  if (isBig() && winT < 0) crowdStrip();
 }
+let bookPage = -1;
 function drawTown() {
   c.fillStyle = '#7c5cff'; c.fillRect(0, 0, W, H); backBtn(() => go('hub')); mascotBust(c, 195, 66, 42, T, isSpeaking(), 'cheer');
-  c.fillStyle = '#b07a3a'; rr(c, 16, 205, W - 32, 14, 6); c.fill(); rr(c, 16, 305, W - 32, 14, 6); c.fill(); for (let k = 0; k < ACTS.length; k++) { const x = 40 + (k % 6) * 62 + (k >= 6 ? 31 : 0), ty2 = k < 6 ? 170 : 270; trophy(c, x, ty2, 0.72, k, save.trophies.includes(k), T); btn('trophy' + k, x - 28, ty2 - 40, 56, 76, () => { sfx.bell(); say(SPORT_NAME[k]); }); }
-  c.fillStyle = '#fff'; rr(c, 16, 335, W - 32, 495, 24); c.fill();
-  for (let i = 0; i < 24; i++) { const x = 60 + (i % 4) * 90, y = 378 + Math.floor(i / 4) * 78, s = save.stickers[save.stickers.length - 24 + i] ?? save.stickers[i];
-    if (i < save.stickers.length) { const sv = save.stickers[Math.max(0, save.stickers.length - 24) + i]; sticker(c, x, y, 32, Math.floor(sv / 10), sv % 10, T + i); btn('st' + i, x - 34, y - 34, 68, 68, () => { sfx.pop(); say(SPORT_NAME[Math.floor(sv / 10)]); }); }
-    else { c.strokeStyle = '#e0d8f5'; c.lineWidth = 4; c.setLineDash([6, 8]); c.beginPath(); c.arc(x, y, 30, 0, 6.28); c.stroke(); c.setLineDash([]); } void s; }
+  c.fillStyle = '#b07a3a'; rr(c, 16, 205, W - 32, 14, 6); c.fill(); rr(c, 16, 305, W - 32, 14, 6); c.fill(); for (let k = 0; k < ACTS.length; k++) { const x = 40 + (k % 6) * 62 + (k >= 6 ? 31 : 0), ty2 = k < 6 ? 170 : 270; trophy(c, x, ty2, 0.72, k, save.trophies.includes(k), T); btn('trophy' + k, x - 28, ty2 - 40, 56, 76, () => { sfx.ding(); say(SPORT_NAME[k]); }); }
+  // Sticker Book (F&L stickers.ts style): one page per sport, earned stickers in colour, missing ones as silhouettes to collect
+  if (bookPage < 0) bookPage = save.stickers.length ? Math.floor(save.stickers[save.stickers.length - 1] / 10) : 0;
+  const P = bookPage, have = new Set(save.stickers); c.fillStyle = '#fff'; rr(c, 16, 335, W - 32, 420, 24); c.fill(); c.fillStyle = ACTS[P].bg[0]; rr(c, 16, 335, W - 32, 70, 24); c.fill(); c.fillRect(16, 380, W - 32, 25);
+  c.save(); c.translate(195 - 56 * 0.55, 370 - 56 * 0.55); c.scale(0.55, 0.55); cardArt(P, 0, 0, 112, 112); c.restore();
+  const got = Array.from({ length: 10 }, (_, v) => have.has(P * 10 + v)).filter(Boolean).length; for (let k = 0; k < 10; k++) { c.fillStyle = k < got ? '#ffd60a' : 'rgba(255,255,255,0.6)'; c.beginPath(); c.arc(270 + (k % 5) * 18, 358 + Math.floor(k / 5) * 18, 6, 0, 6.28); c.fill(); }
+  for (let v = 0; v < 10; v++) { const x = 60 + (v % 5) * 68, y = 462 + Math.floor(v / 5) * 120, on = have.has(P * 10 + v);
+    if (on) { sticker(c, x, y, 30, P, v, T + v); btn('st' + v, x - 32, y - 32, 64, 64, () => { sfx.sticker(); say(SPORT_NAME[P]); }); }
+    else { c.save(); c.globalAlpha = 0.22; c.filter = 'grayscale(1) brightness(0.4)'; sticker(c, x, y, 30, P, v, 0); c.restore(); c.fillStyle = '#ffffff'; c.font = '900 22px ui-rounded, system-ui'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('?', x, y + 2); } }
+  for (let k = 0; k < ACTS.length; k++) { const x = 30 + k * 33, y = 790, on = k === P; c.fillStyle = on ? '#fff' : 'rgba(255,255,255,0.35)'; c.beginPath(); c.arc(x, y, on ? 17 : 14, 0, 6.28); c.fill(); ball(c, ACTS[k].ball, x, y, on ? 11 : 9, 0);
+    btn('page' + k, x - 16, y - 22, 32, 44, () => { if (bookPage !== k) { bookPage = k; sfx.flip(); } }); }
   return 0;
 }
 let townMax = 0;
@@ -190,9 +238,11 @@ function afterWin() { if (screen !== 'play') return; const A = ACTS[actI]; if (A
 let last = performance.now();
 function frame(now: number) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now; T += dt; requestAnimationFrame(frame);
+  fadeT += dt; if (intro) { intro.t += dt; idle = 0; if (intro.t > 2.4) intro = null; } if (tut >= 0) { tut += dt; if (tut > 4.5) tut = -1; } if (onboard >= 0) onboard += dt;
+  if (poke) { poke.t += dt; if (poke.t > 0.3) { const i = poke.i; poke = null; if (screen === 'hub') start(i, save.lv[i], true); } }
   if (lockT > 0) lockT -= dt; if (mascotPoseT > 0) { mascotPoseT -= dt; if (mascotPoseT <= 0) mascotPose = 'stand'; } if (shake > 0) shake = Math.max(0, shake - dt * 30);
   if (screen === 'play' && act) { act.update(dt);
-    if (winT >= 0) { const w0 = winT; winT += dt; if (w0 < 1.9 && winT >= 1.9 && newSticker >= 0) { say(L.sticker); sfx.pop(); } if (winT > 3.2 && !modal) { winT = -1; if (!checkUnlock()) afterWin(); } }
+    if (winT >= 0) { const w0 = winT; winT += dt; if (w0 < 1.9 && winT >= 1.9 && newSticker >= 0) { voiceSay(L.sticker); sfx.pop(); } if (w0 < 2.3 && winT >= 2.3 && newSticker >= 0) sfx.stickerIn(); if (winT > 3.2 && !modal) { winT = -1; if (!checkUnlock()) afterWin(); } }
     else if (!modal) { idle += dt; if (act.busy?.()) idle = 0; const cur = act; stepHint(dt, idle, () => cur.next(), () => { if (cur.intro) { say(cur.intro, false); mascotPose = 'point'; mascotPoseT = 2.5; } });
       demo = hint.active && hint.act ? { a: hint.act, t: hint.t } : null; if (idle > 12 && mascotPoseT <= 0) mascotPose = 'think'; } }
   if (resetPress && pointerIsDown) { resetHold += dt; if (resetHold > 3) { resetPress = false; resetHold = 0; save = fresh(); persist(); sfx.crash(); } } else { resetHold = 0; resetPress = false; }
@@ -201,7 +251,7 @@ function frame(now: number) {
   const sx = shake ? (Math.random() - 0.5) * shake : 0, sy = shake ? (Math.random() - 0.5) * shake : 0; c.setTransform(scale, 0, 0, scale, ox + sx * scale, oy + sy * scale);
   frameBtns = [];
   if (screen === 'title') drawTitle(); else if (screen === 'hub') drawHub(); else if (screen === 'play' && act) drawPlay(); else if (screen === 'town') townMax = drawTown(); else if (screen === 'parents') drawParents();
-  confettiDraw(c, parts); if (screen === 'play' && act && winT < 0 && !modal) drawHint(T, idle); if (modal) { frameBtns = frameBtns.filter(() => false); drawModal(); }
+  if (screen === 'hub' && onboard >= 0) drawOnboard(); confettiDraw(c, parts); if (fadeT < 0.25) { c.fillStyle = `rgba(255,255,255,${1 - fadeT / 0.25})`; c.fillRect(0, 0, W, H); } if (screen === 'play' && act && winT < 0 && !modal) drawHint(T, idle); if (modal) { frameBtns = frameBtns.filter(() => false); drawModal(); }
   btns = frameBtns;
 }
 // ---- input: one finger at a time; leaving the screen or a cancelled touch counts as letting go ----
@@ -211,7 +261,7 @@ cv.addEventListener('pointerdown', e => {
   if (pointerId !== null) { // a second finger: ignore it, unless the first one went quiet (a lost touch end must never freeze input)
     if (performance.now() - lastPtr < 600) return; const old = pointerId; release({ pointerId: old, clientX: e.clientX, clientY: e.clientY } as PointerEvent); }
   pointerId = e.pointerId; lastPtr = performance.now(); pointerIsDown = true; try { cv.setPointerCapture(e.pointerId); } catch { /* */ } initAudio();
-  const p = toLogical(e); idle = 0; demo = null; resetHint(); if (mascotPose === 'think') mascotPose = 'stand'; if (performance.now() - screenAt < 180) return; // a tap that lands as the screen changes must not hit the new screen's buttons
+  const p = toLogical(e); if (onboard > 0.6) onboard = -1; idle = 0; demo = null; resetHint(); if (mascotPose === 'think') mascotPose = 'stand'; if (performance.now() - screenAt < 180) return; // a tap that lands as the screen changes must not hit the new screen's buttons
   const b = [...btns].reverse().find(b => p.x >= b.x && p.x <= b.x + b.w && p.y >= b.y && p.y <= b.y + b.h);
   if (b && !(screen === 'play' && b.id !== 'back' && b.id !== 'mascot' && !modal && act && hitAct(p))) { b.fn(); if (screen === 'town') townDrag = null; return; }
   if (screen === 'play' && act && winT < 0 && !modal) act.down(p);
@@ -238,7 +288,7 @@ function renderArt(kind: 'icon' | 'splash') {
 }
 (window as any).__snap = { renderArt,
   get screen() { return screen; }, get hintDelay() { return hintCfg.delay; }, get slack() { return tune.slack; }, get kid() { return profiles().cur; }, get act() { return actI; }, get level() { return level; }, get winT() { return winT; }, get modal() { return modal ? modal.kind : null; }, levels: ACTS.map(a => a.levels), get freeRemix() { return freeRemix; }, get demo() { return demo ? demo.a : null; },
-  buttons: () => btns.map(b => ({ id: b.id, x: b.x, y: b.y, w: b.w, h: b.h })), next: () => act?.next() ?? null, busy: () => !!act?.busy?.(),
+  buttons: () => btns.map(b => ({ id: b.id, x: b.x, y: b.y, w: b.w, h: b.h })), next: () => act?.next() ?? null, busy: () => !!intro || !!poke || !!act?.busy?.(), get intro() { return !!intro; }, get onboard() { return onboard; },
   toScreen: (x: number, y: number) => { const r = cv.getBoundingClientRect(); return { x: r.left + (ox + x * scale) / dpr, y: r.top + (oy + y * scale) / dpr }; },
   start: (i: number, l: number) => start(i, l), go, save: () => JSON.parse(JSON.stringify(save)), setSave: (s: Save) => { save = s; persist(); }, closeModal: () => { modal = null; afterWin(); },
   store: () => ({ club: hasClub(), sim: store.sim, msg: store.msg }), storeTest, products: PRODUCTS, lines: allLines, lineId, missing: () => [...missing], get gate() { return { ...gate }; },

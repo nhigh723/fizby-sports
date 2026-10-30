@@ -6,10 +6,14 @@ export const NAMED_LINES = Object.values(NAMED);
 export const NUM = ['One!', 'Two!', 'Three!', 'Four!', 'Five!', 'Six!', 'Seven!', 'Eight!', 'Nine!', 'Ten!'];
 export const COLOR_NAME: Record<string, string> = { '#ff3b6b': 'red', '#1fb6ff': 'blue', '#ffd60a': 'yellow', '#3ddc4a': 'green', '#ff9f1c': 'orange', '#9b5cff': 'purple', '#ff5fd2': 'pink' };
 export const SPORT_NAME = ['Soccer!', 'Basketball!', 'Bowling!', 'Tee-ball!', 'Swimming!', 'Mini-golf!', 'Tennis!', 'Racing!', 'Hockey!', 'Gymnastics!', 'Painting!'];
+/** Teaching moment after a win (F&L learn.ts style): Fizby names what the child practised. One per sport. */
+export const FACT = ['You kicked with your feet!', 'Soft or hard, you found it!', 'Ten pins! You counted them!', 'Watch, wait, then hit!', 'Left, right, left, right!',
+  'The wall can help you!', 'You watched the ball!', 'You steered left and right!', 'Pass, then shoot!', 'You remembered every move!', 'Lovely colors!'];
 export const colorLine = (col: string) => `Find ${COLOR_NAME[col]}!`;
 export const gateLine = (col: string) => `Drive through the ${COLOR_NAME[col]} gate!`;
 export const hoopLine = (col: string) => `Shoot in the ${COLOR_NAME[col]} hoop!`;
 export const L = {
+  bigGame: 'Big game! The crowd is here!', book: 'A new sticker for your book!',
   ...NAMED,
   hub: 'Pick a sport!', locked: 'Ask a grown-up to open more levels!',
   soccerGo: 'Swipe the ball into the goal!', soccerKeeper: 'Kick it where the keeper is not!', soccerCount: 'Let us count the goals!',
@@ -29,5 +33,5 @@ export const L = {
   shelfHi: 'Look at your trophies and stickers!', shelfEmpty: 'Play a sport to win stickers!',
 };
 export function allLines(): string[] {
-  const s = new Set<string>([...Object.values(L), ...NUM, ...SPORT_NAME]); Object.keys(COLOR_NAME).forEach(c => { s.add(hoopLine(c)); s.add(colorLine(c)); s.add(gateLine(c)); }); return [...s];
+  const s = new Set<string>([...Object.values(L), ...NUM, ...SPORT_NAME, ...FACT]); Object.keys(COLOR_NAME).forEach(c => { s.add(hoopLine(c)); s.add(colorLine(c)); s.add(gateLine(c)); }); return [...s];
 }

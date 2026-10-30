@@ -30,7 +30,7 @@ export function gym(api: Api, level: number): Activity {
     intro: L.gymGo,
     update(dt) { pose = Math.max(0, pose - dt);
       if (wait > 0) { wait -= dt; if (wait <= 0) make(); return; }
-      if (show >= 0) { st += dt; const k = Math.floor(st / gap); if (k < seq.length) { if (k !== show || cur === null) { show = k; cur = seq[k]; api.sfx.pop(); api.say(NAME[cur]); } } else { show = -1; cur = null; api.say(L.gymYour); } }
+      if (show >= 0) { st += dt; if (st < 0) return; const k = Math.floor(st / gap); if (k < seq.length) { if (k !== show || cur === null) { show = k; cur = seq[k]; api.sfx.pop(); api.say(NAME[cur]); } } else { show = -1; cur = null; api.say(L.gymYour); } }
       if (cheer >= 0) { cheer += dt; if (cheer > 1.4) { cheer = -1; routines++; if (routines >= need) { done = true; api.win(L.bravo); } else make(); } } },
     draw(c: Ctx) { const t = api.t(); c.fillStyle = '#ff5fd2'; c.fillRect(0, 0, W, 844); c.fillStyle = '#9b5cff'; rr(c, 20, 470, W - 40, 180, 30); c.fill(); c.fillStyle = '#ffd6f4'; c.fillRect(0, 600, W, 40);
       c.fillStyle = '#fff'; rr(c, 90, 140, 210, 230, 24); c.fill(); gymnast(c, 195, 290, show >= 0 ? cur : null, t, '#ff9f1c'); // the pal shows
