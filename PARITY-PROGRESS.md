@@ -40,3 +40,23 @@ Source: /workspace/fs-qa-independent/REPORT.md. Newest first.
 - Parity screenshots regenerated (screenshots/parity, 26 shots, no page errors).
 - Live qa (game-time budget, qa-evidence/qa-gt.mjs): iPhone 78/78 levels ok, iPad 78/78 levels ok, 0 FAIL, 0 STUCK. The real-time qa.mjs FAILs line up with host freezes recorded by lagmon (B1).
 - Found and fixed a real bug: the parent gate hold counted frames, not time, so it never completed on iPad (BUGS.md #15). Deployed as fs5-0c3f9b3d4c.
+
+## Closure checklist (2026-10-30 ~13:20 EDT, live build fs5-0c3f9b3d4c)
+| Item | Status | Evidence |
+|---|---|---|
+| V1 | fixed (0745854) | screenshots/iphone, screenshots/ipad |
+| V2 gymnastics art | fixed | screenshots/{iphone,ipad} gym shots, screenshots/parity/25-* |
+| V3 kart/racing | fixed | device shots, race game shots |
+| V4 paint pictures | fixed | screenshots/parity/26-*, device shots |
+| V5 hockey player/puck | fixed | device shots |
+| V6 hub cards/overlaps | fixed | screenshots/parity/02-hub.png, qa-evidence shots 08b-wrong (hub) |
+| V7 title seam | fixed (bunting) | screenshots/parity/01-title.png |
+| V8 unique stickers | fixed (10 per sport) | device-shots sticker-variety shots |
+| V9 swim win | fixed | screenshots/win/* |
+| V10 depth | extra mechanic in every game, on top of 5 level modes | PARITY-PROGRESS V10 list; play-all 110 ok (fs-logs/qa-final2/full-1.log); live qa 78/78 on both devices |
+| V11 parent area | fixed; gate hold real-time fix (BUGS #15) | qa-evidence/qa-tail-live2-{iphone,ipad} logs (live): reaches parents screen |
+| V12 profile setup | fixed | setup flow in qa logs ("setupGo..."), device shots |
+| B1 stalls | root cause: host-level box freezes (lagmon gaps 40-597 s) that line up exactly with every real-time FAIL; no long JS tasks; the restarting watchdog was removed and replaced by a detector that only logs | /workspace/fs-logs/lagmon.log, BUGS.md #12-14, qa-evidence/qa-gt-{iphone,ipad}.log 78/78 ok 0 STUCK |
+| Audio incl. gameplay music | ok | fs-logs/qa-final2 audio-check |
+| Offline (live) | ok, only host github.io | qa-evidence/offline-live2.log |
+| Monkey / profiles | EXIT 0 | fs-logs/qa-final2 |
